@@ -1,5 +1,4 @@
 import * as React from 'react';
-<<<<<<< HEAD
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -72,9 +71,9 @@ function StatCard({ title, value, interval, trend, data }) {
   const trendValues = { up: '+25%', down: '-25%', neutral: '+5%' };
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', flexGrow: 1 }}>
+    <Card variant="elevation" sx={{ height: '100%', flexGrow: 1 }}>
       <CardContent>
-        <Typography component="h2" variant="subtitle2" gutterBottom>
+        <Typography component="h2" variant="subitle2" gutterBottom>
           {title}
         </Typography>
         <Stack
@@ -116,56 +115,11 @@ function StatCard({ title, value, interval, trend, data }) {
             </SparkLineChart>
           </Box>
         </Stack>
-=======
-import { Card, CardContent, Typography, Stack } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-
-function StatCard() {
-  return (
-    <Card
-      variant="elevation"
-      sx={{
-        width: "100%",
-        textAlign: 'center',
-        backgroundColor: '#F0F4FF',
-        borderRadius: '16px',
-        p: 2,
-        boxShadow: 'none'
-      }}
-    >
-      <CardContent>
-        {/* Icône étoiles */}
-        <Stack direction="row" justifyContent="center" spacing={0.5} sx={{ mb: 1 }}>
-          {[...Array(5)].map((_, index) => (
-            <StarIcon key={index} sx={{ color: '#FFA726', fontSize: '20px' }} />
-          ))}
-        </Stack>
-
-        {/* Nombre d'avis collectés */}
-        <Typography
-          variant="h4"
-          fontWeight="bold"
-          sx={{
-            fontSize: '36px',
-            background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}
-        >
-          5 209
-        </Typography>
-
-        {/* Texte "Avis collectés" */}
-        <Typography variant="subtitle1" sx={{ color: '#6366F1', fontWeight: '500' }}>
-          Avis collectés
-        </Typography>
->>>>>>> 60ff468 (Reconnecté au repo GitHub)
       </CardContent>
     </Card>
   );
 }
 
-<<<<<<< HEAD
 StatCard.propTypes = {
   data: PropTypes.arrayOf(PropTypes.number).isRequired,
   interval: PropTypes.string.isRequired,
@@ -174,6 +128,4 @@ StatCard.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-=======
->>>>>>> 60ff468 (Reconnecté au repo GitHub)
 export default StatCard;

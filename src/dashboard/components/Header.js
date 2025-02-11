@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as React from 'react';
 import Stack from '@mui/material/Stack';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
@@ -7,6 +8,9 @@ import MenuButton from './MenuButton';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 
 import Search from './Search';
+=======
+import { Stack } from '@mui/material';
+>>>>>>> 60ff468 (Reconnecté au repo GitHub)
 
 export default function Header() {
   return (
@@ -18,6 +22,7 @@ export default function Header() {
         alignItems: { xs: 'flex-start', md: 'center' },
         justifyContent: 'space-between',
         maxWidth: { sm: '100%', md: '1700px' },
+<<<<<<< HEAD
         pt: 1.5,
       }}
       spacing={2}
@@ -31,6 +36,14 @@ export default function Header() {
         </MenuButton>
         <ColorModeIconDropdown />
       </Stack>
+=======
+        pt: 10,
+      }}
+      spacing={2}
+    >
+
+
+>>>>>>> 60ff468 (Reconnecté au repo GitHub)
     </Stack>
   );
 }

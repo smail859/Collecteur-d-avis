@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -33,21 +34,80 @@ export default function AppNavbar() {
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
+=======
+// React
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+
+// MUI Components
+import { styled } from '@mui/material/styles';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+} from '@mui/material';
+
+// MUI Icons
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
+
+// MUI Classes
+import { tabsClasses } from '@mui/material/Tabs';
+
+// Custom Components
+import SideMenuMobile from '../../components-not-use/SideMenuMobile';
+import MenuButton from './MenuButton';
+import icon from '../../image/icon.png';
+import CustomDatePicker from './CustomDatePicker';
+
+// Styles for Toolbar
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  width: '100%',
+  padding: theme.spacing(5),
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(1.5),
+  flexShrink: 0,
+  [`& ${tabsClasses.flexContainer}`]: {
+    gap: theme.spacing(1),
+    padding: theme.spacing(1),
+    paddingBottom: 0,
+  },
+}));
+
+const AppNavbar = () => {
+  // State Management
+  const [open, setOpen] = useState(false);
+
+  // Toggle Drawer
+  const toggleDrawer = (newOpen) => {
+    return () => setOpen(newOpen);
+>>>>>>> 60ff468 (Reconnecté au repo GitHub)
   };
 
   return (
     <AppBar
+<<<<<<< HEAD
       position="fixed"
       sx={{
         display: { xs: 'auto', md: 'none' },
         boxShadow: 0,
         bgcolor: 'background.paper',
+=======
+      position="static"
+      sx={{
+        bgcolor: 'white',
+>>>>>>> 60ff468 (Reconnecté au repo GitHub)
         backgroundImage: 'none',
         borderBottom: '1px solid',
         borderColor: 'divider',
         top: 'var(--template-frame-height, 0px)',
       }}
     >
+<<<<<<< HEAD
       <Toolbar variant="regular">
         <Stack
           direction="row"
@@ -69,10 +129,71 @@ export default function AppNavbar() {
             </Typography>
           </Stack>
           <ColorModeIconDropdown />
+=======
+      <StyledToolbar>
+        {/* Left Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <img src={icon} alt="Logo" style={{ height: '50px', marginRight: '10px' }} />
+        </Box>
+
+        {/* Center Section - Navigation Links */}
+        <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center', flexGrow: 1 }}>
+          <NavLink
+            to="/"
+            style={({ isActive }) => ({
+              color: isActive ? '#8B5CF6' : '#121826',
+              fontWeight: '600',
+              textDecoration: 'none',
+              fontSize: '20px'
+            })}
+          >
+            Tableau de bord
+          </NavLink>
+          <NavLink
+            to="/services"
+            style={({ isActive }) => ({
+              color: isActive ? '#8B5CF6' : '#121826',
+              fontWeight: '600',
+              textDecoration: 'none',
+              fontSize: '20px'
+            })}
+          >
+            Avis récents
+          </NavLink>
+          <NavLink
+            to="/contact"
+            style={({ isActive }) => ({
+              color: isActive ? '#8B5CF6' : '#121826',
+              fontWeight: '600',
+              textDecoration: 'none',
+              fontSize: '20px'
+            })}
+          >
+            Statistiques
+          </NavLink>
+        </Box>
+
+        {/* Right Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Person2OutlinedIcon 
+            sx={{ 
+              fontSize: 30,            
+              background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
+              color: 'white',          
+              borderRadius: '20px',     
+              padding: '8px'           
+            }} 
+          />
+          <Typography sx={{ color: '#121826', fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px' }}>
+            Smaïl El Hajjar
+          </Typography>
+          <CustomDatePicker />
+>>>>>>> 60ff468 (Reconnecté au repo GitHub)
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuRoundedIcon />
           </MenuButton>
           <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
+<<<<<<< HEAD
         </Stack>
       </Toolbar>
     </AppBar>
@@ -103,3 +224,12 @@ export function CustomIcon() {
     </Box>
   );
 }
+=======
+        </Box>
+      </StyledToolbar>
+    </AppBar>
+  );
+};
+
+export default AppNavbar;
+>>>>>>> 60ff468 (Reconnecté au repo GitHub)
