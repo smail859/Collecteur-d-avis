@@ -39,7 +39,7 @@ const servicesData = [
           title="Collectez des avis clients"
           subtitle="Sélectionnez un service et partagez son lien pour récolter des avis."
           services={servicesData}  // ✅ Liste des services
-          onCopy={handleCopy}  // ✅ Fonction de copie
+          onCopy={handleCopy} 
         />
       </div>
     );
