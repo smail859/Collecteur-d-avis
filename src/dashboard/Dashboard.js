@@ -1,46 +1,45 @@
-import { CssBaseline, Box, Stack } from '@mui/material';
+import {Box, Stack } from '@mui/material';
 import MainGrid from './components/MainGrid';
-import AppTheme from '../shared-theme/AppTheme';
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
+import { useEffect, useState } from "react";
 
-// Fusion des personnalisations du thème
-const xThemeComponents = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
+
+
 
 export default function Dashboard(props) {
-  return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
-      <CssBaseline enableColorScheme />
-      
-      <Box sx={{ display: 'flex' }}>
+  const [reviews, setReviews] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:8000/get-reviews") // URL de l'API FastAPI
+      .then(response => response.json())
+      .then(data => setReviews(data.reviews))
+      .catch(error => console.error("Erreur :", error));
+  }, []);
 
-        {/* ✅ Contenu principal (sans AppNavbar ni Footer) */}
-        <Box sx={{ flexGrow: 1, bgcolor: '#F5F7FF', overflow: 'auto' }}>
+  return (
+      <Box >
+        {/* ✅ Contenu principal  */}
+        <Box sx={{ flexGrow: 1, bgcolor: '#F5F7FF', }}>
           <Box
             component="main"
-            sx={(theme) => ({
+            sx={{
               flexGrow: 1,
-              overflow: 'auto',
               mx: 3,
               pb: 5,
               mt: { xs: 8, md: 0 },
-            })}
+            }}
           >
-            <Stack spacing={2} sx={{ alignItems: 'center' }}>
+            <Stack>
               <MainGrid />
+              <div>
+                <h2>Google Avis</h2>
+                <ul>
+                  {reviews.map((review, index) => (
+                    <li key={index}>{review}</li>
+                  ))}
+                </ul>
+              </div>
             </Stack>
           </Box>
         </Box>
       </Box>
-    </AppTheme>
   );
 }

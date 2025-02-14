@@ -4,7 +4,7 @@ import Dashboard from "./dashboard/Dashboard";
 import AvisRecents from "./avisRécents/pages/AvisRecents";
 import Statistiques from "./statistiques/Statistiques";
 import CollecterAvis from "./collecterAvis/pages/CollecterAvis"
-import AppNavbar from "./dashboard/components/AppNavbar"; 
+import AppNavbar from "./dashboard/components/NavBar/AppNavbar"; 
 import Footer from './dashboard/components/Footer';
 
 function App() {
