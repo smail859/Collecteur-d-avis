@@ -28,7 +28,7 @@ const servicesData = [
   ];
 
   const handleCopy = (serviceName, link) => {
-    navigator.clipboard.writeText(link);  // ✅ Copie automatique dans le presse-papiers
+    navigator.clipboard.writeText(link);  
     alert(`Lien copié pour ${serviceName} : ${link}`);
   };
 
