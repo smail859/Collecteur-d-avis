@@ -1,22 +1,30 @@
 import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from "./dashboard/Dashboard";
-<<<<<<< HEAD
-=======
-import { BrowserRouter } from 'react-router-dom';
->>>>>>> 60ff468 (Reconnecté au repo GitHub)
-
+import AvisRecents from "./avisRécents/pages/AvisRecents";
+import Statistiques from "./statistiques/Statistiques";
+import CollecterAvis from "./collecterAvis/pages/CollecterAvis"
+import AppNavbar from "./dashboard/components/AppNavbar"; 
+import Footer from './dashboard/components/Footer';
 
 function App() {
   return (
-    <div className="App">
-<<<<<<< HEAD
-      <Dashboard/>
-=======
-      <BrowserRouter>
-        <Dashboard />
+    <BrowserRouter>
+      {/* Barre de navigation qui reste affichée */}
+      <AppNavbar />
+
+      {/* Gestion des différentes pages */}
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/avisRecents" element={<AvisRecents/>} />
+        <Route path="/statistiques" element={<Statistiques />} />
+        <Route path="/collecterAvis" element={<CollecterAvis />} />
+      </Routes>
+
+      <Footer />
     </BrowserRouter>
->>>>>>> 60ff468 (Reconnecté au repo GitHub)
-    </div>
+
+
   );
 }
 

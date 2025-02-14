@@ -4,7 +4,7 @@ import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import ContentPasteGoOutlinedIcon from '@mui/icons-material/ContentPasteGoOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 
-const AvisCard = ({ name, date, review, rating }) => {
+const FullAvis = ({ name, date, review, rating }) => {
   return (
     <Card sx={{ 
       width: "350px", 
@@ -17,6 +17,7 @@ const AvisCard = ({ name, date, review, rating }) => {
       flexDirection: 'column', 
       justifyContent: 'space-between' 
     }}>
+      
       {/* En-tête de la carte */}
       <CardHeader
         avatar={<Avatar>{name.charAt(0)}</Avatar>}
@@ -85,17 +86,20 @@ const ListeAvis = () => {
     <Box 
       sx={{ 
         display: 'flex', 
-        flexWrap: 'wrap', 
+        flexWrap: 'wrap',
         gap: 3, 
         justifyContent: 'center', 
-        maxWidth: "1200px", 
+        width: '1300px',
         mx: "auto",
         overflowY: "auto",
-        paddingBottom: 4
+        paddingBottom: 4,
+        paddingTop: 4,
+        borderRadius: '20px',
+        backgroundColor: 'white'
       }}
     >
       {avis.map((a, index) => (
-        <AvisCard key={index} {...a} />
+        <FullAvis key={index} {...a} />
       ))}
     </Box>
   );

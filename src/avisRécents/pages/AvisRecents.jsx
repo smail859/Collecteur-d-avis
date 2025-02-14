@@ -4,6 +4,8 @@ import {
 } from '@mui/material';
 
 import FaceIcon from '@mui/icons-material/Face';
+import FullAvis from "../components/FullAvis"
+import NoteParService from "../components/NoteParService"
 
 const AvisRecents = () => {
   const handleClick = () => {
@@ -11,12 +13,12 @@ const AvisRecents = () => {
   };
 
   return (
-    <Box maxWidth="1400px" mx="auto" p={2} >
+    <Box maxWidth="100%" mx="auto" bgcolor= '#F5F7FF' >
         <Typography fontSize="54px" fontWeight="900" textAlign="start" ml="20px" gutterBottom>
-            Collecter des avis
+            Avis Recents
         </Typography>
         <Typography fontSize="16px" fontWeight="bold" textAlign="start" ml="20px" mb="40px" color='#8B5CF6' gutterBottom>
-            Générez un lien unique, copiez-le ou partagez-le directement par email
+            Suivez les derniers retours de nos utilisateurs
         </Typography>
 
         {/* Conteneur des Chips */}
@@ -60,7 +62,10 @@ const AvisRecents = () => {
                         onClick={handleClick} 
                     />
                 ))}
+                
             </Box>
+            <NoteParService/>
+            <FullAvis/>
         </Stack>
     </Box>
   );

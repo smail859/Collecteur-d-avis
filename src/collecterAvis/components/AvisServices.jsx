@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types'; // Pour documenter et sécuriser les props
 import { 
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
@@ -43,48 +42,53 @@ const CollecterAvis = ({ title, subtitle, services, onCopy }) => {
             </TableRow>
           </TableHead>
 
-          {/* Corps du tableau */}
           <TableBody>
-            {services.map((service, index) => (
-              <TableRow 
-                key={service.name} 
-                sx={{ 
-                  backgroundColor: index % 2 === 0 ? 'white' : '#F2F3FB', // Effet zébré
-                  borderBottom: '1px solid #8B5CF6',
-                }}
-              >
-                {/* Logo + Nom du service */}
-                <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 2, borderBottom: 'none', padding: '30px' }}>
-                  <Avatar src={service.icon} sx={{ width: 40, height: 40 }} />
-                  <Typography fontWeight="600">{service.name}</Typography>
-                </TableCell>
+            {Array.isArray(services) && services.length > 0 ? (
+              services.map((service, index) => (
+                <TableRow 
+                  key={service.name} 
+                  sx={{ backgroundColor: index % 2 === 0 ? 'white' : '#F2F3FB', borderBottom: '1px solid #8B5CF6' }}
+                >
+                  {/* Logo + Nom du service */}
+                  <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 2, borderBottom: 'none', padding: '30px' }}>
+                    <Avatar src={service.icon} sx={{ width: 40, height: 40 }} />
+                    <Typography fontWeight="600">{service.name}</Typography>
+                  </TableCell>
 
-                {/* Liens dynamiques */}
-                <TableCell sx={{ align: 'right', borderBottom: '1px solid #8B5CF6'}}>
-                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap'}}>
-                    {service.links.map((link) => (
-                      <Button 
-                        key={link}
-                        variant="contained" 
-                        sx={{ 
-                          backgroundColor: 'white', 
-                          color: '#8B5CF6',
-                          fontWeight: 'bold',
-                          boxShadow: 1,
-                          borderRadius: '20px',
-                          '&:hover': { backgroundColor: '#F0E8FF' }
-                        }}
-                        endIcon={<ContentCopyIcon />}
-                        onClick={() => onCopy(service.name, link)} // Action de copie
-                      >
-                        {link}
-                      </Button>
-                    ))}
-                  </Box>
+                  {/* Liens dynamiques */}
+                  <TableCell align="right" sx={{ borderBottom: '1px solid #8B5CF6' }}>
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap'}}>
+                      {service.links.map((link) => (
+                        <Button 
+                          key={link}
+                          variant="contained" 
+                          sx={{ 
+                            backgroundColor: 'white', 
+                            color: '#8B5CF6',
+                            fontWeight: 'bold',
+                            boxShadow: 1,
+                            borderRadius: '20px',
+                            '&:hover': { backgroundColor: '#F0E8FF' }
+                          }}
+                          endIcon={<ContentCopyIcon />}
+                          onClick={() => onCopy(service.name, link)} 
+                        >
+                          {link}
+                        </Button>
+                      ))}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={2} align="center">
+                  <Typography variant="body1" color="text.secondary">Aucun service disponible</Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
+
 
         </Table>
       </TableContainer>

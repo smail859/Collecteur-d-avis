@@ -11,8 +11,6 @@ import icon from '../../image/icon.png';
 import AddIcon from '@mui/icons-material/Add';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
-import PermIdentityOutlinedIcon from '@mui/icons-material/PermIdentityOutlined';
 
 const Footer = () => {
   return (
@@ -30,7 +28,7 @@ const Footer = () => {
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
                 {/* Tableau de Bord */}
                 <NavLink
-                    to="/Tableau-de-bord"
+                    to="/"
                     style={({ isActive }) => ({
                     display: 'flex',
                     flexDirection: 'column',
@@ -60,7 +58,7 @@ const Footer = () => {
 
                 {/* Collecter un avis */}
                 <NavLink
-                    to="/Collecter-un-avis"
+                    to="collecterAvis"
                     style={({ isActive }) => ({
                     display: 'flex',
                     flexDirection: 'column',
@@ -89,7 +87,7 @@ const Footer = () => {
                 </NavLink>
                 {/* Avis récents */}
                 <NavLink
-                    to="/Avis-récents"
+                    to="/fullAvis"
                     style={({ isActive }) => ({
                     display: 'flex',
                     flexDirection: 'column',
@@ -114,64 +112,6 @@ const Footer = () => {
                     />
                     <Typography sx={{ fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
                     Avis récents
-                    </Typography>
-                </NavLink>
-                {/* Parametres */}
-                <NavLink
-                    to="/Parametres"
-                    style={({ isActive }) => ({
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: isActive ? '#8B5CF6' : '#121826',
-                    fontWeight: '600',
-                    fontSize: '16px',
-                    })}
-                >
-                    <SettingsApplicationsIcon
-                    sx={{ 
-                        fontSize: '45px',
-                        background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-                        color: 'white',  
-                        borderRadius: '50%', 
-                        padding: '8px', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}  
-                    />
-                    <Typography sx={{ fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
-                        Parametres
-                    </Typography>
-                </NavLink>
-                {/* Profil */}
-                <NavLink
-                    to="/Profil"
-                    style={({ isActive }) => ({
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: isActive ? '#8B5CF6' : '#121826',
-                    fontWeight: '600',
-                    fontSize: '16px',
-                    })}
-                >
-                    <PermIdentityOutlinedIcon
-                    sx={{ 
-                        fontSize: '45px',
-                        background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-                        color: 'white',  
-                        borderRadius: '50%', 
-                        padding: '8px', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}  
-                    />
-                    <Typography sx={{ fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
-                        Profil
                     </Typography>
                 </NavLink>
             </Box>
