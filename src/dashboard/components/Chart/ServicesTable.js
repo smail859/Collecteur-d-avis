@@ -33,13 +33,13 @@ export default function ServicesTable({ services }) {
           {/* En-tête */}
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: '900', color: '#8B5CF6', fontSize: '20px' }}>Services</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '20px' }}>Trustpilot avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '20px' }}>Google avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '20px' }}>App Store avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '20px' }}>Google Play avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '20px' }}>Total d’avis</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '20px'}}>Note moyenne</TableCell>
+              <TableCell sx={{ fontWeight: '900', color: '#8B5CF6', fontSize: '18px' }}>Services</TableCell>
+              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '18px' }}>Trustpilot avis/notes</TableCell>
+              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '18px' }}>Google avis/notes</TableCell>
+              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '18px' }}>App Store avis/notes</TableCell>
+              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '18px' }}>Google Play avis/notes</TableCell>
+              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '18px' }}>Total d’avis</TableCell>
+              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '18px'}}>Note moyenne</TableCell>
             </TableRow>
           </TableHead>
 

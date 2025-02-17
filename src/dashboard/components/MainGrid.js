@@ -103,8 +103,8 @@ export default function MainGrid() {
           <Box 
             sx={{ 
               display: 'flex', 
-              flexDirection: 'column', // Permet d'avoir les boutons l'un sous l'autre
-              alignItems: 'flex-end',  // Alignement à droite
+              flexDirection: 'column', 
+              alignItems: 'flex-end',
               gap: 2, 
               mt: 2 
             }}

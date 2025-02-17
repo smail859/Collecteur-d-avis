@@ -11,7 +11,7 @@ import { BarChart } from '@mui/x-charts/BarChart';
  * @param {function} onFilterChange - Callback pour filtrer les données.
  */
 
-export default function ServicesChart({ dataSets, title, onFilterChange }) {
+export default function ServicesChart({ dataSets, title, onFilterChange, onActiveFilterChange }) {
   const colorGradient = ['#6B5BFF', '#9C78FF']; // Dégradé bleu-violet
   const [selectedFilter, setSelectedFilter] = useState('7days')
   const handleFilterChange = (_, newPeriode) => {
@@ -20,6 +20,14 @@ export default function ServicesChart({ dataSets, title, onFilterChange }) {
       onFilterChange(newPeriode)
     }
   }
+  const [activeFilter, setActiveFilter] = useState('all');
+  const handleFilterEvolutionChange = (newPeriodeEvolution) => {
+    setActiveFilter(newPeriodeEvolution);
+    if (typeof onActiveFilterChange === 'function') {
+      onActiveFilterChange(newPeriodeEvolution);
+    }
+  };
+  
   // Sélectionne les données en fonction de la période choisie
   const { data, labels } = dataSets[selectedFilter] || dataSets["7days"];
   return (
@@ -34,19 +42,51 @@ export default function ServicesChart({ dataSets, title, onFilterChange }) {
 
       {/* Filtres */}
       <Stack direction="row" spacing={2} justifyContent="center" sx={{ marginBottom: '20px' }}>
-        <Button variant="outlined" sx={{ background: '#F2F3FB', color: '#8B5CF6' }} onClick={() => onFilterChange('all')}>
+        <Button
+          variant="outlined"
+          sx={{
+            backgroundColor: activeFilter === 'all' ? '#8B5CF6' : '#F2F3FB',
+            color: activeFilter === 'all' ? 'white' : '#8B5CF6'
+          }}
+          onClick={() => handleFilterEvolutionChange('all')}
+        >
           Tous les services
         </Button>
-        <Button variant="outlined" sx={{ background: '#F2F3FB', color: '#8B5CF6' }} onClick={() => onFilterChange('platforms')}>
+
+        <Button
+          variant="outlined"
+          sx={{
+            backgroundColor: activeFilter === 'platforms' ? '#8B5CF6' : '#F2F3FB',
+            color: activeFilter === 'platforms' ? '#FFFFFF' : '#8B5CF6'
+          }}
+          onClick={() => handleFilterEvolutionChange('platforms')}
+        >
           Toutes les plateformes
         </Button>
-        <Button variant="outlined" sx={{ background: '#F2F3FB', color: '#8B5CF6' }} onClick={() => onFilterChange('notes')}>
+
+        <Button
+          variant="outlined"
+          sx={{
+            backgroundColor: activeFilter === 'notes' ? '#8B5CF6' : '#F2F3FB',
+            color: activeFilter === 'notes' ? '#FFFFFF' : '#8B5CF6'
+          }}
+          onClick={() => handleFilterEvolutionChange('notes')}
+        >
           Notes
         </Button>
-        <Button variant="outlined" sx={{ background: '#F2F3FB', color: '#8B5CF6' }} onClick={() => onFilterChange('date')}>
+
+        <Button
+          variant="outlined"
+          sx={{
+            backgroundColor: activeFilter === 'date' ? '#8B5CF6' : '#F2F3FB',
+            color: activeFilter === 'date' ? '#FFFFFF' : '#8B5CF6'
+          }}
+          onClick={() => handleFilterEvolutionChange('date')}
+        >
           Sélectionner une période
         </Button>
       </Stack>
+
 
       {/* Sélecteur de période */}
       <ToggleButtonGroup
@@ -56,19 +96,45 @@ export default function ServicesChart({ dataSets, title, onFilterChange }) {
         aria-label="Période"
         sx={{ marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'transparent' }}
       >
-        <ToggleButton value="today" sx={{ color: '#8B5CF6', borderColor: '#6B5BFF' }} onClick={() => onFilterChange('today')}>
+        <ToggleButton 
+          value="today"
+          sx={{
+            color: selectedFilter === 'today' ? 'white' : "#8B5CF6",
+            borderColor: '#6B5BFF',
+            backgroundColor: selectedFilter === 'today' ? '#8B5CF6' : '#F2F3FB',
+            '&.Mui-selected': { backgroundColor: '#8B5CF6', color: 'white' }
+          }}
+        >
           Aujourd'hui
         </ToggleButton>
-        <ToggleButton value="7days" sx={{ background: 'linear-gradient(90deg, #2972FF, #8B5CF6)', color: 'white', borderColor: '#6B5BFF' }} onClick={() => onFilterChange('7days')}>
+
+        <ToggleButton 
+          value="7days"
+          sx={{
+            backgroundColor: selectedFilter === '7days' ? '#8B5CF6' : '#F2F3FB',
+            color: selectedFilter === '7days' ? 'white' : "#8B5CF6",
+            borderColor: '#6B5BFF',
+            '&.Mui-selected': { background: 'linear-gradient(90deg, #2972FF, #8B5CF6)', color: 'white' }
+          }}
+        >
           7 derniers jours
         </ToggleButton>
-        <ToggleButton value="30days" sx={{ color: '#8B5CF6', borderColor: '#6B5BFF' }} onClick={() => onFilterChange('30days')}>
+
+        <ToggleButton 
+          value="30days"
+          sx={{
+            color: selectedFilter === '30days' ? 'white' : "#8B5CF6",
+            borderColor: '#6B5BFF',
+            '&.Mui-selected': { backgroundColor: '#8B5CF6', color: 'white' }
+          }}
+        >
           30 derniers jours
         </ToggleButton>
       </ToggleButtonGroup>
 
+
       {/* Graphique mis à jour dynamiquement */}
-      <Card variant="outlined" sx={{ background: 'white', padding: '20px', borderRadius: '12px' }}>
+      <Card variant="outlined" sx={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px' }}>
               <CardContent>
                 <BarChart
                   xAxis={[{ scaleType: 'band', categoryGapRatio: 0.5, data: labels }]}
@@ -117,4 +183,5 @@ ServicesChart.propTypes = {
   ).isRequired,
   title: PropTypes.string.isRequired,
   onFilterChange: PropTypes.func.isRequired,
+  onActiveFilterChange: PropTypes.func.isRequired,
 };

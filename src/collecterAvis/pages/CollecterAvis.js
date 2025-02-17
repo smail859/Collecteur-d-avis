@@ -19,7 +19,28 @@ const servicesData = [
       ]
     },
     {
+      name: "Marketing Automobile",
+      icon: "/icons/marketing-immo.png",
+      links: [
+        "https://marketing-immo.fr/avis"
+      ]
+    },
+    {
       name: "Marketing Immobilier",
+      icon: "/icons/marketing-immo.png",
+      links: [
+        "https://marketing-immo.fr/avis"
+      ]
+    },
+    {
+      name: "Sinimo",
+      icon: "/icons/marketing-immo.png",
+      links: [
+        "https://marketing-immo.fr/avis"
+      ]
+    },
+    {
+      name: "Pige Online",
       icon: "/icons/marketing-immo.png",
       links: [
         "https://marketing-immo.fr/avis"
@@ -32,20 +53,20 @@ const servicesData = [
     alert(`Lien copié pour ${serviceName} : ${link}`);
   };
 
-  function Dashboard() {
+  function CollecterAvis() {
     return (
       <div>
         <AvisServices
           title="Collectez des avis clients"
           subtitle="Sélectionnez un service et partagez son lien pour récolter des avis."
-          services={servicesData}  // ✅ Liste des services
+          services={servicesData}  // Liste des services
           onCopy={handleCopy} 
         />
       </div>
     );
   }
   
-  export default Dashboard;
+  export default CollecterAvis;
   
   
   
