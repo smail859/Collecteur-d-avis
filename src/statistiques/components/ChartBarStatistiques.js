@@ -1,4 +1,4 @@
-import { LinearProgress, Typography, Rating, Box, Grid, Chip } from "@mui/material";
+import { LinearProgress, Typography, Rating, Box, Grid, Chip, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import StarIcon from "@mui/icons-material/Star";
 import { styled } from "@mui/system";
@@ -19,28 +19,21 @@ const CustomLinearProgress = styled(LinearProgress)(() => ({
 }));
 
 const dataset = [
-  { mois: "Jan", gainsNets: 61, gainsBruts: 80 },
-  { mois: "Fév", gainsNets: 75, gainsBruts: 95 },
-  { mois: "Mars", gainsNets: 90, gainsBruts: 110 },
-  { mois: "Avr", gainsNets: 120, gainsBruts: 150 },
-  { mois: "Mai", gainsNets: 200, gainsBruts: 250 },
-  { mois: "Juin", gainsNets: 250, gainsBruts: 310 },
-  { mois: "Juil", gainsNets: 300, gainsBruts: 380 },
+  { mois: "Jan", gainsNets: 61, gainsBruts: 80, nombreAvis: 10 },
+  { mois: "Fév", gainsNets: 75, gainsBruts: 95, nombreAvis: 20 },
+  { mois: "Mars", gainsNets: 90, gainsBruts: 110, nombreAvis: 30 },
+  { mois: "Avr", gainsNets: 120, gainsBruts: 150, nombreAvis: 50 },
+  { mois: "Mai", gainsNets: 200, gainsBruts: 250, nombreAvis: 70 },
+  { mois: "Juin", gainsNets: 250, gainsBruts: 310, nombreAvis: 100 },
+  { mois: "Juil", gainsNets: 300, gainsBruts: 380, nombreAvis: 130 },
 ];
-console.log(dataset);
-
 
 const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, ratingData }) => {
-  const [selected, setSelected] = useState();
+  const [selectedFilter, setSelectedFilter] = useState("gains");
 
-  const handleServiceChange = (newService) => {
-    if (newService !== null) {
-      setSelected(newService);
-      if (typeof onFilterChange === "function") {
-        onFilterChange(newService);
-      } else {
-        console.warn("onFilterChange is not a function");
-      }
+  const handleFilterChange = (_, newValue) => {
+    if (newValue !== null) {
+      setSelectedFilter(newValue);
     }
   };
 
@@ -62,7 +55,7 @@ const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, ratin
       <Box sx={{ flex: 1 }}>
         <Grid container spacing={4}>
           {data.map((item) => (
-            <Grid item key={item.id} xs={12} sm={6} md={3} >
+            <Grid item key={item.id} xs={12} sm={6} md={3}>
               <Box sx={{ bgcolor: "#F2F3FB", padding: "20px", borderRadius: 2, width: "290px", height: "240px" }}>
                 {item.type === "money" && <CustomLinearProgress variant="determinate" value={75} sx={{ width: "120px", height: "18px", marginBottom: "10px" }} />}
                 {item.type === "rating" && <Rating value={item.stars} precision={0.5} readOnly />}
@@ -84,36 +77,100 @@ const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, ratin
             </Grid>
           ))}
         </Grid>
+
+        {/* Toggle Gains / Nombre d'avis */}
         <Box sx={{ bgcolor: "#F2F3FB", borderRadius: "20px", padding: "20px", marginTop: "20px" }}>
+          <ToggleButtonGroup
+            value={selectedFilter}
+            exclusive
+            onChange={handleFilterChange}
+            sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}
+          >
+            <ToggleButton
+              value="avis"
+              sx={{
+                backgroundColor: selectedFilter === "avis" ? "#8B5CF6" : "white",
+                color: selectedFilter === "avis" ? "white" : "#8B5CF6",
+                borderRadius: "50px",
+                padding: "8px 16px",
+                fontWeight: "bold",
+                border: "1px solid #8B5CF6",
+              }}
+            >
+              Nombre d'avis
+            </ToggleButton>
+            <ToggleButton
+              value="gains"
+              sx={{
+                backgroundColor: selectedFilter === "gains" ? "#8B5CF6" : "white",
+                color: selectedFilter === "gains" ? "white" : "#8B5CF6",
+                borderRadius: "50px",
+                padding: "8px 16px",
+                fontWeight: "bold",
+                border: "1px solid #8B5CF6",
+              }}
+            >
+              Gains (€)
+            </ToggleButton>
+          </ToggleButtonGroup>
+
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={dataset} layout="horizontal">
-              <XAxis type="number" domain={[10, 'dataMax']} />
-              <YAxis dataKey="mois" type="category" width={40} />
+            <BarChart data={dataset}>
+              <XAxis dataKey="mois" tick={{ fill: "#8B5CF6", fontWeight: "bold" }} />
+              <YAxis tick={{ fill: "#8B5CF6", fontWeight: "bold" }} />
               <Tooltip />
-              <Legend />
-              <Bar dataKey="gainsNets" fill="#8B5CF6" barSize={1} radius={[5, 5, 0, 0]} />
-              <Bar dataKey="gainsBruts" fill="#FAB245" barSize={10} radius={[5, 5, 0, 0]} />
+              <Legend verticalAlign="top" height={36} iconType="circle" />
+
+              {selectedFilter === "gains" ? (
+                <>
+                  <Bar dataKey="gainsNets" stackId="a" fill="#8B5CF6" barSize={40} radius={[10, 10, 0, 0]} />
+                  <Bar dataKey="gainsBruts" stackId="a" fill="#FAB245" barSize={40} radius={[10, 10, 0, 0]} />
+                </>
+              ) : (
+                <Bar dataKey="nombreAvis" fill="#8B5CF6" barSize={40} radius={[10, 10, 0, 0]} />
+              )}
             </BarChart>
           </ResponsiveContainer>
         </Box>
-
       </Box>
-      <Box sx={{ width: "275px", height: "700px", borderRadius: "20px", bgcolor: "#F2F3FB", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", overflow: "hidden" }}>
-        <Typography variant="h2" fontWeight="bold" color="white" sx={{ position: "absolute", top: "25%", zIndex: 2 }}>{progression}%</Typography>
-        <Wave fill="#8B5CF6" paused={false} options={{ height: 10, amplitude: 20, speed: 0.3, points: 3 }} style={{ position: "absolute", bottom: `${70 - progression}%`, width: "100%", height: "80%", zIndex: 1 }} />
-        <Box sx={{ position: "absolute", bottom: "20px", display: "flex", flexDirection: "column", alignItems: "center", zIndex: 2 }}>
+
+      {/* Bloc de progression */}
+      <Box sx={{ width: "275px", height: "760px", borderRadius: "20px", bgcolor: "#F2F3FB", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", overflow: "hidden" }}>
+        <Typography variant="h2" fontWeight="bold" color="white" sx={{ position: "absolute", top: "35%", zIndex: 2 }}>{progression}%</Typography>
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "20px",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            zIndex: 2,
+          }}
+        >
+          <Typography fontSize="14px" fontWeight="200" color="white">
+            Plus que <span style={{ color: "white", fontWeight: "bold"}}>2 avis</span> 
+          </Typography>
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            {[20, 40, 60, 80, 100].map((level) => (
-              <LocalFireDepartmentIcon key={level} sx={{ color: progression >= level ? "#FFA500" : "#ddd" }} />
-            ))}
+            <LocalFireDepartmentIcon sx={{ color: progression >= 20 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression >= 40 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression >= 60 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression >= 80 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression === 100 ? "#FFA500" : "#ddd" }} />
           </Box>
-          <Typography fontSize="14px" fontWeight="200" color="white">Plus que <span style={{ fontWeight: "bold" }}>2 avis</span></Typography>
+
         </Box>
+       
+        <Wave fill="#8B5CF6" paused={false} options={{ height: 10, amplitude: 20, speed: 0.3, points: 3 }} style={{ position: "absolute", bottom: `${60 - progression}%`, width: "100%", height: "80%", zIndex: 1 }} />
       </Box>
     </Box>
   );
 };
 
-ChartBarStatistiques.propTypes = { data: PropTypes.array.isRequired, progression: PropTypes.number.isRequired, colors: PropTypes.array, ratingData: PropTypes.array };
+ChartBarStatistiques.propTypes = {
+  data: PropTypes.array.isRequired,
+  progression: PropTypes.number.isRequired,
+  colors: PropTypes.array,
+  ratingData: PropTypes.array,
+};
 
 export default ChartBarStatistiques;

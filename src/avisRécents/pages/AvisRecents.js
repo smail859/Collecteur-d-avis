@@ -9,12 +9,11 @@ import FullAvis from "../components/FullAvis"
 import NoteParService from "../components/NoteParService"
 import ListChip from '../components/ListChip';
 import MONBIEN from "../../image/MONBIEN.png"
-import MARKETING from "../../image/MARKETING.png"
-import MARKETINGA from "../../image/MARKETINGA.png"
-import PIGEONLINE from "../../image/PIGEONLINE.png"
-import SINIMO from "../../image/SINIMO.png"
 import STARTLOC from "../../image/STARTLOC.png"
-
+import MARKETINGAUTO from "../../image/MARKETINGAUTO.png"
+import MARKETINGIMMO from "../../image/MARKETINGIMMO.png"
+import SINIMO from "../../image/SINIMO.png"
+import PIGEONLINE from "../../image/PIGEONLINE.png"
 const AvisRecents = ({onFilterChange}) => {
 
     const [selected, setSelected] = useState()
@@ -49,15 +48,15 @@ const AvisRecents = ({onFilterChange}) => {
         },
         {
           label: "Marketing Immobilier",
-          icon: MARKETING,
+          icon: MARKETINGIMMO,
         },
         {
           label: "Marketing Automobile",
-          icon: MARKETINGA,
+          icon: MARKETINGAUTO,
         },
         {
           label: "Sav",
-          icon: MARKETING,
+          icon: MARKETINGIMMO,
         },
     ];
       

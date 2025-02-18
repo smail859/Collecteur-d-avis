@@ -22,7 +22,7 @@ export default function ActionButtons({ buttons = [], sx = {}, containerProps = 
           variant={btn.variant || "text"}
           endIcon={btn.icon || <AcUnitIcon/>}
           sx={{
-            color: btn.color || '#121826',
+            color: btn.color || 'white',
             backgroundColor: btn.bgColor || 'white',
             padding: '12px 24px',
             borderRadius: '20px',

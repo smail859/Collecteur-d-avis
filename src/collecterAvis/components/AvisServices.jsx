@@ -51,7 +51,7 @@ const CollecterAvis = ({ title, subtitle, services, onCopy }) => {
                 >
                   {/* Logo + Nom du service */}
                   <TableCell component="th" scope="row" sx={{ display: 'flex', alignItems: 'center', gap: 2, borderBottom: 'none', padding: '30px' }}>
-                    <Avatar src={service.icon} sx={{ width: 40, height: 40 }} />
+                    <Avatar src={service.icon} sx={{ width: 60, height: 60 }} />
                     <Typography fontWeight="600">{service.name}</Typography>
                   </TableCell>
 

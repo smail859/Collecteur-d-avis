@@ -265,11 +265,14 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
             position: "absolute",
             bottom: "20px",
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             alignItems: "center",
             zIndex: 2,
           }}
         >
+          <Typography fontSize="14px" fontWeight="200" color="white">
+            Plus que <span style={{ color: "white", fontWeight: "bold"}}>2 avis</span> 
+          </Typography>
           <Box sx={{ display: "flex", gap: 0.5 }}>
             <LocalFireDepartmentIcon sx={{ color: progression >= 20 ? "#FFA500" : "#ddd" }} />
             <LocalFireDepartmentIcon sx={{ color: progression >= 40 ? "#FFA500" : "#ddd" }} />
@@ -277,9 +280,7 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
             <LocalFireDepartmentIcon sx={{ color: progression >= 80 ? "#FFA500" : "#ddd" }} />
             <LocalFireDepartmentOutlinedIcon sx={{ color: progression === 100 ? "#FFA500" : "#ddd" }} />
           </Box>
-          <Typography fontSize="14px" fontWeight="200" color="white">
-            Plus que <span style={{ color: "white", fontWeight: "bold"}}>2 avis</span> 
-          </Typography>
+
         </Box>
       </Box>
     </Box>

@@ -1,125 +1,69 @@
 import React from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Container,
-  Box,
-  Typography
-} from '@mui/material';
-import { NavLink } from 'react-router-dom';
+import { Container, Box } from '@mui/material';
+import NavLinks from "../components/NavBar/NavLinks";
 import icon from '../../image/icon.png';
 import AddIcon from '@mui/icons-material/Add';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 
+const links = [
+  { path: "/", label: "Tableau de bord", icon: <HomeOutlinedIcon /> },
+  { path: "/avisRecents", label: "Avis récents", icon: <CalendarMonthOutlinedIcon /> },
+  { path: "/collecterAvis", label: "Collecter des avis", icon: <AddIcon /> },
+  { path: "/statistiques", label: "Statistiques", icon: <CalendarMonthOutlinedIcon /> }
+];
+
 const Footer = () => {
   return (
-    <AppBar position="sticky" sx={{ backgroundColor: 'white', boxShadow: 1}}> 
+    <footer 
+      style={{
+        position: "static", // Fixe le footer en bas
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: "100%", // Taille ajustée
+        width: "100%",
+        backgroundColor: "white",
+        borderTop: "1px solid #E0E0E0", // Séparation avec le contenu
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000, // Toujours au-dessus du contenu
+        padding: "10px 0"
+      }}
+    >
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ justifyContent: 'space-between', maxWidth: "100%", height: "150px" }}>
-          
-          {/* Logo à gauche */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <img src={icon} alt="Logo" style={{ height: '50px' }} />
+        <Box 
+          sx={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            alignItems: "center", 
+            justifyContent: "flex-end", // Tout aligner à droite
+            width: "100%"
+          }}
+        >
+          {/* Logo à gauche (mais poussé à droite) */}
+          <Box sx={{ display: "flex", alignItems: "center", mr: 3 }}>
+            <img src={icon} alt="Logo" style={{ height: "50px" }} />
           </Box>
 
-          {/* Liens à droite avec une marge */}
-          <Box sx={{ display: 'flex', gap: 10, ml: 'auto', mr: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
-                {/* Tableau de Bord */}
-                <NavLink
-                    to="/"
-                    style={({ isActive }) => ({
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: isActive ? '#8B5CF6' : '#121826',
-                    fontWeight: '600',
-                    fontSize: '16px',
-                    })}
-                >
-                    <HomeOutlinedIcon 
-                    sx={{ 
-                        fontSize: '45px',
-                        background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-                        color: 'white',  
-                        borderRadius: '50%', 
-                        padding: '8px', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }} 
-                    />
-                    <Typography sx={{ fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
-                        Tableau de Bord
-                    </Typography>
-                </NavLink>
-
-                {/* Collecter un avis */}
-                <NavLink
-                    to="collecterAvis"
-                    style={({ isActive }) => ({
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: isActive ? '#8B5CF6' : '#121826',
-                    fontWeight: '600',
-                    fontSize: '16px',
-                    })}
-                >
-                    <AddIcon
-                    sx={{ 
-                        fontSize: '45px',
-                        background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-                        color: 'white',  
-                        borderRadius: '50%', 
-                        padding: '8px', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}  
-                    />
-                    <Typography sx={{ fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
-                        Collecter un avis
-                    </Typography>
-                </NavLink>
-                {/* Avis récents */}
-                <NavLink
-                    to="/fullAvis"
-                    style={({ isActive }) => ({
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    color: isActive ? '#8B5CF6' : '#121826',
-                    fontWeight: '600',
-                    fontSize: '16px',
-                    })}
-                >
-                    <CalendarMonthOutlinedIcon
-                    sx={{ 
-                        fontSize: '45px',
-                        background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-                        color: 'white',  
-                        borderRadius: '50%', 
-                        padding: '8px', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}  
-                    />
-                    <Typography sx={{ fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
-                    Avis récents
-                    </Typography>
-                </NavLink>
-            </Box>
-
+          {/* Liens alignés à droite */}
+          <Box sx={{ display: "flex", justifyContent: "right", gap: 5, ml: "auto" }}>
+            {links.map((link) => (
+              <Box 
+                key={link.path} 
+                sx={{
+                  transition: "all 0.3s ease-in-out", 
+                  '&:hover': { transform: "scale(1.1)" } // Animation au survol
+                }}
+              >
+                <NavLinks label={link.label} path={link.path} icon={link.icon} isFooter={true} />
+              </Box>
+            ))}
           </Box>
-        </Toolbar>
+        </Box>
       </Container>
-    </AppBar>
+    </footer>
   );
 }
 

@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useMemo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material';
 import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
 
@@ -6,24 +7,26 @@ import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
  * Composant réutilisable pour afficher une liste de services et avis.
  * @param {Array} services - Liste des services avec leurs avis et notes.
  */
-
 export default function ServicesTable({ services }) {
-  // Fonction pour afficher l'icône de tendance
-  const getTrendIcon = (trend) => {
+  // Styles factorisés
+  const headerCellStyle = { fontWeight: '900', color: '#8B5CF6', fontSize: '16px' };
+
+  // Fonction optimisée avec useMemo pour éviter de recalculer inutilement
+  const getTrendIcon = useMemo(() => (trend) => {
     if (trend === 'up') return <ArrowUpward style={{ color: 'green' }} />;
     if (trend === 'down') return <ArrowDownward style={{ color: 'red' }} />;
     return <Remove style={{ color: 'gray' }} />;
-  };
+  }, []);
 
   return (
     <Box sx={{ padding: '40px', borderRadius: '12px' }}>
       {/* Titre */}
-      <Typography variant="h4" fontWeight="bold"  sx={{ color: '#333' }}>
+      <Typography variant="h4" fontWeight="bold" sx={{ color: '#333' }}>
         Nombre d’avis et notes <span style={{ color: '#6B5BFF' }}>par services</span>
       </Typography>
 
       {/* Sous-titre */}
-      <Typography variant="body1"  sx={{ color: '#8B5CF6', marginTop: '20px', marginBottom: "20px" }}>
+      <Typography variant="body1" sx={{ color: '#8B5CF6', marginTop: '20px', marginBottom: "20px" }}>
         Analysez les performances de vos services grâce aux notes et avis clients collectés sur chaque plateforme.
       </Typography>
 
@@ -33,13 +36,9 @@ export default function ServicesTable({ services }) {
           {/* En-tête */}
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: '900', color: '#8B5CF6', fontSize: '16px' }}>Services</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '16px' }}>Trustpilot avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '16px' }}>Google avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '16px' }}>App Store avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '16px' }}>Google Play avis/notes</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '16px' }}>Total d’avis</TableCell>
-              <TableCell sx={{ fontWeight: '200', color: '#8B5CF6', fontSize: '16px'}}>Note moyenne</TableCell>
+              {['Services', 'Trustpilot avis/notes', 'Google avis/notes', 'App Store avis/notes', 'Google Play avis/notes', 'Total d’avis', 'Note moyenne'].map((header) => (
+                <TableCell key={header} sx={headerCellStyle}>{header}</TableCell>
+              ))}
             </TableRow>
           </TableHead>
 
@@ -54,8 +53,12 @@ export default function ServicesTable({ services }) {
                   {/* Service avec icône */}
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
-                      <img src={service.icon} alt={service.name} width={32} height={32} />
-                      <Typography sx={{color: '#121826', fontWeight: '600'}}>{service.name}</Typography>
+                      {service.icon ? (
+                        <img src={service.icon} alt={service.name} width={32} height={32} />
+                      ) : (
+                        <Typography variant="body2" sx={{ color: 'gray' }}>No Icon</Typography>
+                      )}
+                      <Typography sx={{ color: '#121826', fontWeight: '600' }}>{service.name}</Typography>
                     </Box>
                   </TableCell>
 
@@ -90,13 +93,13 @@ export default function ServicesTable({ services }) {
   );
 }
 
-// Validation avec PropTypes
+// Définition des types de props attendues
 ServicesTable.propTypes = {
   services: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
+      icon: PropTypes.string,
       trustpilot: PropTypes.string.isRequired,
       google: PropTypes.string.isRequired,
       appStore: PropTypes.string,
@@ -106,4 +109,9 @@ ServicesTable.propTypes = {
       trend: PropTypes.oneOf(['up', 'down', 'neutral']).isRequired,
     })
   ).isRequired,
+};
+
+// Valeurs par défaut
+ServicesTable.defaultProps = {
+  services: []
 };

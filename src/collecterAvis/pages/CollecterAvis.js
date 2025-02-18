@@ -1,10 +1,15 @@
 import AvisServices from '../components/AvisServices';
-
+import MONBIEN from "../../image/MONBIEN.png";
+import STARTLOC from "../../image/STARTLOC.png";
+import MARKETINGAUTO from "../../image/MARKETINGAUTO.png";
+import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
+import SINIMO from "../../image/SINIMO.png";
+import PIGEONLINE from "../../image/PIGEONLINE.png";
 
 const servicesData = [
     {
       name: "Monbien",
-      icon: "/icons/monbien.png", 
+      icon: MONBIEN, 
       links: [
         "https://monbien.fr/avis",
         "https://monbien.fr/contact"
@@ -12,7 +17,7 @@ const servicesData = [
     },
     {
       name: "Startloc",
-      icon: "/icons/startloc.png",
+      icon: STARTLOC,
       links: [
         "https://startloc.fr/avis",
         "https://startloc.fr/contact"
@@ -20,28 +25,28 @@ const servicesData = [
     },
     {
       name: "Marketing Automobile",
-      icon: "/icons/marketing-immo.png",
+      icon: MARKETINGAUTO,
       links: [
         "https://marketing-immo.fr/avis"
       ]
     },
     {
       name: "Marketing Immobilier",
-      icon: "/icons/marketing-immo.png",
+      icon: MARKETINGIMMO,
       links: [
         "https://marketing-immo.fr/avis"
       ]
     },
     {
       name: "Sinimo",
-      icon: "/icons/marketing-immo.png",
+      icon: SINIMO,
       links: [
         "https://marketing-immo.fr/avis"
       ]
     },
     {
       name: "Pige Online",
-      icon: "/icons/marketing-immo.png",
+      icon: PIGEONLINE,
       links: [
         "https://marketing-immo.fr/avis"
       ]

@@ -4,11 +4,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography"
 import {useState} from "react"
 import MONBIEN from "../../image/MONBIEN.png"
-import MARKETING from "../../image/MARKETING.png"
-import MARKETINGA from "../../image/MARKETINGA.png"
-import PIGEONLINE from "../../image/PIGEONLINE.png"
-import SINIMO from "../../image/SINIMO.png"
 import STARTLOC from "../../image/STARTLOC.png"
+import MARKETINGAUTO from "../../image/MARKETINGAUTO.png"
+import MARKETINGIMMO from "../../image/MARKETINGIMMO.png"
+import SINIMO from "../../image/SINIMO.png"
+import PIGEONLINE from "../../image/PIGEONLINE.png"
 import ListChip from "../../avisRécents/components/ListChip";
 
 
@@ -57,15 +57,15 @@ const Statistiques = ({onFilterChange}) => {
     },
     {
       label: "Marketing Immobilier",
-      icon: MARKETING,
+      icon: MARKETINGIMMO,
     },
     {
       label: "Marketing Automobile",
-      icon: MARKETINGA,
+      icon: MARKETINGAUTO,
     },
     {
       label: "Sav",
-      icon: MARKETING,
+      icon: MARKETINGIMMO,
     },
   ];
 
