@@ -28,7 +28,6 @@ export default function ActionButtons({ buttons = [], sx = {}, containerProps = 
             borderRadius: '20px',
             fontWeight: 'bold',
             boxShadow: btn.boxShadow || '5px 2px 4px rgba(0, 0, 0, 0.1)',
-            '&:hover': { backgroundColor: btn.hoverColor || btn.bgColor },
             fontSize: "16px", // (optionnel) Ajuste la taille du texte
             ...btn.sx // Permet d'ajouter des styles spécifiques au bouton
           }}

@@ -1,9 +1,9 @@
 import { Chip, Stack, Box } from "@mui/material";
 import PropTypes from "prop-types";
 
-const ListChip = ({ servicesChip, handleServiceChange, selected }) => {
+const ListChip = ({ servicesChip, handleServiceChange, selected, sx }) => {
   return (
-    <Box maxWidth="100%" mx="auto" p={2}>
+    <Box maxWidth="100%" mx="auto" p={2} >
       <Stack
         direction="row"
         spacing={2}
@@ -25,6 +25,7 @@ const ListChip = ({ servicesChip, handleServiceChange, selected }) => {
             display: 'flex',
             flexWrap: 'wrap',
             gap: 3, 
+            ...sx
           }}
         >
           {servicesChip.map((service) => (
@@ -32,18 +33,18 @@ const ListChip = ({ servicesChip, handleServiceChange, selected }) => {
                 key={service.label}
                 label={service.label}
                 icon={
-                service.icon ? (
+                  typeof service.icon === "string" ? ( // Si c'est une URL (string), affiche une image
                     <img
-                    src={service.icon}
-                    alt={service.label}
-                    style={{
+                      src={service.icon}
+                      alt={service.label}
+                      style={{
                         width: 20,
                         height: 20,
                         marginRight: 8,
-                    }}
+                      }}
                     />
-                ) : null
-                }
+                  ) : service.icon // Sinon, c'est un composant React (icône MUI)
+                }                
                 onClick={() => handleServiceChange(service.label)}
                 sx={{
                 display: "flex",
@@ -64,6 +65,7 @@ const ListChip = ({ servicesChip, handleServiceChange, selected }) => {
                 fontSize: "16px",
                 fontWeight: "400",
                 lineHeight: "150%",
+                "& .MuiChip-icon": {marginRight: "8px"}
                 }}
             />
             
@@ -79,12 +81,14 @@ ListChip.propTypes = {
   servicesChip: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string.isRequired,
-      icon: PropTypes.string, // Utilisation de string pour les images
+      icon: PropTypes.node, 
     })
   ).isRequired,
   handleServiceChange: PropTypes.func.isRequired,
-  selected: PropTypes.string, // Ajout du prop pour suivre l'état actif
+  selected: PropTypes.string,
+  sx: PropTypes.object,
 };
+
 
 ListChip.defaultProps = {
     servicesChip: [],

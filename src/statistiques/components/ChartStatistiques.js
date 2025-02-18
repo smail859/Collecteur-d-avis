@@ -1,14 +1,16 @@
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Rating from '@mui/material/Rating';
-import Typography from '@mui/material/Typography';
-import LinearProgress from "@mui/material/LinearProgress";
+import { LinearProgress, Typography, Rating, Box, Grid, Chip} from "@mui/material";
+import { PieChart, Pie, Cell } from "recharts";
 import { styled } from "@mui/system";
 import StarIcon from "@mui/icons-material/Star";
 import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
 import SouthEastIcon from '@mui/icons-material/SouthEast';
 import HorizontalRuleIcon from '@mui/icons-material/HorizontalRule';
 import PropTypes from "prop-types";
+import Wave from "react-wavify";
+import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+
+
 
 // Barre de progression personnalisée
 const CustomLinearProgress = styled(LinearProgress)(() => ({
@@ -21,7 +23,7 @@ const CustomLinearProgress = styled(LinearProgress)(() => ({
     },
 }));
 
-const ChartStatistiques = ({ data, rows, progression }) => {
+const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
   const getRankStyle = (rank) => ({
     background: rank === 1 ? "linear-gradient(to right, #8B5CF6, #2972FF)" : rank === 2 ? "transparent" : rank === 3 ? "#FFF" : "transparent", 
     color: "black",
@@ -86,6 +88,52 @@ const ChartStatistiques = ({ data, rows, progression }) => {
                   <Typography variant="h4" sx={{ fontWeight: "bold", marginTop: "8px", fontSize: "100px", color: "#8B5CF6" }}>
                     {item.total}
                   </Typography>
+
+                  {/* Graphique  */}
+                  {item.type === "chart" && (
+                    <Box
+                    sx={{
+                      borderRadius: "12px",
+                      padding: "16px",
+                      width: 250,
+                      textAlign: "left",
+                    }}
+                  >
+                    {/* Graphique Pie */}
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2}}>
+                      <PieChart width={80} height={80}>
+                        <Pie
+                          data={ratingData}
+                          dataKey="value"
+                          outerRadius={20}
+                          fill="#8884d8"
+                          paddingAngle={2}
+                        >
+                          {ratingData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={colors[index]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+              
+                      {/* Légende avec Chip */}
+                      <Box>
+                        {ratingData.map((entry, index) => (
+                          <Chip
+                            key={index}
+                            icon={<StarIcon sx={{ color: "white" }} />}
+                            label={`${entry.label}`}
+                            sx={{
+                              background: colors[index],
+                              color: "white",
+                              fontWeight: "bold",
+                              marginBottom: 1,
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  </Box>
+                  )}
                 </Box>
               </Box>
             </Grid>
@@ -165,19 +213,72 @@ const ChartStatistiques = ({ data, rows, progression }) => {
       </Box>
 
       {/* Partie droite : Progression */}
-      <Box sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "240px",
-        height: "700px",
-        borderRadius: 2,
-        bgcolor: "#F2F3FB",
-        flexShrink: 0,
-      }}>
-        <Box sx={{ width: "100%", height: "80%", background: "linear-gradient(180deg, #6A5ACD 0%, #7B68EE 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-          <Typography variant="h2" fontWeight="bold" color="white">
-            {progression}%
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "275px",
+          height: "700px",
+          borderRadius: "20px",
+          bgcolor: "#F2F3FB",
+          flexDirection: "column",
+          position: "relative",
+          overflow: "hidden", // Empêche la vague de dépasser
+        }}
+      >
+        {/* Texte du pourcentage */}
+        <Typography
+          variant="h2"
+          fontWeight="bold"
+          color="white"
+          sx={{
+            position: "absolute",
+            top: "25%",
+            zIndex: 2, // S'assure que le texte est au-dessus de la vague
+          }}
+        >
+          {progression}%
+        </Typography>
+
+        {/* Vague animée */}
+        <Wave
+          fill="#8B5CF6"
+          paused={false}
+          options={{
+            height: 10, // Contrôle la hauteur de la vague
+            amplitude: 20, // Gère l’ondulation
+            speed: 0.3, // Vitesse de l'animation
+            points: 3, // Nombre de vagues
+          }}
+          style={{
+            position: "absolute",
+            bottom: `${80 - progression}%`, // Monte en fonction de la progression
+            width: "100%",
+            height: "80%",
+            zIndex: 1,
+          }}
+        />
+        {/* Icônes et Texte */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "20px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            zIndex: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 0.5 }}>
+            <LocalFireDepartmentIcon sx={{ color: progression >= 20 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression >= 40 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression >= 60 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentIcon sx={{ color: progression >= 80 ? "#FFA500" : "#ddd" }} />
+            <LocalFireDepartmentOutlinedIcon sx={{ color: progression === 100 ? "#FFA500" : "#ddd" }} />
+          </Box>
+          <Typography fontSize="14px" fontWeight="200" color="white">
+            Plus que <span style={{ color: "white", fontWeight: "bold"}}>2 avis</span> 
           </Typography>
         </Box>
       </Box>
@@ -193,3 +294,6 @@ ChartStatistiques.propTypes = {
 };
 
 export default ChartStatistiques;
+
+
+
