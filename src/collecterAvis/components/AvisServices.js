@@ -12,6 +12,10 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
  * @param {Array} services - Liste des services avec leurs icônes et liens associés.
  * @param {Function} onCopy - Fonction appelée lorsqu'un bouton de copie est cliqué.
  */
+
+/**
+ * Masquer les liens en arrière plan et afficher uniquement Google ou TrustPilot
+ */
 const CollecterAvis = ({ title, subtitle, services, onCopy }) => {
   return (
     <Box maxWidth="1400px" mx="auto" p={3}>

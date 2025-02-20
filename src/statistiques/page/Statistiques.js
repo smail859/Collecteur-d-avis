@@ -13,6 +13,7 @@ import ListChip from "../../avisRécents/components/ListChip";
 
 
 const Statistiques = ({onFilterChange}) => {
+  
   const rows = [
     { top: 1, name: "Joanna M", avis: "8 avis", gainBruts: "80€", gainNets: "62€", noteMoyenne: 4.8, trend: "down" },
     { top: 2, name: "Mélanie", avis: "7 avis", gainBruts: "70€", gainNets: "54€", noteMoyenne: 4.3, trend: "up" },

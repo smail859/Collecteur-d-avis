@@ -8,6 +8,17 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import { useState } from "react";
 
 // Barre de progression personnalisée
+
+  /**
+   * Afficher le nombre total d'avis eu dans sur l'année pour le commercial selectioné
+   * Afficher le gains bruts sur l'année pour le commercial selectionné en sachant que 1 avis === 10€
+   * Afficher le gains nets sur l'année pour le commercial selectionné en faisant le calcul our passer du brut au net
+   * Calculer combien de notes 5,4,3,2,1 etoiles le collaborateurs a
+   * Afficher dans le graphique le nombre d'avis eu sur l'année
+   * Afficher dans le graphique les gains brut et nets eu sur l'année
+   * Afficher l'objectif d'avis qui est de 120 à l'année et calculer combien d'avis il lui manque par exemple (70 avis = 70% et il manque de avis donc 30 flammes sans couleur)
+  */
+
 const CustomLinearProgress = styled(LinearProgress)(() => ({
   height: 10,
   borderRadius: 5,
