@@ -8,6 +8,11 @@ function StatCard() {
 
 
   const [nbrAvis, setNbrAvis] = useState(Math.random() * 2)
+  /**
+   * Recuperer l'ensemble des avis de tous les services
+   * Calculer combien d'avis nous avons eu 
+   * Afficher le nombre d'avis recoltés
+  */
 
   useEffect(() => {
     function getRandomIntInclusive(min, max) {

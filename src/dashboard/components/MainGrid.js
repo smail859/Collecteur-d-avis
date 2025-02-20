@@ -16,6 +16,7 @@ import PIGEONLINE from "../../image/PIGEONLINE.png";
 
 /**
  * Données des services avec leurs avis et notes.
+ * 
  */
 const servicesData = [
   { id: 1, name: 'Monbien', icon: MONBIEN, trustpilot: '568 - 4.8/5', google: '568 - 4.8/5', appStore: '-', googlePlay: '-', totalReviews: '1 004 avis', avgRating: 4.8, trend: 'down' },

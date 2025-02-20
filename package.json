@@ -29,6 +29,7 @@
     "react-wavify": "^1.11.1",
     "recharts": "^2.15.1",
     "selenium": "^2.20.0",
+    "serpapi": "^2.1.0",
     "web-vitals": "^4.2.4"
   },
   "scripts": {
@@ -54,5 +55,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

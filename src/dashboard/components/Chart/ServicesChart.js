@@ -7,6 +7,14 @@ import { BarChart } from '@mui/x-charts/BarChart';
  * Composant réutilisable pour afficher un graphique d'évolution des avis.
  */
 export default function ServicesChart({ dataSets, title, onFilterChange, onActiveFilterChange, colorGradient = ['#6B5BFF', '#9C78FF'] }) {
+
+  /**
+   * Revoir les bouton "Toutes les plateformes" etc.. pour en faire des bouton select
+   * Filtrer les avis dans le graphiques par services
+   * Filtrer les avis dans le graphique par plateformes (Google, Trustpilot)
+   * Filtrer les avis dans le graphique par notes (5,4,3,2,1 etoiles)
+   * Filtrer les avis par périodes avec les bouton "Aujourd'hui, 7 derniers jours et 30 derniers jours"
+   */
   const [selectedFilter, setSelectedFilter] = useState('7days');
   const [activeFilter, setActiveFilter] = useState('all');
 
@@ -73,7 +81,7 @@ export default function ServicesChart({ dataSets, title, onFilterChange, onActiv
 
       {/* Filtres de type de données */}
       <Stack direction="row" spacing={2} justifyContent="center" sx={{ marginBottom: '20px' }}>
-        {["all", "platforms", "notes", "date"].map((filter) => (
+        {["all", "platforms", "notes"].map((filter) => (
           <Button key={filter} variant="outlined" sx={getButtonStyle(activeFilter === filter)} onClick={() => handleFilterEvolutionChange(filter)}>
             {filter === "all" ? "Tous les services" : filter === "platforms" ? "Toutes les plateformes" : filter === "notes" ? "Notes" : "Sélectionner une période"}
           </Button>

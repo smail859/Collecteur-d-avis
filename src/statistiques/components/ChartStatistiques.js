@@ -10,6 +10,16 @@ import Wave from "react-wavify";
 import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 
+  /**
+   * Filtrer et afficher les données du collaborateurs selectionnées dans la ListChip
+   * Afficher le nombre total d'avis eu dans le mois pour le commercial selectioné
+   * Afficher le gains bruts pour le commercial selectionné en sachant que 1 avis === 10€
+   * Afficher le gains nets pour le commercial selectionné en faisant le calcul our passer du brut au net
+   * Calculer combien de notes 5,4,3,2,1 etoiles le collaborateurs a
+   * Afficher les 3 premiers comerciaux avec le plus d'avis et afficher en denrier position si il n'est pas dans le top 3 son nom et sa position
+   * Afficher l'objectif d'avis qui est de 10 et calculer combien d'avis il lui manque par exemple (8 avis = 80% et il manque de avis donc 2 flammes sans couleur)
+   * Ne pas oublier de modifier la couleur de la personne concerner par le filtre
+  */
 
 
 // Barre de progression personnalisée
@@ -24,6 +34,8 @@ const CustomLinearProgress = styled(LinearProgress)(() => ({
 }));
 
 const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
+
+
   const getRankStyle = (rank) => ({
     background: rank === 1 ? "linear-gradient(to right, #8B5CF6, #2972FF)" : rank === 2 ? "transparent" : rank === 3 ? "#FFF" : "transparent", 
     color: "black",

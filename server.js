@@ -1,91 +1,71 @@
-<<<<<<< HEAD
 const express = require("express");
-const { google } = require("googleapis");
 const cors = require("cors");
+const { getJson } = require("serpapi");
 
 const app = express();
 const PORT = 5000;
 
-// Chemin vers votre fichier de clé JSON
-const SERVICE_ACCOUNT_FILE = "monbienfr-dfbe9d2d91c7.json";
-const SCOPES = ["https://www.googleapis.com/auth/businessprofile"];
+app.use(cors()); // Autorise les requêtes depuis React
+app.use(express.json());
 
-// L'ID de votre établissement
-const LOCATION_ID = "5883753786407685028";
+const apiKey = "4546b3a57afe8d74757c0ddb90ef60d2e778e2afce5ffc489d971792699a9256";
+const dataId = "0x479184d4eff4c4d7:0x7899f13a20c78918";
 
-app.use(cors()); // Autoriser les requêtes cross-origin
+// Fonction pour récupérer les avis
+const fetchReviews = (req, res) => {
+  const nextPageToken = req.query.nextPageToken || null; 
 
-// Route pour récupérer les avis
-app.get("/get-reviews", async (req, res) => {
-  try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: SERVICE_ACCOUNT_FILE,
-      scopes: SCOPES,
-    });
+  getJson(
+    nextPageToken
+      ? {
+          engine: "google_maps_reviews",
+          data_id: dataId,
+          hl: "fr",
+          api_key: apiKey,
+          next_page_token: nextPageToken,
+        }
+      : {
+          engine: "google_maps_reviews",
+          data_id: dataId,
+          hl: "fr",
+          api_key: apiKey,
+          reviews_limit: 50, 
+        },
+    (json) => {
+      if (json.error) {
+        return res.status(500).json({ error: json.error });
+      }
 
-    const client = await auth.getClient();
-    const myBusiness = google.mybusinessaccountmanagement({ version: "v1", auth: client });
+      const formattedReviews = json.reviews.map((review) => ({
+        link: review.link,
+        rating: review.rating,
+        date: review.date,
+        source: review.source,
+        likes: review.likes,
+        review_id: review.review_id,
+        text: review.snippet,
+        user: {
+          name: review.user.name,
+          link: review.user.link,
+          contributor_id: review.user.contributor_id,
+          thumbnail: review.user.thumbnail,
+          reviews_count: review.user.reviews,
+          photos_count: review.user.photos,
+        },
+      }));
 
-    const response = await myBusiness.accounts.locations.reviews.list({
-      parent: `accounts/{account_id}/locations/${LOCATION_ID}`,
-    });
+      res.json({
+        reviews: formattedReviews,
+        nextPageToken: json.serpapi_pagination?.next_page_token || null, // Passer seulement le token
+      });
+    }
+  );
+};
 
-    console.log("API Response:", response.data); 
-    const reviews = response.data.reviews || [];
-    res.status(200).json({ reviews });
-  } catch (error) {
-    console.error("Error fetching reviews:", error.message);
-    res.status(500).send("Failed to fetch reviews");
-  }
-});
+// Route API pour récupérer les avis
+app.get("/api/reviews", fetchReviews);
 
-
+// Démarrer le serveur
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
-=======
-const express = require("express");
-const { google } = require("googleapis");
-const cors = require("cors");
-
-const app = express();
-const PORT = 5000;
-
-// Chemin vers votre fichier de clé JSON
-const SERVICE_ACCOUNT_FILE = "monbienfr-dfbe9d2d91c7.json";
-const SCOPES = ["https://www.googleapis.com/auth/businessprofile"];
-
-// L'ID de votre établissement
-const LOCATION_ID = "5883753786407685028";
-
-app.use(cors()); // Autoriser les requêtes cross-origin
-
-// Route pour récupérer les avis
-app.get("/get-reviews", async (req, res) => {
-  try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: SERVICE_ACCOUNT_FILE,
-      scopes: SCOPES,
-    });
-
-    const client = await auth.getClient();
-    const myBusiness = google.mybusinessaccountmanagement({ version: "v1", auth: client });
-
-    const response = await myBusiness.accounts.locations.reviews.list({
-      parent: `accounts/{account_id}/locations/${LOCATION_ID}`,
-    });
-
-    console.log("API Response:", response.data); 
-    const reviews = response.data.reviews || [];
-    res.status(200).json({ reviews });
-  } catch (error) {
-    console.error("Error fetching reviews:", error.message);
-    res.status(500).send("Failed to fetch reviews");
-  }
-});
-
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
->>>>>>> 60ff468 (Reconnecté au repo GitHub)

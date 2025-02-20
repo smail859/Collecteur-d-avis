@@ -2,6 +2,12 @@ import { Chip, Stack, Box } from "@mui/material";
 import PropTypes from "prop-types";
 
 const ListChip = ({ servicesChip, handleServiceChange, selected, sx }) => {
+
+  /**
+   * Filtrer mes avis par services en cliquant sur un des services
+   * Une fois avoir cliqué sur un service le composant NoteParService apparait suivant le service selectionné
+  */
+
   return (
     <Box maxWidth="100%" mx="auto" p={2} >
       <Stack

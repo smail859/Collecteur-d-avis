@@ -4,6 +4,14 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
 const AvisFilter = () => {
 
+  /**
+   * Filtrer les avis par services
+   * Filtrer les avis par notes
+   * Filtrer les avis par commerciaux
+   * Filtrer les avis par plateformes
+   * Filtrer les avis par période
+  */
+
   const [filters, setFilters] = useState({
     commercial: "",
     note: "",
