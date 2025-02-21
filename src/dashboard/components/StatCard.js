@@ -1,33 +1,19 @@
 import { Card, CardContent, Typography, Stack } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import useFetchReviews from "../../hooks/components/useFetchReviews"
 
 
 function StatCard() {
 
-
-  const [nbrAvis, setNbrAvis] = useState(Math.random() * 2)
+  const { totalReviews } = useFetchReviews();
   /**
    * Recuperer l'ensemble des avis de tous les services
    * Calculer combien d'avis nous avons eu 
    * Afficher le nombre d'avis recoltés
   */
 
-  useEffect(() => {
-    function getRandomIntInclusive(min, max) {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-  
-    // Met à jour le nombre d'avis toutes les 5 secondes pour ensuite le faire a chaque appel API
-    const interval = setInterval(() => {
-      setNbrAvis(getRandomIntInclusive(0, 50000));
-    }, 5000); // 5000 ms = 5 secondes
-  
-    return () => clearInterval(interval); // Nettoie l'intervalle quand le composant est démonté
-  }, []);
+
   return (
     <Card
       variant="elevation"
@@ -59,7 +45,7 @@ function StatCard() {
             WebkitTextFillColor: 'transparent'
           }}
         >
-          {nbrAvis}
+          {totalReviews}
         </Typography>
 
         {/* Texte "Avis collectés" */}

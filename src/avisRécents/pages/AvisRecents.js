@@ -1,6 +1,5 @@
-import { Stack, Box, Typography, Button } from "@mui/material";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { Stack, Box, Typography, Button, TextField} from "@mui/material";
+import { useState } from "react";
 import FullAvis from "../components/FullAvis";
 import NoteParService from "../components/NoteParService";
 import ListChip from "../components/ListChip";
@@ -11,45 +10,14 @@ import MARKETINGAUTO from "../../image/MARKETINGAUTO.png";
 import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
 import SINIMO from "../../image/SINIMO.png";
 import PIGEONLINE from "../../image/PIGEONLINE.png";
+import useFetchReviews from "../../hooks/components/useFetchReviews";
 
 const AvisRecents = ({ onFilterChange }) => {
   const [selected, setSelected] = useState();
-  const [reviews, setReviews] = useState([]);
-  const [nextPage, setNextPage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  
 
-  // Fonction pour récupérer les avis depuis l'API
-  const fetchReviews = async (nextPageToken = null) => {
-    if (loading) return;
-    setLoading(true);
-  
-    try {
-      const url = nextPageToken 
-        ? `http://localhost:5000/api/reviews?nextPageToken=${nextPageToken}` 
-        : "http://localhost:5000/api/reviews";
-  
-      const response = await axios.get(url);
-      console.log("Réponse du backend :", response.data);
-  
-      // Ajouter les nouveaux avis sans doublons
-      const newReviews = response.data.reviews.filter(
-        (review) => !reviews.some((r) => r.review_id === review.review_id)
-      );
-      setReviews((prevReviews) => [...prevReviews, ...newReviews]);
-  
-      // Mettre à jour le token pour la page suivante
-      setNextPage(response.data.nextPageToken || null);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des avis :", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Charger les avis au démarrage
-  useEffect(() => {
-    fetchReviews();
-  }, []);
+  const { reviews, totalReviews, loadMoreReviews, displayLimit } = useFetchReviews();
+
 
   // Gestion des services sélectionnés
   const handleServiceChange = (newService) => {
@@ -62,6 +30,7 @@ const AvisRecents = ({ onFilterChange }) => {
       }
     }
   };
+  
 
   // Services disponibles
   const servicesChip = [
@@ -103,11 +72,23 @@ const AvisRecents = ({ onFilterChange }) => {
               <Typography>Chargement des avis...</Typography>
             )}
           </Box>
+          
+          {/* <TextField
+            label="Rechercher un avis..."
+            variant="outlined"
+            fullWidth
+            onChange={(e) => setSearchTerm(e.target.value)}
+          /> */}
+
 
           {/* Bouton pour charger plus d'avis */}
-          {nextPage && (
-            <Button onClick={() => fetchReviews(nextPage)} disabled={loading} variant="contained" sx={{ backgroundColor: "#8B5CF6", color: "white", borderRadius: "20px", mt: 3 }}>
-              {loading ? "Chargement..." : "Charger plus d'avis"}
+          {displayLimit < totalReviews && (
+            <Button
+              onClick={loadMoreReviews}
+              variant="contained"
+              sx={{ backgroundColor: "#8B5CF6", color: "white", borderRadius: "20px", mt: 3 }}
+            >
+              Charger plus d'avis
             </Button>
           )}
         </Box>

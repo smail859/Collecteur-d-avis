@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { getJson } = require("serpapi");
+const rateLimit = require("express-rate-limit")
 
 const app = express();
 const PORT = 5000;
@@ -8,7 +9,13 @@ const PORT = 5000;
 app.use(cors()); // Autorise les requêtes depuis React
 app.use(express.json());
 
-const apiKey = "4546b3a57afe8d74757c0ddb90ef60d2e778e2afce5ffc489d971792699a9256";
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 60 minutes
+  max: 1, // Limite à 1 requete par IP
+  message: "Trop de requetes veuillez reessayer plus tard."
+})
+
+const apiKey = "7b7a9e8069dd613c40026dcea341e76bf84c1216b3dd40eb6c6700e1b0e18895";
 const dataId = "0x479184d4eff4c4d7:0x7899f13a20c78918";
 
 // Fonction pour récupérer les avis
@@ -69,3 +76,6 @@ app.get("/api/reviews", fetchReviews);
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
+
+// Utiliser le limiter
+app.use(limiter);

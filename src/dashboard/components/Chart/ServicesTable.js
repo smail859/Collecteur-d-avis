@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material';
 import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
 
+
 /**
  * Composant réutilisable pour afficher une liste de services et avis.
  * @param {Array} services - Liste des services avec leurs avis et notes.
@@ -16,6 +17,7 @@ export default function ServicesTable({ services }) {
    * Faire la meme chose pour Trustpilot 
    * Calculer le total d'avis Google et Trustpilot et l'afficher
   */
+  
 
   // Styles factorisés
   const headerCellStyle = { fontWeight: '600', color: '#8B5CF6', fontSize: '16px' };
