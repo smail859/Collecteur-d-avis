@@ -1,9 +1,8 @@
-import { Card, CardContent, CardHeader, CardActions, Typography, Avatar, Stack, Link } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
+import { Card, CardContent, CardHeader, CardActions, Typography, Avatar, Stack, Link,Rating } from '@mui/material';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import PropTypes from "prop-types";
 
-const FullAvis = ({ avisData }) => {
+const FullAvis = ({ avisData, defaultValueAvis }) => {
 
   
   /**
@@ -38,9 +37,7 @@ const FullAvis = ({ avisData }) => {
       {/* Contenu de l'avis */}
       <CardContent sx={{ paddingTop: 1, flexGrow: 1 }}>
         <Stack direction="row" spacing={0.5} alignItems="center">
-          {[...Array(avisData.rating)].map((_, i) => (
-            <StarIcon key={i} sx={{ color: '#FFD700' }} />
-          ))}
+        <Rating name="half-rating-read" value={defaultValueAvis} readOnly precision={0.5} />
         </Stack>
         <Typography variant="body2" color="text.secondary" mt={1}>
           {avisData.text}
@@ -76,7 +73,7 @@ FullAvis.propTypes = {
     }).isRequired,
     rating: PropTypes.number.isRequired,
     date: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
+    text: PropTypes.string,
     link: PropTypes.string,
     likes: PropTypes.number,
   }).isRequired

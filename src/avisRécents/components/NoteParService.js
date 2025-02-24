@@ -1,29 +1,27 @@
-import { Card, Box, Typography, Rating, LinearProgress} from '@mui/material';
+import { Card, Box, Typography, Rating, LinearProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import SouthEastOutlinedIcon from '@mui/icons-material/SouthEastOutlined';
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
-import { useState } from "react";
+import StarIcon from '@mui/icons-material/Star';
 import PropTypes from "prop-types";
 
 const CustomLinearProgress = styled(LinearProgress)(() => ({
-    height: 10,
+  height: 10,
+  borderRadius: 5,
+  backgroundColor: "#E0E0E0",
+  '& .MuiLinearProgress-bar': {
     borderRadius: 5,
-    backgroundColor: "#E0E0E0",
-    '& .MuiLinearProgress-bar': {
-      borderRadius: 5,
-      backgroundImage: 'linear-gradient(to right, #1CB5E0, #e01cd5)',
-    },
+    backgroundImage: 'linear-gradient(to right, #1CB5E0, #e01cd5)',
+  },
 }));
 
-const NoteParService = ({logo, labelService, noteService, nombreAvis }) => {
-  const [progress, setProgress] = useState({
-    5: 68,
-    4: 4,
-    3: 0,
-    2: 0,
-    1: 28
-  });
-
+const NoteParService = ({
+  logo,
+  labelService,
+  noteService,
+  nombreAvis,
+  defaultValue,
+  progress  // La prop contenant les pourcentages par note
+}) => {
   return (
     <Box 
       sx={{ 
@@ -81,12 +79,11 @@ const NoteParService = ({logo, labelService, noteService, nombreAvis }) => {
 
             {/* Note + Étoiles */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              
-            <Typography sx={{ display: 'flex', alignItems: 'center', fontSize: '54px', fontWeight: '800'}}>
-              {noteService}
+              <Typography sx={{ display: 'flex', alignItems: 'center', fontSize: '54px', fontWeight: '800'}}>
+                {noteService}
                 <SouthEastOutlinedIcon sx={{ color: 'red', width: '32px', height: '32px', marginLeft: '4px' }}/>
-            </Typography>
-            <Rating name="half-rating-read" defaultValue={4.8} precision={0.5} readOnly />
+              </Typography>
+              <Rating name="half-rating-read" defaultValue={defaultValue} readOnly />
             </Box>
         </Card>
       </Box>
@@ -118,15 +115,15 @@ const NoteParService = ({logo, labelService, noteService, nombreAvis }) => {
                 justifyContent: 'center',
                 textAlign: 'center',
                 borderRadius: '20px',
-                backgroundColor: note === 4 ? '#7C4DFF' : 'white', 
+                backgroundColor: 'white', 
               }}
             >
-              <StarBorderOutlinedIcon sx={{ color: note === 4 ? 'white' : 'gold', width: '20px', height: '20px' }} />
-              <Typography sx={{ fontSize: '18px', fontWeight: '700', minWidth: '30px', color: note === 4 ? 'white' : 'black', }}>
+              <StarIcon sx={{ color: 'gold', width: '20px', height: '20px' }} />
+              <Typography sx={{ fontSize: '18px', fontWeight: '700', minWidth: '30px' }}>
                 {note}
               </Typography>
             </Box>
-            <CustomLinearProgress variant="determinate" value={progress[note]} sx={{ flexGrow: 1 }} />
+            <CustomLinearProgress variant="determinate" value={parseInt(progress[note])} sx={{ flexGrow: 1 }} />
             <Box sx={{
               display: 'flex',
               alignItems: 'center',
@@ -152,18 +149,16 @@ const NoteParService = ({logo, labelService, noteService, nombreAvis }) => {
         ))}
       </Box>
     </Box>
-    
   );
 };
 
-
-// Validation avec PropTypes
 NoteParService.propTypes = {
   logo: PropTypes.string,
   labelService: PropTypes.string,
   noteService: PropTypes.number, 
   nombreAvis : PropTypes.number,
+  defaultValue: PropTypes.number,
+  progress: PropTypes.object 
 };
 
-  
 export default NoteParService;

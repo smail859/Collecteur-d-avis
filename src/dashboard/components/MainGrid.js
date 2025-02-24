@@ -18,12 +18,12 @@ import SINIMO from "../../image/SINIMO.png";
 import PIGEONLINE from "../../image/PIGEONLINE.png";
 
 /**
- * 📊 Composant principal `MainGrid`
+ * Composant principal `MainGrid`
  * Affiche le tableau de bord avec les statistiques, le tableau des services et les graphiques.
  */
 export default function MainGrid() {
   const navigate = useNavigate();
-  const { reviewsPerPeriod, totalReviews, selectedFilter, changeFilter, parseRelativeDate } = useFetchReviews();
+  const { reviewsPerPeriod, totalReviews, selectedFilter, changeFilter, parseRelativeDate, averageRating } = useFetchReviews();
 
   // État pour gérer le filtre actif du graphique
   const [activeFilter, setActiveFilter] = useState(selectedFilter);
@@ -34,7 +34,7 @@ export default function MainGrid() {
   }, [selectedFilter]);
 
   /**
-   * 🏷️ Génère les labels de dates dynamiques en fonction du filtre sélectionné
+   * Génère les labels de dates dynamiques en fonction du filtre sélectionné
    * @param {string} filter - "today", "7days", "30days"
    * @returns {Array} Tableau de labels de dates formatées
    */
@@ -48,7 +48,7 @@ export default function MainGrid() {
   }, []);
 
   /**
-   * 📊 Prépare les datasets pour `ServicesChart`
+   * Prépare les datasets pour `ServicesChart`
    */
   const dataSets = useMemo(() => {
     if (!reviewsPerPeriod || !reviewsPerPeriod[selectedFilter]) {
@@ -100,11 +100,11 @@ export default function MainGrid() {
 
 
   /**
-   * 📌 Liste des services affichés dans le tableau avec leurs avis et notes
+   * Liste des services affichés dans le tableau avec leurs avis et notes
    */
   const servicesData = useMemo(() => [
     { id: 1, name: 'Monbien', icon: MONBIEN, trustpilot: totalReviews, google: totalReviews, appStore: '-', googlePlay: '-', avgRating: 4.8, trend: 'down' },
-    { id: 2, name: 'Startloc', icon: STARTLOC, trustpilot: totalReviews, google: totalReviews, appStore: '18 - 4.8/5', googlePlay: '36 - 4.8/5', avgRating: 4.3, trend: 'up' },
+    { id: 2, name: 'Startloc', icon: STARTLOC, trustpilot: totalReviews, google: totalReviews, appStore: '18 - 4.8/5', googlePlay: '36 - 4.8/5', avgRating: averageRating, trend: 'up' },
     { id: 3, name: 'Marketing Automobile', icon: MARKETINGAUTO, trustpilot: '568 - 4.8/5', google: '568 - 4.8/5', appStore: '-', googlePlay: '-', avgRating: 4.1, trend: 'neutral' },
     { id: 4, name: 'Marketing Immobilier', icon: MARKETINGIMMO, trustpilot: '260 - 4.8/5', google: '84 - 4.8/5', appStore: '-', googlePlay: '-', avgRating: 3.8, trend: 'down' },
     { id: 5, name: 'Sinimo', icon: SINIMO, trustpilot: '260 - 4.8/5', google: '260 - 4.8/5', appStore: '360 - 4.8/5', googlePlay: '360 - 4.8/5', avgRating: 3.3, trend: 'up' },

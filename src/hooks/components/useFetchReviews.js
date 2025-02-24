@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 
-const useFetchReviews = () => {
-  // 🟢 États principaux
+const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", services: "" }) => {
+  // États principaux
   const [reviews, setReviews] = useState([]); // Liste des avis récupérés
   const [loading, setLoading] = useState(false); // Indicateur de chargement
   const [error, setError] = useState(null); // Gestion des erreurs
@@ -11,11 +11,12 @@ const useFetchReviews = () => {
   const [selectedFilter, setSelectedFilter] = useState("7days"); // Filtre sélectionné
   const [refresh, setRefresh] = useState(false); // Permet de forcer le rafraîchissement des avis
 
-  // 🟢 Mémoïsation du nombre total d'avis
+  // Mémoïsation du nombre total d'avis
   const totalReviews = useMemo(() => totalReviewsAPI, [totalReviewsAPI]);
 
+
   /**
-   * 📅 Fonction pour convertir une date relative en objet Date
+   * Fonction pour convertir une date relative en objet Date
    * @param {string} relativeDate - Exemple : "il y a 7 jours"
    * @returns {Date} Objet Date correspondant
    */
@@ -25,7 +26,7 @@ const useFetchReviews = () => {
     const now = new Date();
     const result = new Date(now);
 
-    // 📌 Cas spéciaux où le nombre est écrit en lettres
+    // Cas spéciaux où le nombre est écrit en lettres
     if (relativeDate.trim() === "il y a un jour") {
       result.setDate(now.getDate() - 1);
       result.setHours(0, 0, 0, 0);
@@ -44,7 +45,14 @@ const useFetchReviews = () => {
       return result;
     }
 
-    // 📌 Vérification via regex pour les autres formats avec chiffres
+    if (relativeDate.trim() === "il y a un an") {
+      result.setFullYear(now.getFullYear() - 1);
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+    
+
+    // Vérification via regex pour les autres formats avec chiffres
     const match = relativeDate.match(/(\d+)\s*(jour|jours|semaine|semaines|mois)/);
     if (!match) return new Date();
 
@@ -59,8 +67,9 @@ const useFetchReviews = () => {
     return result;
   }, []);
 
+
   /**
-   * 📌 Classement des avis par période
+   * Classement des avis par période
    */
   const reviewsPerPeriod = useMemo(() => {
     if (!reviews.length) return { today: [], "7days": [], "30days": [] };
@@ -103,72 +112,118 @@ const useFetchReviews = () => {
   }, [reviews]);
 
   /**
-   * 📌 Gestion de l'affichage des avis
+   * Gestion de l'affichage des avis
    */
-  const allReviews = useMemo(() => reviews || [], [reviews]);
+  const sortedReviews = useMemo(() => {
+    return reviews.slice().sort((a, b) => new Date(b.iso_date) - new Date(a.iso_date));
+  }, [reviews]);
+  
+  const allReviews = useMemo(() => {
+    return reviews ? reviews.slice().sort((a, b) => new Date(b.iso_date) - new Date(a.iso_date)) : [];
+  }, [reviews]);
+
+  
+  
 
   const displayedReviews = useMemo(() => {
     return allReviews.slice(0, displayLimit);
   }, [allReviews, displayLimit]);
 
   /**
-   * 📌 Fonction pour charger plus d'avis
+   * Fonction pour charger plus d'avis
    */
   const loadMoreReviews = () => {
     setDisplayLimit((prevLimit) => prevLimit + 8);
   };
 
   /**
-   * 📌 Changement de filtre
+   * Changement de filtre
    */
   const changeFilter = (filter) => {
     setSelectedFilter(filter);
   };
 
-  /**
-   * 🔍 Recherche de prénoms dans les avis
-   */
-  const keywords = ["Smail", "Lucas", "Mélanie", "Déborah"]; // Liste des prénoms connus
 
-  const countNamesInReviews = (reviews) => {
-    const nameCounts = {};
-    const reviewsWithNames = [];
-
-    reviews.forEach((review) => {
-      if (!review.text) return;
-
-      const reviewText = review.text.toLowerCase();
-      let nameFound = false;
-
-      keywords.forEach((name) => {
-        const regex = new RegExp(`\\b${name.toLowerCase()}\\b`, "g");
-        const matches = reviewText.match(regex);
-
-        if (matches) {
-          nameCounts[name] = (nameCounts[name] || 0) + matches.length;
-          nameFound = true;
-        }
-      });
-
-      if (nameFound) {
-        reviewsWithNames.push(review);
-      }
-    });
-
-    console.log("📌 Avis contenant des noms détectés :", reviewsWithNames);
-    return nameCounts;
-  };
-
-  const [nameCounts, setNameCounts] = useState({});
-
-  useEffect(() => {
-    if (reviews.length > 0) {
-      setNameCounts(countNamesInReviews(reviews));
+  const filteredReviews = useMemo(() => {
+    // Commencez par l'ensemble complet des avis
+    let result = allReviews;
+  
+    // Filtrer par note (ex: "5 étoiles" => 5)
+    if (externalFilters.note) {
+      const noteValue = parseInt(externalFilters.note[0], 10);
+      result = result.filter((review) => review.rating === noteValue);
     }
+  
+    // Filtrer par période
+    if (externalFilters.periode) {
+      if (externalFilters.periode === "Cette semaine") {
+        result = reviewsPerPeriod["7days"];
+      } else if (externalFilters.periode === "Ce mois") {
+        result = result.filter((review) => {
+          const reviewDate = parseRelativeDate(review.date);
+          const now = new Date();
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          console.log(
+            "Review:", review.date,
+            "Parsed:", reviewDate,
+            "StartOfMonth:", startOfMonth,
+            "Now:", now
+          );
+          console.log("date de l'avis :", review.date, reviewDate, startOfMonth, now)
+          return reviewDate >= startOfMonth && reviewDate <= now;
+        });
+      }
+    }
+      
+    // Fonction de normalisation pour enlever les accents
+    const normalizeText = (text) =>
+      text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+    if (externalFilters.commercial) {
+      const normalizedFilter = normalizeText(externalFilters.commercial);
+      result = result.filter(
+        (review) =>
+          review.text &&
+          normalizeText(review.text).includes(normalizedFilter)
+      );
+    }
+  
+    // Filtrer par plateforme
+    if (externalFilters.plateforme) {
+      result = result.filter((review) => review.source === externalFilters.plateforme);
+    }
+  
+    // Filtrer par service
+    if (externalFilters.services) {
+      result = result.filter((review) => review.service === externalFilters.services);
+    }
+  
+    return result;
+  }, [allReviews, externalFilters, reviewsPerPeriod, parseRelativeDate]);
+  
+  
+  // Fonction pour recuperer la notes total de l'etablissement
+  const averageRating = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    const total = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return (total / reviews.length).toFixed(1); // moyenne avec 1 décimale
   }, [reviews]);
 
+  // Fonction pour recuperer les avis par étoiles 
+  const ratingsCount = useMemo(() => {
+    // Initialisation des compteurs pour chaque note de 1 à 5
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    reviews.forEach((review) => {
+      if (review.rating >= 1 && review.rating <= 5) {
+        counts[review.rating] += 1;
+      }
+    });
+    return counts;
+  }, [reviews]);
+
+
   /**
-   * 📌 Fonction pour récupérer les avis
+   * Fonction pour récupérer les avis
    */
   const fetchReviews = useCallback(async () => {
     setLoading(true);
@@ -236,7 +291,10 @@ const useFetchReviews = () => {
     selectedFilter,
     refreshReviews,
     parseRelativeDate,
-    countNamesInReviews,
+    averageRating,
+    ratingsCount,
+    filteredReviews,
+    sortedReviews
   };
 };
 

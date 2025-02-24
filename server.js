@@ -45,7 +45,7 @@ const fetchReviews = (req, res) => {
 
       const formattedReviews = json.reviews.map((review) => ({
         link: review.link,
-        rating: review.rating,
+        rating: review.rating, // note de l'avis
         date: review.date,
         source: review.source,
         likes: review.likes,
