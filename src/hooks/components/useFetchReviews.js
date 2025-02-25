@@ -244,6 +244,64 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   }, [reviews]);
 
 
+  const commercialCounts = useMemo(() => {
+    const counts = {};
+  
+    // Déterminer la période du mois précédent
+    const now = new Date();
+    const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  
+    console.log("Période filtrée :", firstDayLastMonth, "->", lastDayLastMonth);
+  
+    // Liste des commerciaux avec plusieurs orthographes possibles
+    const commerciauxRecherches = {
+      "smail": ["Smaïl", "Smail", "Ismail"],
+      "melanie": ["Mélanie", "Melanie"],
+      "deborah": ["Déborah", "Deborah", "Débora", "Debora", "Déborrah", "Deborrah", "Débby", "Debby", "Debbi", "Debi", "Débborah", "Déborha", "Déboraah", "Déboraa", "Débhora", "Débhoraah"]
+    };
+  
+    // Fonction de normalisation
+    const normalizeText = (text) =>
+      text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+    // Filtrer les avis du mois précédent
+    const lastMonthReviews = filteredReviews.filter((review) => {
+      const reviewDate = parseRelativeDate(review.date);
+      return reviewDate >= firstDayLastMonth && reviewDate <= lastDayLastMonth;
+    });
+  
+    console.log("Avis filtrés du mois précédent :", lastMonthReviews);
+  
+    // Recherche des commerciaux dans le texte des avis filtrés
+    lastMonthReviews.forEach((review) => {
+      if (review.text) {
+        const normalizedText = normalizeText(review.text);
+        const detectedCommercials = new Set(); // Stocker les commerciaux déjà comptés dans cet avis
+  
+        Object.entries(commerciauxRecherches).forEach(([key, variations]) => {
+          variations.forEach((variant) => {
+            const normalizedVariant = normalizeText(variant);
+  
+            const regex = new RegExp(`\\b${normalizedVariant}\\b`, "i");
+            if (regex.test(normalizedText) && !detectedCommercials.has(key)) {
+              console.log(`${variant} détecté dans :`, review.text);
+              counts[key] = (counts[key] || 0) + 1;
+              detectedCommercials.add(key); // Empêche de le compter plusieurs fois pour un même avis
+            }
+          });
+        });
+      }
+    });
+  
+    // 📊 Transformer l'objet `counts` en tableau [{ name, count }]
+    const result = Object.entries(counts).map(([name, count]) => ({ name, count }));
+  
+    console.log("📊 Résultat final commercialCounts:", result);
+    return result;
+  }, [filteredReviews, parseRelativeDate]);
+
+
   /**
    * Fonction pour récupérer les avis
    */
@@ -323,7 +381,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     ratingsCount,
     filteredReviews,
     sortedReviews,
-    rankingsByService
+    rankingsByService,
+    commercialCounts
   };
 };
 

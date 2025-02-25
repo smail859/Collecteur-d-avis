@@ -13,6 +13,9 @@ import ListChip from "../../avisRécents/components/ListChip";
 import useFetchReviews from "../../hooks/components/useFetchReviews"; // Import du hook pour le classement
 
 const Statistiques = () => {
+
+  const { commercialCounts } = useFetchReviews();
+
   // Données des commerciaux
   const servicesData = [
     { label: "Monbien", icon: MONBIEN, commerciaux: ["Joanna", "Théo"] },
@@ -33,30 +36,25 @@ const Statistiques = () => {
     setSelectedCommercial(commercial);
   };
 
-  // Données dynamiques selon le commercial sélectionné
-  const commercialStats = {
-    Joanna: { avis: 8, gainBruts: 80, gainNets: 62, progression: 80 },
-    Mélanie: { avis: 7, gainBruts: 70, gainNets: 54, progression: 75 },
-    "Jean-Simon": { avis: 5, gainBruts: 50, gainNets: 39, progression: 65 },
-    "Alice Robert": { avis: 10, gainBruts: 100, gainNets: 78, progression: 90 },
-  };
+  const tableauCommerciaux = Array.isArray(commercialCounts) ? commercialCounts : [];
 
-  const stats = commercialStats[selectedCommercial] || { avis: 0, gainBruts: 0, gainNets: 0, progression: 0 };
 
   // Données pour le graphique
   const ratingData = [
-    { rank: 1, label: "4 - 5", value: (stats.avis / 10) * 80 },
-    { rank: 2, label: "1 - 2", value: (stats.avis / 10) * 20 },
+    { rank: 1, label: "4 - 5", value:  80 },
+    { rank: 2, label: "1 - 2", value:  20 },
   ];
   const colors = ["#7B61FF", "#E3E4FE"];
 
-  // 🔥 Récupération du classement des commerciaux pour Startloc
-  const { top3, fullRanking } = useFetchReviews();
+  const progression = 80
 
-  // 🔥 Trouver la place du commercial sélectionné
-  const selectedRank = fullRanking.findIndex((c) => c.name === selectedCommercial) + 1;
-  const isTop3 = selectedRank > 0 && selectedRank <= 3;
-
+  const data = tableauCommerciaux.map((commercial, index) => ({
+    rank: index + 1,
+    label: commercial.name,
+    count: commercial.count, 
+  }));
+  
+  
   return (
     <Box>
       <Typography variant="h2" textAlign="left" ml="180px" mt="50px" gutterBottom>
@@ -81,31 +79,11 @@ const Statistiques = () => {
           </Typography>
 
           <ChartStatistiques
-            data={[
-              { id: 1, stars: 4, text: "Total d'avis collectés", total: stats.avis, type: "rating" },
-              { id: 2, stars: 0, text: "Gains Bruts (€)", total: stats.gainBruts, type: "money" },
-              { id: 3, stars: 0, text: "Gains Nets (€)", total: stats.gainNets, type: "money" },
-              { id: 4, stars: 1.5, text: "Notes (nombre d'étoiles)", type: "chart" },
-            ]}
-            rows={[
-              {
-                top: 1,
-                name: selectedCommercial,
-                avis: `${stats.avis} avis`,
-                gainBruts: `${stats.gainBruts}€`,
-                gainNets: `${stats.gainNets}€`,
-                noteMoyenne: 4.5,
-                trend: "up",
-              },
-            ]}
-            progression={stats.progression}
+            data={data}
+            progression={progression}
             colors={colors}
             ratingData={ratingData}
-            top3={top3} // 🔥 Ajout du Top 3
-            fullRanking={fullRanking} // 🔥 Liste complète du classement
-            selectedCommercial={selectedCommercial} // 🔥 Commercial sélectionné
-            selectedRank={selectedRank} // 🔥 Position du commercial sélectionné
-            isTop3={isTop3} // 🔥 Indique s'il est dans le Top 3
+            tableauCommerciaux={tableauCommerciaux}
           />
 
           <Typography variant="subtitle1" textAlign="left" ml="180px" mt="50px" gutterBottom>
@@ -113,28 +91,7 @@ const Statistiques = () => {
             <span style={{ color: "#8B5CF6", fontWeight: "500" }}>de {selectedCommercial}</span>
           </Typography>
 
-          <ChartBarStatistiques
-            data={[
-              { id: 1, stars: 4, text: "Total d'avis collectés", total: stats.avis, type: "rating" },
-              { id: 2, stars: 0, text: "Gains Bruts (€)", total: stats.gainBruts, type: "money" },
-              { id: 3, stars: 0, text: "Gains Nets (€)", total: stats.gainNets, type: "money" },
-              { id: 4, stars: 1.5, text: "Notes (nombre d'étoiles)", type: "chart" },
-            ]}
-            rows={[
-              {
-                top: 1,
-                name: selectedCommercial,
-                avis: `${stats.avis} avis`,
-                gainBruts: `${stats.gainBruts}€`,
-                gainNets: `${stats.gainNets}€`,
-                noteMoyenne: 4.5,
-                trend: "up",
-              },
-            ]}
-            progression={stats.progression}
-            ratingData={ratingData}
-            colors={colors}
-          />
+          {/* <ChartBarStatistiques/> */}
         </>
       )}
     </Box>

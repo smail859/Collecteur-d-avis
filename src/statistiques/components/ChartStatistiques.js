@@ -1,3 +1,4 @@
+import {useMemo} from "react"
 import { LinearProgress, Typography, Rating, Box, Grid, Chip} from "@mui/material";
 import { PieChart, Pie, Cell } from "recharts";
 import { styled } from "@mui/system";
@@ -9,17 +10,6 @@ import PropTypes from "prop-types";
 import Wave from "react-wavify";
 import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-
-  /**
-   * Filtrer et afficher les données du collaborateurs selectionnées dans la ListChip
-   * Afficher le nombre total d'avis eu dans le mois pour le commercial selectioné
-   * Afficher le gains bruts du mois pour le commercial selectionné en sachant que 1 avis === 10€
-   * Afficher le gains nets du mois pour le commercial selectionné en faisant le calcul our passer du brut au net
-   * Calculer combien de notes 5,4,3,2,1 etoiles le collaborateurs a
-   * Afficher les 3 premiers comerciaux avec le plus d'avis et afficher en denrier position si il n'est pas dans le top 3 son nom et sa position
-   * Afficher l'objectif d'avis qui est de 10 et calculer combien d'avis il lui manque par exemple (8 avis = 80% et il manque de avis donc 2 flammes sans couleur)
-   * Ne pas oublier de modifier la couleur de la personne concerner par le filtre
-  */
 
 
 // Barre de progression personnalisée
@@ -33,7 +23,25 @@ const CustomLinearProgress = styled(LinearProgress)(() => ({
     },
 }));
 
-const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, fullRanking, selectedCommercial, selectedRank, isTop3 }) => {
+const ChartStatistiques = ({ data, progression, colors, ratingData, tableauCommerciaux }) => {
+
+  // Trier et extraire le top 3
+  const top3 = useMemo(() => {
+    return [...tableauCommerciaux] // Cette props est sensé reprendre le tableau commercialCount et donc le result
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3)
+      .map((commercial, index) => ({
+        top: index + 1,
+        name: commercial.name,
+        avis: commercial.count,
+        gainBruts: `${commercial.count * 10}€`,
+        gainNets: `${commercial.count * 10}€`,
+        trend: index === 0 ? "up" : index === 1 ? "neutral" : "down",
+      }));
+  }, [tableauCommerciaux]);
+  
+  
+
 
   const getRankStyle = (rank) => ({
     background: rank === 1 ? "linear-gradient(to right, #8B5CF6, #2972FF)" : rank === 2 ? "transparent" : rank === 3 ? "#FFF" : "transparent", 
@@ -47,8 +55,6 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, 
     return <HorizontalRuleIcon />;
   };
 
-
-  
 
   return (
     <Box
@@ -154,30 +160,7 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, 
           ))}
         </Grid>
 
-        {/* 🔥 Classement des commerciaux pour Startloc */}
-        <Box sx={{ mt: 4, mb: 4 }}>
-          <Typography variant="h6">🏆 Top 3 des commerciaux - Startloc</Typography>
-          
-          {/* 🔥 Affichage du Top 3 */}
-          {top3.map((commercial, index) => (
-            <Box key={commercial.name} sx={{ display: "flex", gap: 2, alignItems: "center", fontWeight: "bold" }}>
-              <Box sx={{ width: "30px", height: "30px", borderRadius: "50%", bgcolor: "#8B5CF6", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {index + 1}
-              </Box>
-              {commercial.name} - {commercial.count} avis
-            </Box>
-          ))}
-
-          {/* 🔥 Si le commercial sélectionné n'est pas dans le Top 3, affiche sa position */}
-          {!isTop3 && selectedRank > 0 && (
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center", fontWeight: "bold", mt: 2 }}>
-              <Box sx={{ width: "30px", height: "30px", borderRadius: "50%", bgcolor: "#FFB800", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {selectedRank}
-              </Box>
-              {selectedCommercial} - {fullRanking[selectedRank - 1]?.count || 0} avis
-            </Box>
-          )}
-        </Box>
+        
 
 
         {/* Tableau Top du mois */}
@@ -197,7 +180,7 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, 
         >
           <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
             {/* Header */}
-            <Box sx={{ display: "flex", padding: "12px", borderRadius: "10px", color: "#8B5CF6" }}>
+            <Box sx={{ display: "flex", padding: "12px", borderRadius: "10px", color: "#8B5CF6"}}>
               <Box sx={{ flex: 1, fontWeight: "900" }}>Top du mois</Box>
               <Box sx={{ flex: 1, textAlign: "center" }}>Avis</Box>
               <Box sx={{ flex: 1, textAlign: "center" }}>Gains bruts</Box>
@@ -205,27 +188,42 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, 
               <Box sx={{ flex: 1, textAlign: "center" }}>Note moyenne</Box>
             </Box>
 
-            {rows.map((row) => (
-              <Box key={row.top} sx={{ display: "flex", alignItems: "center", padding: "16px", borderRadius: "20px", ...getRankStyle(row.top) }}>
-                <Box sx={{ flex: 1, display: "flex", alignItems: "center", gap: 1, fontWeight: "bold", color: row.top === 1 ? "white" : "black" }}>
+            {top3.map((commercial, index) => (
+              <Box key={commercial.name} sx={{ display: "flex", alignItems: "center", padding: "16px", borderRadius: "20px", ...getRankStyle(commercial.top) }}>
+                <Box sx={{ flex: 1, display: "flex", alignItems: "center", gap: 1, fontWeight: "bold", color: commercial.top === 1 ? "white" : "black" }}>
                   <Box sx={{
                     width: "50px",
                     height: "50px",
                     borderRadius: "15px",
-                    backgroundColor: row.top === 1 ? "#FF8C00" : row.top === 2 ? "#FF007F" : "#FF0063",
+                    backgroundColor: commercial.top === 1 ? "#FF8C00" : commercial.top === 2 ? "#FF007F" : "#FF0063",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     fontWeight: "bold",
                     color: "white",
                   }}>
-                    {row.top}
+                    {index + 1}
                   </Box>
-                  {row.name}
+                  {commercial.name}
+
                 </Box>
-                <Box sx={{ flex: 1, textAlign: "center", color: row.top === 1 ? "white" : "black" }}>{row.avis}</Box>
-                <Box sx={{ flex: 1, textAlign: "center",color: row.top === 1 ? "white" : "black"  }}>{row.gainBruts}</Box>
-                <Box sx={{ flex: 1, textAlign: "center", color: row.top === 1 ? "white" : "black"  }}>{row.gainNets}</Box>
+
+                {/* Avis reçus */}
+                <Box sx={{ flex: 1, textAlign: "center", color: commercial.top === 1 ? "white" : "black" }}>
+                  {commercial.avis}
+                </Box>
+
+                {/* Gains bruts */}
+                <Box sx={{ flex: 1, textAlign: "center", color: commercial.top === 1 ? "white" : "black" }}>
+                  {commercial.avis * 10}€
+                </Box>
+
+                {/* Gains nets */}
+                <Box sx={{ flex: 1, textAlign: "center", color: commercial.top === 1 ? "white" : "black" }}>
+                  {commercial.avis * 10}€
+                </Box>
+
+                {/* Note moyenne sur 10 */}
                 <Box
                   sx={{
                     flex: 1,
@@ -240,11 +238,11 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, 
                     maxHeight: "62px",
                     borderRadius: "10px",
                     margin: "auto",
-                    boxShadow: row.top === 3 ? " rgba(149, 157, 165, 0.2) 0px 8px 24px;" : 'none',
+                    boxShadow: commercial.top === 3 ? "rgba(149, 157, 165, 0.2) 0px 8px 24px" : "none",
                   }}
                 >
-                  {getTrendIcon(row.trend)}
-                  <strong>{row.noteMoyenne} <StarIcon sx={{ color: "gold" }} /></strong>
+                  {getTrendIcon(commercial.trend)}
+                  <strong>{(commercial.avis / 10).toFixed(1)} <StarIcon sx={{ color: "gold" }} /></strong>
                 </Box>
               </Box>
             ))}
@@ -330,13 +328,10 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, 
 // Validation avec PropTypes
 ChartStatistiques.propTypes = {
   data: PropTypes.array.isRequired,
-  rows: PropTypes.array.isRequired,
   progression: PropTypes.number.isRequired,
-  top3: PropTypes.array.isRequired, // 🔥 Top 3 commerciaux
-  fullRanking: PropTypes.array.isRequired, // 🔥 Liste complète du classement
-  selectedCommercial: PropTypes.string.isRequired, // 🔥 Nom du commercial sélectionné
-  selectedRank: PropTypes.number.isRequired, // 🔥 Position du commercial sélectionné
-  isTop3: PropTypes.bool.isRequired, // 🔥 Indique s'il est dans le Top 3
+  colors: PropTypes.array.isRequired,
+  ratingData: PropTypes.array.isRequired,
+  tableauCommerciaux: PropTypes.array.isRequired, 
 };
 
 export default ChartStatistiques;
