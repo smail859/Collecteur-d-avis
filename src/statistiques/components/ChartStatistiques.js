@@ -33,8 +33,7 @@ const CustomLinearProgress = styled(LinearProgress)(() => ({
     },
 }));
 
-const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
-
+const ChartStatistiques = ({ data, rows, progression, colors, ratingData, top3, fullRanking, selectedCommercial, selectedRank, isTop3 }) => {
 
   const getRankStyle = (rank) => ({
     background: rank === 1 ? "linear-gradient(to right, #8B5CF6, #2972FF)" : rank === 2 ? "transparent" : rank === 3 ? "#FFF" : "transparent", 
@@ -47,6 +46,9 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
     if (trend === "down") return <SouthEastIcon sx={{ color: 'red' }} />;
     return <HorizontalRuleIcon />;
   };
+
+
+  
 
   return (
     <Box
@@ -151,6 +153,32 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
             </Grid>
           ))}
         </Grid>
+
+        {/* 🔥 Classement des commerciaux pour Startloc */}
+        <Box sx={{ mt: 4, mb: 4 }}>
+          <Typography variant="h6">🏆 Top 3 des commerciaux - Startloc</Typography>
+          
+          {/* 🔥 Affichage du Top 3 */}
+          {top3.map((commercial, index) => (
+            <Box key={commercial.name} sx={{ display: "flex", gap: 2, alignItems: "center", fontWeight: "bold" }}>
+              <Box sx={{ width: "30px", height: "30px", borderRadius: "50%", bgcolor: "#8B5CF6", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {index + 1}
+              </Box>
+              {commercial.name} - {commercial.count} avis
+            </Box>
+          ))}
+
+          {/* 🔥 Si le commercial sélectionné n'est pas dans le Top 3, affiche sa position */}
+          {!isTop3 && selectedRank > 0 && (
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", fontWeight: "bold", mt: 2 }}>
+              <Box sx={{ width: "30px", height: "30px", borderRadius: "50%", bgcolor: "#FFB800", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {selectedRank}
+              </Box>
+              {selectedCommercial} - {fullRanking[selectedRank - 1]?.count || 0} avis
+            </Box>
+          )}
+        </Box>
+
 
         {/* Tableau Top du mois */}
         <Box
@@ -277,12 +305,12 @@ const ChartStatistiques = ({ data, rows, progression, colors, ratingData}) => {
             position: "absolute",
             bottom: "20px",
             display: "flex",
-            flexDirection: "row",
             alignItems: "center",
             zIndex: 2,
+            flexDirection:'column'
           }}
         >
-          <Typography fontSize="14px" fontWeight="200" color="white">
+          <Typography fontSize="14px" fontWeight="200" color="white" >
             Plus que <span style={{ color: "white", fontWeight: "bold"}}>2 avis</span> 
           </Typography>
           <Box sx={{ display: "flex", gap: 0.5 }}>
@@ -304,6 +332,11 @@ ChartStatistiques.propTypes = {
   data: PropTypes.array.isRequired,
   rows: PropTypes.array.isRequired,
   progression: PropTypes.number.isRequired,
+  top3: PropTypes.array.isRequired, // 🔥 Top 3 commerciaux
+  fullRanking: PropTypes.array.isRequired, // 🔥 Liste complète du classement
+  selectedCommercial: PropTypes.string.isRequired, // 🔥 Nom du commercial sélectionné
+  selectedRank: PropTypes.number.isRequired, // 🔥 Position du commercial sélectionné
+  isTop3: PropTypes.bool.isRequired, // 🔥 Indique s'il est dans le Top 3
 };
 
 export default ChartStatistiques;

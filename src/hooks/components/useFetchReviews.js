@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
+import useFilterService from "../components/utils/useFilterService"; // 🔥 Import du hook
+
 
 const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", services: "" }) => {
+  
   // États principaux
   const [reviews, setReviews] = useState([]); // Liste des avis récupérés
   const [loading, setLoading] = useState(false); // Indicateur de chargement
@@ -14,7 +17,19 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   // Mémoïsation du nombre total d'avis
   const totalReviews = useMemo(() => totalReviewsAPI, [totalReviewsAPI]);
 
+  // Vérifier que `reviews` est bien un tableau
+  const validReviews = Array.isArray(reviews) ? reviews : [];
 
+  // 🔥 Utilisation du hook `useFilterService` pour chaque service
+  const rankingsByService = {
+    Startloc: useFilterService(validReviews, "Startloc"),
+    Monbien: useFilterService(validReviews, "Monbien"),
+    Sinimo: useFilterService(validReviews, "Sinimo"),
+    "Marketing Automobile": useFilterService(validReviews, "Marketing Automobile"),
+    "Marketing Immobilier": useFilterService(validReviews, "Marketing Immobilier"),
+    "Pige Online": useFilterService(validReviews, "Pige Online"),
+  };
+  
   /**
    * Fonction pour convertir une date relative en objet Date
    * @param {string} relativeDate - Exemple : "il y a 7 jours"
@@ -53,7 +68,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     
 
     // Vérification via regex pour les autres formats avec chiffres
-    const match = relativeDate.match(/(\d+)\s*(jour|jours|semaine|semaines|mois)/);
+    const match = relativeDate.match(/(\d+)\s*(jour|jours|semaine|semaines|mois|an|ans)/i);
     if (!match) return new Date();
 
     const value = parseInt(match[1], 10);
@@ -62,6 +77,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     if (unit.includes("jour")) result.setDate(now.getDate() - value);
     else if (unit.includes("semaine")) result.setDate(now.getDate() - value * 7);
     else if (unit.includes("mois")) result.setMonth(now.getMonth() - value);
+    else if (unit.includes("an")) result.setFullYear(now.getFullYear() - value);
 
     result.setHours(0, 0, 0, 0);
     return result;
@@ -115,16 +131,22 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
    * Gestion de l'affichage des avis
    */
   const sortedReviews = useMemo(() => {
-    return reviews.slice().sort((a, b) => new Date(b.iso_date) - new Date(a.iso_date));
+    const sorted = reviews.slice().sort((a, b) => {
+      const dateA = a.iso_date ? new Date(a.iso_date) : parseRelativeDate(a.date);
+      const dateB = b.iso_date ? new Date(b.iso_date) : parseRelativeDate(b.date);
+      return dateB - dateA;
+    });
+  
+    return sorted;
   }, [reviews]);
   
   const allReviews = useMemo(() => {
-    return reviews ? reviews.slice().sort((a, b) => new Date(b.iso_date) - new Date(a.iso_date)) : [];
+    return reviews
+      ? reviews.slice().sort((a, b) => new Date(parseRelativeDate(b.date)) - new Date(parseRelativeDate(a.date)))
+      : [];
   }, [reviews]);
-
   
   
-
   const displayedReviews = useMemo(() => {
     return allReviews.slice(0, displayLimit);
   }, [allReviews, displayLimit]);
@@ -228,38 +250,43 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     setError(null);
-
+  
     let allReviews = [];
     let nextToken = null;
-
+  
     try {
       const cachedReviews = localStorage.getItem("cachedReviews");
       if (cachedReviews && !refresh) {
-        const parsedReviews = JSON.parse(cachedReviews);
-        setReviews(parsedReviews);
-        setTotalReviewsAPI(parsedReviews.length);
-        setLoading(false);
-        return;
+        try {
+          const parsedReviews = JSON.parse(cachedReviews);
+          if (Array.isArray(parsedReviews)) {
+            setReviews(parsedReviews);
+            setTotalReviewsAPI(parsedReviews.length);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn("Cache corrompu, récupération des avis depuis l'API...");
+        }
       }
-
+  
       do {
         const url = nextToken
           ? `http://localhost:5000/api/reviews?nextPageToken=${nextToken}`
           : "http://localhost:5000/api/reviews";
-
+  
         const response = await axios.get(url);
-
         const newReviews = response.data.reviews.filter(
           (review) => !allReviews.some((r) => r.review_id === review.review_id)
         );
-
+  
         allReviews = [...allReviews, ...newReviews];
         nextToken = response.data.nextPageToken || null;
       } while (nextToken);
-
+  
       setReviews(allReviews);
       setTotalReviewsAPI(allReviews.length);
-
+  
       localStorage.setItem("cachedReviews", JSON.stringify(allReviews));
     } catch (error) {
       setError(error?.message || "Une erreur est survenue");
@@ -268,6 +295,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       setRefresh(false);
     }
   }, [refresh]);
+  
 
   useEffect(() => {
     fetchReviews();
@@ -294,7 +322,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     averageRating,
     ratingsCount,
     filteredReviews,
-    sortedReviews
+    sortedReviews,
+    rankingsByService
   };
 };
 
