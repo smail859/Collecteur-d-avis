@@ -19,7 +19,7 @@ const Statistiques = () => {
   // Données des commerciaux
   const servicesData = [
     { label: "Monbien", icon: MONBIEN, commerciaux: ["Joanna", "Théo"] },
-    { label: "Startloc", icon: STARTLOC, commerciaux: ["Mélanie"] },
+    { label: "Startloc", icon: STARTLOC, commerciaux: ["Mélanie", "Smaïl", "Lucas", "Deborah"] },
     { label: "Sinimo", icon: SINIMO, commerciaux: ["Anaïs"] },
     { label: "Marketing Automobile", icon: MARKETINGAUTO, commerciaux: ["Jean-Simon", "Elodie"] },
     { label: "Marketing Immobilier", icon: MARKETINGIMMO, commerciaux: ["Jean Dupont"] },
@@ -37,6 +37,7 @@ const Statistiques = () => {
   };
 
   const tableauCommerciaux = Array.isArray(commercialCounts) ? commercialCounts : [];
+  
 
 
   // Données pour le graphique
@@ -53,6 +54,9 @@ const Statistiques = () => {
     label: commercial.name,
     count: commercial.count, 
   }));
+
+  console.log("Prop `selectedCommercial` reçue:", selectedCommercial);
+
   
   
   return (
@@ -83,6 +87,7 @@ const Statistiques = () => {
             progression={progression}
             colors={colors}
             ratingData={ratingData}
+            selectedCommercial={selectedCommercial}
             tableauCommerciaux={tableauCommerciaux}
           />
 

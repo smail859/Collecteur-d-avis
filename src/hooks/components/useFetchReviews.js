@@ -258,6 +258,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     const commerciauxRecherches = {
       "smail": ["Smaïl", "Smail", "Ismail"],
       "melanie": ["Mélanie", "Melanie"],
+      "lucas": ["Lucas", "Luka", "Luca"],
       "deborah": ["Déborah", "Deborah", "Débora", "Debora", "Déborrah", "Deborrah", "Débby", "Debby", "Debbi", "Debi", "Débborah", "Déborha", "Déboraah", "Déboraa", "Débhora", "Débhoraah"]
     };
   
@@ -285,7 +286,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   
             const regex = new RegExp(`\\b${normalizedVariant}\\b`, "i");
             if (regex.test(normalizedText) && !detectedCommercials.has(key)) {
-              console.log(`${variant} détecté dans :`, review.text);
               counts[key] = (counts[key] || 0) + 1;
               detectedCommercials.add(key); // Empêche de le compter plusieurs fois pour un même avis
             }

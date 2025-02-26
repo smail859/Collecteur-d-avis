@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 /**
- * 🔥 Classement des commerciaux pour un service donné
+ * Classement des commerciaux pour un service donné
  */
 export default function useFilterService(reviews = [], serviceName = "Startloc") {
   return useMemo(() => {
