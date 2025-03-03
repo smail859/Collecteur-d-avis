@@ -25,7 +25,6 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: "100%",
         height: "auto",
         bgcolor: "#F2F3FB",
         marginTop: "20px",

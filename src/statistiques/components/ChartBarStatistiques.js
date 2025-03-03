@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import Wave from "react-wavify";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import { useState } from "react";
+import StatistiquesGrid from "../components-not-use/StatistiquesGrid";
 
 // Barre de progression personnalisée
 
@@ -68,6 +69,12 @@ const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, ratin
           {data.map((item) => (
             <Grid item key={item.id} xs={12} sm={6} md={3}>
               <Box sx={{ bgcolor: "#F2F3FB", padding: "20px", borderRadius: 2, width: "290px", height: "240px" }}>
+                <StatistiquesGrid 
+                  data={data} 
+                  selectedCommercial={selectedCommercial} 
+                  colors={colors} 
+                  ratingData={ratingData} 
+                />
                 {item.type === "money" && <CustomLinearProgress variant="determinate" value={75} sx={{ width: "120px", height: "18px", marginBottom: "10px" }} />}
                 {item.type === "rating" && <Rating value={item.stars} precision={0.5} readOnly />}
                 <Typography variant="body1" fontWeight="bold" mt={1}>{item.text}</Typography>

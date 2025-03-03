@@ -17,7 +17,6 @@ const ProgressionSection = ({ progression = 0, top3 = [] }) => {
         height: "700px",
         borderRadius: "20px",
         bgcolor: "#F2F3FB",
-        flexDirection: "column",
         position: "relative",
         overflow: "hidden", // Empêche la vague de dépasser
       }}

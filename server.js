@@ -15,6 +15,9 @@ const limiter = rateLimit({
   message: "Trop de requetes veuillez reessayer plus tard."
 })
 
+// Utiliser le limiter
+app.use(limiter);
+
 const apiKey = "7b7a9e8069dd613c40026dcea341e76bf84c1216b3dd40eb6c6700e1b0e18895";
 const dataId = "0x479184d4eff4c4d7:0x7899f13a20c78918";
 
@@ -77,5 +80,4 @@ app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
 
-// Utiliser le limiter
-app.use(limiter);
+

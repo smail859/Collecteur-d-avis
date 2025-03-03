@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import PropTypes from "prop-types";
 import ChartBarStatistiques from "./ChartBarStatistiques";
 import ProgressionSection from "../components-not-use/ProgressionSection";
@@ -52,10 +52,6 @@ const ChartStatistiques = ({ data, progression, tableauCommerciaux, selectedComm
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        flexDirection: "row",
         maxWidth: "1600px",
         height: "auto",
         margin: "50px auto",
@@ -65,21 +61,41 @@ const ChartStatistiques = ({ data, progression, tableauCommerciaux, selectedComm
         gap: 3,
       }}
     >
-      <StatistiquesGrid data={data} selectedCommercial={selectedCommercial} colors={colors} ratingData={ratingData}/>
+      {/*Statistiques + Progression sur une ligne */}
+      <Grid container spacing={3} alignItems="center">
+        {/* StatistiquesGrid (Prend 8 colonnes, avec une hauteur max) */}
+        <Grid item xs={12} md={8} sx={{ display: "flex", flexDirection: "column", maxHeight: "0px" }}>
+          <StatistiquesGrid 
+            data={data} 
+            selectedCommercial={selectedCommercial} 
+            colors={colors} 
+            ratingData={ratingData} 
+          />
+        </Grid>
 
-      <TopDuMoisTable
-        top3={top3}
-        selectedCommercial={selectedCommercial}
-        selectedCommercialData={selectedCommercialData}
-        selectedRank={selectedRank}
-        isSelectedInTop3={isSelectedInTop3}
-        isSelectedCommercialValid={isSelectedCommercialValid}
-      />
-      <ProgressionSection progression={progression} top3={top3} />
-      {/* <ChartBarStatistiques data={data} /> */}
+        {/* ProgressionSection (Prend 4 colonnes, aligné au centre) */}
+        <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <ProgressionSection progression={progression} top3={top3} />
+        </Grid>
+      </Grid>
+
+      {/*Tableau Top du Mois (Prend toute la largeur) */}
+      <Grid container spacing={3} sx={{maxWidth: "70%"}}>
+        <Grid item xs={12}>
+          <TopDuMoisTable
+            top3={top3}
+            selectedCommercial={selectedCommercial}
+            selectedCommercialData={selectedCommercialData}
+            selectedRank={selectedRank}
+            isSelectedInTop3={isSelectedInTop3}
+            isSelectedCommercialValid={isSelectedCommercialValid}
+          />
+        </Grid>
+      </Grid>
     </Box>
 
-    
+
+
   );
 };
 

@@ -55,6 +55,7 @@ const Statistiques = () => {
     count: commercial.count, 
   }));
 
+
   console.log("Prop `selectedCommercial` reçue:", selectedCommercial);
 
   
@@ -96,7 +97,7 @@ const Statistiques = () => {
             <span style={{ color: "#8B5CF6", fontWeight: "500" }}>de {selectedCommercial}</span>
           </Typography>
 
-          {/* <ChartBarStatistiques/> */}
+          <ChartBarStatistiques data={data}/>
         </>
       )}
     </Box>

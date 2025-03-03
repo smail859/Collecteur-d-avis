@@ -185,13 +185,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
           const reviewDate = parseRelativeDate(review.date);
           const now = new Date();
           const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-          console.log(
-            "Review:", review.date,
-            "Parsed:", reviewDate,
-            "StartOfMonth:", startOfMonth,
-            "Now:", now
-          );
-          console.log("date de l'avis :", review.date, reviewDate, startOfMonth, now)
           return reviewDate >= startOfMonth && reviewDate <= now;
         });
       }
@@ -252,7 +245,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
   
-    console.log("Période filtrée :", firstDayLastMonth, "->", lastDayLastMonth);
   
     // Liste des commerciaux avec plusieurs orthographes possibles
     const commerciauxRecherches = {
@@ -271,8 +263,10 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       const reviewDate = parseRelativeDate(review.date);
       return reviewDate >= firstDayLastMonth && reviewDate <= lastDayLastMonth;
     });
+
+    console.log(firstDayLastMonth)
+    console.log(lastDayLastMonth)
   
-    console.log("Avis filtrés du mois précédent :", lastMonthReviews);
   
     // Recherche des commerciaux dans le texte des avis filtrés
     lastMonthReviews.forEach((review) => {
@@ -294,10 +288,9 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       }
     });
   
-    // 📊 Transformer l'objet `counts` en tableau [{ name, count }]
+    // Transformer l'objet `counts` en tableau [{ name, count }]
     const result = Object.entries(counts).map(([name, count]) => ({ name, count }));
   
-    console.log("📊 Résultat final commercialCounts:", result);
     return result;
   }, [filteredReviews, parseRelativeDate]);
 
