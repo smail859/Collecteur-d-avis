@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import useFilterService from "../components/utils/useFilterService"; // 🔥 Import du hook
+import useFilterService from "../components/utils/useFilterService"; // Import du hook
 
 
 const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", services: "" }) => {
@@ -20,7 +20,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   // Vérifier que `reviews` est bien un tableau
   const validReviews = Array.isArray(reviews) ? reviews : [];
 
-  // 🔥 Utilisation du hook `useFilterService` pour chaque service
+  // Utilisation du hook `useFilterService` pour chaque service
   const rankingsByService = {
     Startloc: useFilterService(validReviews, "Startloc"),
     Monbien: useFilterService(validReviews, "Monbien"),
@@ -245,7 +245,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
   
-  
     // Liste des commerciaux avec plusieurs orthographes possibles
     const commerciauxRecherches = {
       "smail": ["Smaïl", "Smail", "Ismail"],
@@ -264,10 +263,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       return reviewDate >= firstDayLastMonth && reviewDate <= lastDayLastMonth;
     });
 
-    console.log(firstDayLastMonth)
-    console.log(lastDayLastMonth)
-  
-  
     // Recherche des commerciaux dans le texte des avis filtrés
     lastMonthReviews.forEach((review) => {
       if (review.text) {
@@ -293,6 +288,90 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   
     return result;
   }, [filteredReviews, parseRelativeDate]);
+
+
+  const commercialCountsYears = useMemo(() => {
+    const counts = {}; // Structure: { "janvier": { "smail": 5, "melanie": 3, ... }, "février": { ... }, ... }
+
+    const now = new Date();
+    const firstDayOfYear = new Date(now.getFullYear(), 0, 1); // 1er janvier
+    const lastDayOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59); // 31 décembre
+
+    const commerciauxRecherches = {
+      "smail": ["Smaïl", "Smail", "Ismail"],
+      "melanie": ["Mélanie", "Melanie"],
+      "lucas": ["Lucas", "Luka", "Luca"],
+      "deborah": ["Déborah", "Deborah", "Débora", "Debora"]
+    };
+
+    const normalizeText = (text) =>
+      text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    // Initialiser le comptage par mois
+    const moisLabels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    moisLabels.forEach((mois) => {
+      counts[mois] = {}; // Crée une structure { "Janvier": {}, "Février": {}, ... }
+    });
+
+    // Filtrer les avis de l'année en cours
+    const yearlyReviews = filteredReviews.filter((review) => {
+      const reviewDate = parseRelativeDate(review.date);
+      return reviewDate >= firstDayOfYear && reviewDate <= lastDayOfYear;
+    });
+
+    // Comptabiliser les avis par commercial et par mois
+    yearlyReviews.forEach((review) => {
+      if (review.text) {
+        const normalizedText = normalizeText(review.text);
+        const detectedCommercials = new Set();
+        const reviewDate = parseRelativeDate(review.date);
+        const moisIndex = reviewDate.getMonth(); // 0 = Janvier, 1 = Février...
+        const moisLabel = moisLabels[moisIndex];
+
+        Object.entries(commerciauxRecherches).forEach(([key, variations]) => {
+          variations.forEach((variant) => {
+            const normalizedVariant = normalizeText(variant);
+            const regex = new RegExp(`\\b${normalizedVariant}\\b`, "i");
+
+            if (regex.test(normalizedText) && !detectedCommercials.has(key)) {
+              counts[moisLabel][key] = (counts[moisLabel][key] || 0) + 1;
+              detectedCommercials.add(key);
+            }
+          });
+        });
+      }
+    });
+
+    // Transformer les données en tableau exploitable pour les graphiques
+    const allCommerciaux = Object.keys(commerciauxRecherches);
+
+    const resultYears = moisLabels.map((mois) => {
+      // Liste des commerciaux avec leurs avis, sinon 0
+      const commerciauxAvecZero = allCommerciaux.map((name) => {
+        return { name, count: counts[mois][name] || 0 };
+      });
+    
+      return {
+        mois,
+        commerciaux: commerciauxAvecZero,
+      };
+    });
+
+    // Initialiser un objet pour stocker les totaux par commercial
+    const totalAvisParCommercial = {};
+
+    // Calcul du total des avis par commercial sur toute l'année
+    resultYears.forEach((moisData) => {
+      moisData.commerciaux.forEach(({ name, count }) => {
+        totalAvisParCommercial[name] = (totalAvisParCommercial[name] || 0) + count;
+      });
+    });
+
+    return { resultYears, totalAvisParCommercial };
+  }, [filteredReviews, parseRelativeDate]);
+
+
+  
 
 
   /**
@@ -375,7 +454,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     filteredReviews,
     sortedReviews,
     rankingsByService,
-    commercialCounts
+    commercialCounts,
+    commercialCountsYears,
   };
 };
 

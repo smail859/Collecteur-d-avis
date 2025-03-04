@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import { Box, Grid } from "@mui/material";
 import PropTypes from "prop-types";
-import ChartBarStatistiques from "./ChartBarStatistiques";
-import ProgressionSection from "../components-not-use/ProgressionSection";
-import TopDuMoisTable from "../components-not-use/TopDuMoisTable";
-import StatistiquesGrid from "../components-not-use/StatistiquesGrid";
+import ProgressionSection from "../components-stats/ProgressionSection";
+import TopDuMoisTable from "../components-stats/TopDuMoisTable";
+import StatistiquesGrid from "../components-stats/StatistiquesGrid";
 
 const ChartStatistiques = ({ data, progression, tableauCommerciaux, selectedCommercial }) => {
   // Trier et extraire le top 3

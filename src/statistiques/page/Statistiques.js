@@ -14,8 +14,9 @@ import useFetchReviews from "../../hooks/components/useFetchReviews"; // Import 
 
 const Statistiques = () => {
 
-  const { commercialCounts } = useFetchReviews();
-
+  const { commercialCounts, totalAvisParCommercial} = useFetchReviews();
+  
+  
   // Données des commerciaux
   const servicesData = [
     { label: "Monbien", icon: MONBIEN, commerciaux: ["Joanna", "Théo"] },
@@ -38,28 +39,24 @@ const Statistiques = () => {
 
   const tableauCommerciaux = Array.isArray(commercialCounts) ? commercialCounts : [];
   
-
-
   // Données pour le graphique
   const ratingData = [
     { rank: 1, label: "4 - 5", value:  80 },
     { rank: 2, label: "1 - 2", value:  20 },
   ];
-  const colors = ["#7B61FF", "#E3E4FE"];
-
-  const progression = 80
 
   const data = tableauCommerciaux.map((commercial, index) => ({
     rank: index + 1,
     label: commercial.name,
     count: commercial.count, 
   }));
+  const colors = ["#7B61FF", "#E3E4FE"];
+  const progression = 80
+
+  // Partie ChartBar
 
 
-  console.log("Prop `selectedCommercial` reçue:", selectedCommercial);
 
-  
-  
   return (
     <Box>
       <Typography variant="h2" textAlign="left" ml="180px" mt="50px" gutterBottom>
@@ -96,8 +93,15 @@ const Statistiques = () => {
             <span style={{ fontWeight: "bold", color: "#121826" }}>Bilan annuel </span>
             <span style={{ color: "#8B5CF6", fontWeight: "500" }}>de {selectedCommercial}</span>
           </Typography>
+          <ChartBarStatistiques 
+            data={data} 
+            progression={progression} 
+            colors={colors} 
+            ratingData={ratingData} 
+            selectedCommercial={selectedCommercial} 
+          />
 
-          <ChartBarStatistiques data={data}/>
+
         </>
       )}
     </Box>
