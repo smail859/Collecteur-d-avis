@@ -99,9 +99,8 @@ const Statistiques = () => {
             colors={colors} 
             ratingData={ratingData} 
             selectedCommercial={selectedCommercial} 
+            totalAvisParCommercial={totalAvisParCommercial}
           />
-
-
         </>
       )}
     </Box>

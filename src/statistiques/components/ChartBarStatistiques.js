@@ -9,7 +9,7 @@ import StatistiquesGrid from "../components-stats/StatistiquesGrid";
 
 
 
-const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, selectedCommercial }) => {
+const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, selectedCommercial, totalAvisParCommercial }) => {
   const [selectedFilter, setSelectedFilter] = useState("gains");
 
   const handleFilterChange = (_, newValue) => {
@@ -37,9 +37,12 @@ const ChartBarStatistiques = ({ data, progression, onFilterChange, colors, selec
       }}
     >
       <Box sx={{ flex: 1 }}>
-          <StatistiquesGrid isYearly={true} data={data}             
+          <StatistiquesGrid 
+            isYearly={true} 
+            data={data}             
             selectedCommercial={selectedCommercial} 
             colors={colors} 
+            totalAvisParCommercial={totalAvisParCommercial}
           />
 
         {/* Toggle Gains / Nombre d'avis */}

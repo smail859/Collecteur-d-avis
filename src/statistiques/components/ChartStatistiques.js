@@ -47,7 +47,6 @@ const ChartStatistiques = ({ data, progression, tableauCommerciaux, selectedComm
   ];
   const colors = ["#7B61FF", "#E3E4FE"];
 
-  
   return (
     <Box
       sx={{

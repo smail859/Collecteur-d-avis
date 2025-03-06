@@ -90,10 +90,9 @@ export default function MainGrid() {
     };
   }, [reviewsPerPeriod, selectedFilter, parseRelativeDate, getDateLabels]);
 
-  console.log("📊 Vérification des avis dans '30days' :");
+
   reviewsPerPeriod["30days"]?.forEach(r => {
       const reviewDate = parseRelativeDate(r.date);
-      console.log(`📆 Avis ID: ${r.review_id} | Date brute: ${r.date} | Date calculée: ${reviewDate.toLocaleDateString('fr-FR')}`);
   });
 
 

@@ -357,21 +357,28 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       };
     });
 
-    // Initialiser un objet pour stocker les totaux par commercial
-    const totalAvisParCommercial = {};
+    /// Initialiser un tableau pour stocker les totaux sous forme de { name, count }
+    const totalAvisParCommercial = [];
 
     // Calcul du total des avis par commercial sur toute l'année
+    const totalCounts = {}; // Temporaire pour accumuler les valeurs
+
     resultYears.forEach((moisData) => {
       moisData.commerciaux.forEach(({ name, count }) => {
-        totalAvisParCommercial[name] = (totalAvisParCommercial[name] || 0) + count;
+        totalCounts[name] = (totalCounts[name] || 0) + count;
       });
     });
 
+    // Transformer en tableau
+    for (const [label, count] of Object.entries(totalCounts)) {
+      totalAvisParCommercial.push({ label , count });
+    } 
     return { resultYears, totalAvisParCommercial };
   }, [filteredReviews, parseRelativeDate]);
 
-
   
+
+
 
 
   /**
