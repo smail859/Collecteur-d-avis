@@ -347,8 +347,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
 
     const resultYears = moisLabels.map((mois) => {
       // Liste des commerciaux avec leurs avis, sinon 0
-      const commerciauxAvecZero = allCommerciaux.map((name) => {
-        return { name, count: counts[mois][name] || 0 };
+      const commerciauxAvecZero = allCommerciaux.map((label) => {
+        return { label, count: counts[mois][label] || 0 };
       });
     
       return {
@@ -364,8 +364,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     const totalCounts = {}; // Temporaire pour accumuler les valeurs
 
     resultYears.forEach((moisData) => {
-      moisData.commerciaux.forEach(({ name, count }) => {
-        totalCounts[name] = (totalCounts[name] || 0) + count;
+      moisData.commerciaux.forEach(({ label, count }) => {
+        totalCounts[label] = (totalCounts[label] || 0) + count;
       });
     });
 
@@ -375,6 +375,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     } 
     return { resultYears, totalAvisParCommercial };
   }, [filteredReviews, parseRelativeDate]);
+
 
   
 

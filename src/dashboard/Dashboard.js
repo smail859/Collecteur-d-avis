@@ -6,7 +6,7 @@ export default function Dashboard() {
 
   return (
       <Box >
-        {/* ✅ Contenu principal  */}
+        {/* Contenu principal  */}
         <Box sx={{ flexGrow: 1, bgcolor: '#F5F7FF', }}>
           <Box
             component="main"

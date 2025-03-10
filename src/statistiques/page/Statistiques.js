@@ -10,7 +10,7 @@ import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
 import SINIMO from "../../image/SINIMO.png";
 import PIGEONLINE from "../../image/PIGEONLINE.png";
 import ListChip from "../../avisRécents/components/ListChip";
-import useFetchReviews from "../../hooks/components/useFetchReviews"; // Import du hook pour le classement
+import useFetchReviews from "../../hooks/components/useFetchReviews";
 
 const Statistiques = () => {
 
@@ -76,8 +76,9 @@ const Statistiques = () => {
       {/* Affichage des statistiques dynamiques */}
       {selectedCommercial && (
         <>
-          <Typography variant="h4" textAlign="center" mt={5}>
-            Commercial sélectionné : {selectedCommercial}
+          <Typography variant="h4" textAlign="start" mt={5} marginLeft={20}>
+            <span style={{ color: "#8B5CF6", fontWeight: "500" }}>Bilan de {selectedCommercial}</span>
+            <span style={{ fontWeight: "bold", color: "#121826" }}> pour le mois en cours</span>
           </Typography>
 
           <ChartStatistiques
@@ -89,7 +90,7 @@ const Statistiques = () => {
             tableauCommerciaux={tableauCommerciaux}
           />
 
-          <Typography variant="subtitle1" textAlign="left" ml="180px" mt="50px" gutterBottom>
+          <Typography variant="h4" textAlign="left" ml="180px" mt="50px" gutterBottom>
             <span style={{ fontWeight: "bold", color: "#121826" }}>Bilan annuel </span>
             <span style={{ color: "#8B5CF6", fontWeight: "500" }}>de {selectedCommercial}</span>
           </Typography>

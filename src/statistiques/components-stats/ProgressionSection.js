@@ -3,10 +3,15 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import { Box, Typography } from "@mui/material";
 
 // Composant pour la progression avec les flammes et la vague animée
-const ProgressionSection = ({ progression = 0, top3 = [] }) => {
-  // Récupération du nombre d'avis du premier commercial du top 3 (avec gestion du cas vide)
-  const avisPremierCommercial = top3.length > 0 ? top3[0].avis : 0;
+const ProgressionSection = ({ progression = 0, commercialCountMount, commercialCountYears, isYearly, selectedCommercial}) => {
 
+  console.log("Progression affichée :", progression, "%");
+  console.log("Commercial sélectionné dans ProgressionSection :", selectedCommercial);
+  const OBJECTIF_MENSUEL = 5; 
+  const OBJECTIF_ANNUEL = 60;
+  const BASE_HEIGHT = 0; // La vague commence avec une hauteur de 0%
+
+  
   return (
     <Box
       sx={{
@@ -18,7 +23,7 @@ const ProgressionSection = ({ progression = 0, top3 = [] }) => {
         borderRadius: "20px",
         bgcolor: "#F2F3FB",
         position: "relative",
-        overflow: "hidden", // Empêche la vague de dépasser
+        overflow: "hidden", 
       }}
     >
       {/* Texte du pourcentage */}
@@ -29,27 +34,28 @@ const ProgressionSection = ({ progression = 0, top3 = [] }) => {
         sx={{
           position: "absolute",
           top: "25%",
-          zIndex: 2, // S'assure que le texte est au-dessus de la vague
+          zIndex: 2, 
         }}
       >
         {progression}%
       </Typography>
 
-      {/* Vague animée */}
+
+
       <Wave
         fill="#8B5CF6"
         paused={false}
         options={{
-          height: 10, // Contrôle la hauteur de la vague
-          amplitude: 20, // Gère l’ondulation
-          speed: 0.3, // Vitesse de l'animation
-          points: 3, // Nombre de vagues
+          height: 30,
+          amplitude: 30, 
+          speed: 0.3,
+          points: 3,
         }}
         style={{
           position: "absolute",
-          bottom: `${80 - progression}%`, // Monte en fonction de la progression
+          bottom: "0%", // La vague commence bien depuis le bas
           width: "100%",
-          height: "80%",
+          height: `${BASE_HEIGHT + (progression * (100 - BASE_HEIGHT) / 100)}%`, 
           zIndex: 1,
         }}
       />
@@ -67,26 +73,44 @@ const ProgressionSection = ({ progression = 0, top3 = [] }) => {
         }}
       >
         <Typography fontSize="14px" fontWeight="200" color="white">
-          {avisPremierCommercial >= 5 ? (
-            "Bravo, vous avez atteint votre objectif du mois !"
+          {isYearly ? (
+            commercialCountYears >= OBJECTIF_ANNUEL ? (
+              "Bravo, vous avez atteint votre objectif de l'année !"
+            ) : (
+              <>
+                Plus que{" "}
+                <span style={{ color: "white", fontWeight: "bold" }}>
+                  {Math.max(0, OBJECTIF_ANNUEL - commercialCountYears)} avis
+                </span>
+              </>
+            )
           ) : (
-            <>
-              Plus que{" "}
-              <span style={{ color: "white", fontWeight: "bold" }}>
-                {5 - avisPremierCommercial} avis
-              </span>
-            </>
+            commercialCountMount >= OBJECTIF_MENSUEL ? (
+              "Bravo, vous avez atteint votre objectif du mois !"
+            ) : (
+              <>
+                Plus que{" "}
+                <span style={{ color: "white", fontWeight: "bold" }}>
+                  {Math.max(0, OBJECTIF_MENSUEL - commercialCountMount)} avis
+                </span>
+              </>
+            )
           )}
         </Typography>
-
         <Box sx={{ display: "flex", gap: 0.5 }}>
           {Array.from({ length: 5 }, (_, index) => (
             <LocalFireDepartmentIcon
               key={index}
-              sx={{ color: avisPremierCommercial > index ? "#FFA500" : "#ddd" }}
+              sx={{ 
+                color: (isYearly 
+                  ? commercialCountYears / (OBJECTIF_ANNUEL / 5) 
+                  : commercialCountMount / (OBJECTIF_MENSUEL / 5)
+                ) > index ? "#FFA500" : "#ddd" 
+              }}
             />
           ))}
         </Box>
+
       </Box>
     </Box>
   );

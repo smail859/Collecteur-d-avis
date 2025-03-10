@@ -1,101 +1,91 @@
-import { useMemo } from "react";
-import { Box, Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import PropTypes from "prop-types";
 import ProgressionSection from "../components-stats/ProgressionSection";
 import TopDuMoisTable from "../components-stats/TopDuMoisTable";
 import StatistiquesGrid from "../components-stats/StatistiquesGrid";
 
-const ChartStatistiques = ({ data, progression, tableauCommerciaux, selectedCommercial }) => {
+const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => {
   // Trier et extraire le top 3
-  const top3 = useMemo(() => {
-    return [...tableauCommerciaux]
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3)
-      .map((commercial, index) => ({
-        top: index + 1,
-        name: commercial.name,
-        avis: commercial.count,
-        gainBruts: `${commercial.count * 10}€`,
-        gainNets: `${commercial.count * 10}€`,
-        trend: index === 0 ? "up" : index === 1 ? "neutral" : "down",
-      }));
-  }, [tableauCommerciaux]);
+  const top3 = [...tableauCommerciaux]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
+    .map((commercial, index) => ({
+      top: index + 1,
+      name: commercial.name,
+      avis: commercial.count,
+      gainBruts: `${commercial.count * 10}€`,
+      gainNets: `${commercial.count * 10}€`,
+      trend: index === 0 ? "up" : index === 1 ? "neutral" : "down",
+    }));
 
   const normalizeText = (text) =>
     text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  // Vérifier si le commercial sélectionné est dans le top 3
-  const isSelectedInTop3 = top3.some(com => normalizeText(com.name) === normalizeText(selectedCommercial));
-
-  // Trouver les données du commercial sélectionné
   const selectedCommercialData = tableauCommerciaux.find(
     com => normalizeText(com.name) === normalizeText(selectedCommercial)
   );
 
-  // Trouver le rang du commercial sélectionné
-  const sortedCommercials = [...tableauCommerciaux].sort((a, b) => b.count - a.count);
-  const selectedRank = sortedCommercials.findIndex(
-    com => normalizeText(com.name) === normalizeText(selectedCommercial)
-  ) + 1;
-
-  const isSelectedCommercialValid = selectedCommercialData !== undefined;
-
-  // Données pour le graphique
-  const ratingData = [
-    { rank: 1, label: "4 - 5", value:  80 },
-    { rank: 2, label: "1 - 2", value:  20 },
-  ];
-  const colors = ["#7B61FF", "#E3E4FE"];
+  const OBJECTIF_MENSUEL = 5;
+  const commercialCountMount = selectedCommercialData ? selectedCommercialData.count : 0;
+  const progressionCommercial = selectedCommercial
+    ? Math.min(100, Math.round((commercialCountMount / OBJECTIF_MENSUEL) * 100))
+    : 0;
 
   return (
     <Box
       sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        flexWrap: "wrap",
         maxWidth: "1600px",
-        height: "auto",
         margin: "50px auto",
-        padding: "20px",
+        padding: "30px",
         borderRadius: "20px",
         bgcolor: "white",
         gap: 3,
       }}
     >
-      {/*Statistiques + Progression sur une ligne */}
-      <Grid container spacing={3} alignItems="center">
-        {/* StatistiquesGrid (Prend 8 colonnes, avec une hauteur max) */}
-        <Grid item xs={12} md={8} sx={{ display: "flex", flexDirection: "column", maxHeight: "0px" }}>
-          <StatistiquesGrid 
-            data={data} 
-            selectedCommercial={selectedCommercial} 
-            colors={colors} 
-            ratingData={ratingData} 
-          />
-        </Grid>
+      {/* Bloc des statistiques et tableau */}
+      <Box sx={{ flex: 1 }}>
+        <StatistiquesGrid data={data} selectedCommercial={selectedCommercial} />
 
-        {/* ProgressionSection (Prend 4 colonnes, aligné au centre) */}
-        <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <ProgressionSection progression={progression} top3={top3} />
-        </Grid>
-      </Grid>
-
-      {/*Tableau Top du Mois (Prend toute la largeur) */}
-      <Grid container spacing={3} sx={{maxWidth: "70%"}}>
-        <Grid item xs={12}>
+        {/* Tableau Top du Mois */}
+        <Box sx={{ marginTop: "30px", bgcolor: "#F2F3FB", borderRadius: "20px", padding: "20px" }}>
           <TopDuMoisTable
             top3={top3}
             selectedCommercial={selectedCommercial}
             selectedCommercialData={selectedCommercialData}
-            selectedRank={selectedRank}
-            isSelectedInTop3={isSelectedInTop3}
-            isSelectedCommercialValid={isSelectedCommercialValid}
           />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
+
+      {/* Bloc de progression */}
+      <Box
+        sx={{
+          width: "275px",
+          height: "700px",
+          borderRadius: "20px",
+          bgcolor: "#F2F3FB",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <ProgressionSection
+          progression={progressionCommercial}
+          commercialCountMount={commercialCountMount}
+          isYearly={false}
+          selectedCommercial={selectedCommercial}
+        />
+      </Box>
     </Box>
-
-
-
   );
 };
+
+
 
 // Validation avec PropTypes
 ChartStatistiques.propTypes = {

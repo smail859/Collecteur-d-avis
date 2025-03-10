@@ -147,8 +147,6 @@ const AvisRecents = ({ onFilterChange }) => {
             
           </Box>
 
-
-
           {/* Affichage des avis */}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, justifyContent: "center", width: "1300px", mx: "auto", overflowY: "auto", paddingBottom: 4, paddingTop: 4, borderRadius: "20px", backgroundColor: "white" }}>
             {reviewsToDisplay.length > 0 ? (

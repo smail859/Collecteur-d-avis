@@ -10,17 +10,9 @@ import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
  */
 export default function ServicesTable({ services }) {
 
-  /**
-   * Recuperer les avis par services dans un autre fichier ou dans celui-ci a voir
-   * Afficher le nombre d'avis obtenue par service
-   * Afficher le la note general du service 
-   * Faire la meme chose pour Trustpilot 
-   * Calculer le total d'avis Google et Trustpilot et l'afficher
-  */
-  
 
   // Styles factorisés
-  const headerCellStyle = { fontWeight: '600', color: '#8B5CF6', fontSize: '16px' };
+  const headerCellStyle = { fontWeight: '600', color: '#8B5CF6', fontSize: '15px' };
 
   // Fonction optimisée avec useMemo pour éviter de recalculer inutilement
   const getTrendIcon = useMemo(() => (trend) => {

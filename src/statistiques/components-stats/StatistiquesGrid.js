@@ -51,14 +51,10 @@ const StatistiquesGrid = ({ data = [], selectedCommercial, isYearly = false }) =
 
   return (
     <Box>
-      <Typography variant="h5" textAlign="left" mt={3} mb={2}>
-        {isYearly ? "Statistiques annuelles" : "Statistiques mensuelles"}
-      </Typography>
-
       <Grid container sx={{display: "flex", flexDirection: "row", justifyContent: "start", gap: 10, marginLeft: "70px"}}>
         {!isYearly && (
           <Grid item xs={12} sm={6} md={3}>
-            <Box sx={{ width: "290px", height: "240px", borderRadius: 2, bgcolor: "#F2F3FB", padding: "34px" }}>
+            <Box sx={{ width: "350px", height: "240px", borderRadius: 2, bgcolor: "#F2F3FB", padding: "34px" }}>
               <Rating value={5} precision={0.5} readOnly />
               <Typography variant="h6" sx={{ fontWeight: "400", color: "#8B5CF6" }}>
                 <span style={{ fontWeight: "bold" }}>Total</span> d'avis collectés
