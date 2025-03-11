@@ -29,7 +29,7 @@ const Statistiques = () => {
 
   // États : Service et Commercial sélectionnés
   const [selectedService, setSelectedService] = useState("");
-  const [selectedCommercial, setSelectedCommercial] = useState("");
+  const [selectedCommercial, setSelectedCommercial] = useState("Smaïl");
 
   // Fonction pour gérer le changement de commercial
   const handleCommercialChange = (serviceLabel, commercial) => {

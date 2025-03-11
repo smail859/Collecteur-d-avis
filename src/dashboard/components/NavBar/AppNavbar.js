@@ -31,6 +31,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   flexShrink: 0,
+  
 }));
 
 const links = [
@@ -56,6 +57,7 @@ export default function AppNavbar() {
         borderBottom: '1px solid',
         borderColor: 'divider',
         top: 'var(--template-frame-height, 0px)',
+        boxShadow:"none"
       }}
     >
       <StyledToolbar>

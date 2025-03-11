@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Box } from '@mui/material';
-import NavLinks from "../components/NavBar/NavLinks";
+import NavLinks from "./NavBar/NavLinks";
 import icon from '../../image/icon.png';
 import AddIcon from '@mui/icons-material/Add';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
@@ -17,19 +17,19 @@ const Footer = () => {
   return (
     <footer 
       style={{
-        position: "static", // Fixe le footer en bas
+        position: "static", 
         bottom: 0,
         left: 0,
         right: 0,
-        height: "100%", // Taille ajustée
+        height: "100%", 
         width: "100%",
         backgroundColor: "white",
-        borderTop: "1px solid #E0E0E0", // Séparation avec le contenu
+        borderTop: "1px solid #E0E0E0", 
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        zIndex: 1000, // Toujours au-dessus du contenu
-        padding: "10px 0"
+        zIndex: 1000, 
+        padding: "20px 0"
       }}
     >
       <Container maxWidth="xl">

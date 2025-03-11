@@ -11,7 +11,7 @@ import theme from './theme';
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline /> {/* ✅ Applique automatiquement la couleur de fond */}
+      <CssBaseline /> 
       <BrowserRouter>
         {/* Barre de navigation qui reste affichée */}
         <AppNavbar />
