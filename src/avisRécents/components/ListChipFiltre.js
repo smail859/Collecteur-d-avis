@@ -1,58 +1,42 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { FormControl, InputLabel, Select, MenuItem, Box } from "@mui/material";
-
+import { Select, Flex } from "antd";
 
 /**
  * Filtrer les avis par services, notes, commerciaux, plateformes et période.
  */
 const ListChipFiltre = ({ filters, onChangeFilters, dataFilters }) => {
-  const handleChange = (event) => {
+  const handleChange = (key, value) => {
     onChangeFilters({
       ...filters,
-      [event.target.name]: event.target.value,
+      [key]: value,
     });
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
-      {/* Liste des filtres */}
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-        {dataFilters.map((filter) => (
-          <FormControl key={filter.name} sx={{ minWidth: 160 }}>
-            <InputLabel shrink sx={{ textAlign: "center", fontSize: "14px" }}>
-              {filter.label}
-            </InputLabel>
-            <Select
-              variant="standard"
-              disableUnderline
-              name={filter.name}
-              value={filters[filter.name]}
-              onChange={handleChange}
-              sx={{
-                background: "#F2F3FB",
-                color: "#8B5CF6",
-                width: "160px",
-                height: "52px",
-                padding: "14px",
-                borderRadius: "20px",
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              <MenuItem value="">
-                <em>Tous</em>
-              </MenuItem>
-              {filter.options.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        ))}
-      </Box>
-    </Box>
+    <Flex wrap="wrap" justify="center" gap="10px" style={{ width: "100%" }}>
+      {dataFilters.map((filter) => (
+        <Select
+          key={filter.name}
+          value={filters[filter.name] || filter.options[0]} 
+          onChange={(value) => handleChange(filter.name, value)}
+          style={{
+            width: 180,
+            height: 48,
+            borderRadius: 12,
+            fontWeight: "bold",
+            fontSize: 14,
+            color: "#6B5BFF",
+            backgroundColor: "#FFFFFF",
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+          }}
+          options={filter.options.map((option) => ({
+            label: option,
+            value: option,
+          }))}
+        />
+      ))}
+    </Flex>
   );
 };
 

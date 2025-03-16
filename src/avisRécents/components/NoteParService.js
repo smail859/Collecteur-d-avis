@@ -1,8 +1,8 @@
 import { Card, Box, Typography, Rating, LinearProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import SouthEastOutlinedIcon from '@mui/icons-material/SouthEastOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import PropTypes from "prop-types";
+import SouthEastOutlinedIcon from '@mui/icons-material/SouthEastOutlined';
 
 const CustomLinearProgress = styled(LinearProgress)(() => ({
   height: 10,
@@ -19,8 +19,7 @@ const NoteParService = ({
   labelService,
   noteService,
   nombreAvis,
-  defaultValue,
-  progress  // La prop contenant les pourcentages par note
+  progress 
 }) => {
   return (
     <Box 
@@ -83,7 +82,13 @@ const NoteParService = ({
                 {noteService}
                 <SouthEastOutlinedIcon sx={{ color: 'red', width: '32px', height: '32px', marginLeft: '4px' }}/>
               </Typography>
-              <Rating name="half-rating-read" defaultValue={defaultValue} readOnly />
+              <Rating 
+                name="half-rating-read" 
+                value={parseFloat(noteService) || 0} // ✅ Utilise directement `noteService`
+                precision={0.1} 
+                readOnly 
+              />
+
             </Box>
         </Card>
       </Box>
@@ -123,7 +128,11 @@ const NoteParService = ({
                 {note}
               </Typography>
             </Box>
-            <CustomLinearProgress variant="determinate" value={parseInt(progress[note])} sx={{ flexGrow: 1 }} />
+            <CustomLinearProgress 
+              variant="determinate" 
+              value={parseInt(progress?.[note] || 0)} 
+              sx={{ flexGrow: 1 }} 
+            />
             <Box sx={{
               display: 'flex',
               alignItems: 'center',
@@ -142,7 +151,7 @@ const NoteParService = ({
                 textAlign: 'center',
                 borderRadius: '20px',
                 backgroundColor: 'white',  }}>
-                {progress[note]}%
+                {progress?.[note] || 0}%
               </Typography>
             </Box>
           </Box>
@@ -155,9 +164,10 @@ const NoteParService = ({
 NoteParService.propTypes = {
   logo: PropTypes.string,
   labelService: PropTypes.string,
-  noteService: PropTypes.number, 
+  noteService: PropTypes.shape({
+    google: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), 
+  }), 
   nombreAvis : PropTypes.number,
-  defaultValue: PropTypes.number,
   progress: PropTypes.object 
 };
 

@@ -10,25 +10,18 @@ import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
  */
 export default function ServicesTable({ services }) {
 
-  /**
-   * Recuperer les avis par services dans un autre fichier ou dans celui-ci a voir
-   * Afficher le nombre d'avis obtenue par service
-   * Afficher le la note general du service 
-   * Faire la meme chose pour Trustpilot 
-   * Calculer le total d'avis Google et Trustpilot et l'afficher
-  */
-  
-
   // Styles factorisés
   const headerCellStyle = { fontWeight: '600', color: '#8B5CF6', fontSize: '16px' };
 
   // Fonction optimisée avec useMemo pour éviter de recalculer inutilement
-  const getTrendIcon = useMemo(() => (trend) => {
-    if (trend === 'up') return <ArrowUpward style={{ color: 'green' }} />;
-    if (trend === 'down') return <ArrowDownward style={{ color: 'red' }} />;
-    return <Remove style={{ color: 'gray' }} />;
+  const getTrendIcon = useMemo(() => {
+    return {
+      up: <ArrowUpward style={{ color: 'green' }} />,
+      down: <ArrowDownward style={{ color: 'red' }} />,
+      neutral: <Remove style={{ color: 'gray' }} />
+    };
   }, []);
-
+  
   return (
     <Box sx={{ padding: '40px', borderRadius: '12px' }}>
       {/* Titre */}
@@ -82,11 +75,12 @@ export default function ServicesTable({ services }) {
 
                   {/* Note moyenne avec icône */}
                   <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {getTrendIcon(service.trend)}
-                      <Typography>{service.avgRating}</Typography>
-                      <Star style={{ color: '#FFC107' }} />
-                    </Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    {getTrendIcon[service.trend]}
+  
+                    <Typography>{service.avgRating}</Typography>
+                    <Star style={{ color: '#FFC107' }} />
+                  </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -116,8 +110,9 @@ ServicesTable.propTypes = {
       appStore: PropTypes.string,
       googlePlay: PropTypes.string,
       totalReviews: PropTypes.string.isRequired,
-      avgRating: PropTypes.number.isRequired,
+      avgRating: PropTypes.func.isRequired,
       trend: PropTypes.oneOf(['up', 'down', 'neutral']).isRequired,
+
     })
   ).isRequired,
 };

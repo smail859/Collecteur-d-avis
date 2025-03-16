@@ -1,7 +1,6 @@
 import ChartStatistiques from "../components/ChartStatistiques";
 import ChartBarStatistiques from "../components/ChartBarStatistiques";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import { Typography, Button, Box } from "@mui/material";
 import { useState } from "react";
 import MONBIEN from "../../image/MONBIEN.png";
 import STARTLOC from "../../image/STARTLOC.png";
@@ -10,88 +9,129 @@ import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
 import SINIMO from "../../image/SINIMO.png";
 import PIGEONLINE from "../../image/PIGEONLINE.png";
 import ListChip from "../../avisRécents/components/ListChip";
-import useFetchReviews from "../../hooks/components/useFetchReviews"; // Import du hook pour le classement
+import useFetchReviews from "../../hooks/components/useFetchReviews";
+import CommercialTable from "../components/CommercialTable";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const Statistiques = () => {
+  const { commercialCounts, commercialCountsYears } = useFetchReviews();
+  
+  // Fonction pour générer le PDF à partir de l'élément avec id "pdf-content"
+  const generatePDF = () => {
+    const input = document.getElementById("pdf-content");
+    if (!input) {
+      console.error("L'élément avec id 'pdf-content' n'a pas été trouvé.");
+      return;
+    }
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("avis.pdf");
+    });
+  };
 
-  const { commercialCounts } = useFetchReviews();
+  // Extraire les données annuelles (total des avis par commercial et par service)
+  const { totalAvisParCommercialParService } = commercialCountsYears || {};
 
-  // Données des commerciaux
-  const servicesData = [
-    { label: "Monbien", icon: MONBIEN, commerciaux: ["Joanna", "Théo"] },
-    { label: "Startloc", icon: STARTLOC, commerciaux: ["Mélanie"] },
-    { label: "Sinimo", icon: SINIMO, commerciaux: ["Anaïs"] },
-    { label: "Marketing Automobile", icon: MARKETINGAUTO, commerciaux: ["Jean-Simon", "Elodie"] },
-    { label: "Marketing Immobilier", icon: MARKETINGIMMO, commerciaux: ["Jean Dupont"] },
-    { label: "Pige Online", icon: PIGEONLINE, commerciaux: ["Alice Robert"] },
-  ];
+  // État : Commercial sélectionné
+  const [selectedCommercial, setSelectedCommercial] = useState("Smaïl");
 
-  // États : Service et Commercial sélectionnés
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedCommercial, setSelectedCommercial] = useState("");
-
-  // Fonction pour gérer le changement de commercial
+  // Fonction de changement de commercial
   const handleCommercialChange = (serviceLabel, commercial) => {
-    setSelectedService(serviceLabel);
     setSelectedCommercial(commercial);
   };
 
+  // Vérifier que commercialCounts contient des données
   const tableauCommerciaux = Array.isArray(commercialCounts) ? commercialCounts : [];
 
+  // Construction des données mensuelles pour les cartes
+  const data = tableauCommerciaux.map((commercial) => ({
+    label: commercial.name || "Inconnu",
+    count: commercial.count || 0,
+  }));
 
-  // Données pour le graphique
-  const ratingData = [
-    { rank: 1, label: "4 - 5", value:  80 },
-    { rank: 2, label: "1 - 2", value:  20 },
+  // Données des services et leurs commerciaux (pour le sélecteur)
+  const servicesData = [
+    { label: "Monbien", icon: MONBIEN, commerciaux: ["Joanna", "Théo"] },
+    { label: "Startloc", icon: STARTLOC, commerciaux: ["Mélanie", "Smaïl", "Lucas", "Deborah", "Manon"] },
+    { label: "Sinimo", icon: SINIMO, commerciaux: ["Anaïs"] },
+    { label: "Marketing automobile", icon: MARKETINGAUTO, commerciaux: ["Elodie", "Oceane"] },
+    { label: "Marketing immobilier", icon: MARKETINGIMMO, commerciaux: ["Johanna", "Jean-Simon"] },
+    { label: "Pige Online", icon: PIGEONLINE, commerciaux: ["Angela"] },
   ];
+
+  // Couleurs
   const colors = ["#7B61FF", "#E3E4FE"];
 
-  const progression = 80
-
-  const data = tableauCommerciaux.map((commercial, index) => ({
-    rank: index + 1,
-    label: commercial.name,
-    count: commercial.count, 
-  }));
-  
-  
   return (
     <Box>
       <Typography variant="h2" textAlign="left" ml="180px" mt="50px" gutterBottom>
         <span style={{ fontWeight: "bold", color: "#121826" }}>Statistiques détaillées</span>
-        <span style={{ color: "#8B5CF6", fontWeight: "200" }}> par collaborateur</span>
+        <span style={{ color: "#8B61FF", fontWeight: "200" }}> par collaborateur</span>
       </Typography>
 
       {/* Sélection des commerciaux */}
       <ListChip
         servicesChip={servicesData}
-        selectedService={selectedService}
         selectedCommercial={selectedCommercial}
         handleCommercialChange={handleCommercialChange}
         variant="select"
       />
+      
 
-      {/* Affichage des statistiques dynamiques */}
       {selectedCommercial && (
         <>
-          <Typography variant="h4" textAlign="center" mt={5}>
-            Commercial sélectionné : {selectedCommercial}
+          <Typography variant="h4" textAlign="start" mt={5} ml="180px">
+            <span style={{ color: "#8B61FF", fontWeight: "500" }}>Bilan de {selectedCommercial}</span>
+            <span style={{ fontWeight: "bold", color: "#121826" }}> pour le mois en cours</span>
           </Typography>
-
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 3, alignItems: 'center' }}>
+            <Button
+              onClick={generatePDF}
+              variant="contained"
+              sx={{
+                background: "linear-gradient(90deg, #7B61FF 0%, #8B61FF 100%)",
+                color: "white",
+                fontWeight: "bold",
+                borderRadius: "30px",
+                textTransform: "none",
+                px: 4,
+                py: 1.5,
+                boxShadow: "0"
+              }}
+            >Exporter les données mensuelles en PDF</Button>
+          </Box>
           <ChartStatistiques
             data={data}
-            progression={progression}
             colors={colors}
-            ratingData={ratingData}
+            selectedCommercial={selectedCommercial}
             tableauCommerciaux={tableauCommerciaux}
+            totalAvisParCommercialParService={totalAvisParCommercialParService}
           />
 
-          <Typography variant="subtitle1" textAlign="left" ml="180px" mt="50px" gutterBottom>
+          <Typography variant="h4" textAlign="left" ml="180px" mt="50px" gutterBottom>
             <span style={{ fontWeight: "bold", color: "#121826" }}>Bilan annuel </span>
-            <span style={{ color: "#8B5CF6", fontWeight: "500" }}>de {selectedCommercial}</span>
+            <span style={{ color: "#8B61FF", fontWeight: "500" }}>de {selectedCommercial}</span>
           </Typography>
 
-          {/* <ChartBarStatistiques/> */}
+          <ChartBarStatistiques
+            data={data}
+            colors={colors}
+            selectedCommercial={selectedCommercial}
+            totalAvisParCommercialParService={totalAvisParCommercialParService}
+            commercialCountsYears={commercialCountsYears}
+          />
+
+          {/* Conteneur PDF caché (positionné hors écran) */}
+          <Box id="pdf-content" sx={{ position: "absolute", top: "-9999px", left: "-9999px" }}>
+            <CommercialTable commercialCounts={commercialCounts} />
+          </Box>
         </>
       )}
     </Box>

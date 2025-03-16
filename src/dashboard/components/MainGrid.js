@@ -23,8 +23,7 @@ import PIGEONLINE from "../../image/PIGEONLINE.png";
  */
 export default function MainGrid() {
   const navigate = useNavigate();
-  const { reviewsPerPeriod, totalReviews, selectedFilter, changeFilter, parseRelativeDate, averageRating } = useFetchReviews();
-
+  const { totalReviews, selectedFilter, reviewsCountByService,avgRatingByService, averageRatingLastTwoMonths} = useFetchReviews();
   // État pour gérer le filtre actif du graphique
   const [activeFilter, setActiveFilter] = useState(selectedFilter);
 
@@ -38,81 +37,107 @@ export default function MainGrid() {
    * @param {string} filter - "today", "7days", "30days"
    * @returns {Array} Tableau de labels de dates formatées
    */
-  const getDateLabels = useCallback((filter) => {
-    const days = filter === "today" ? 1 : filter === "7days" ? 8 : 32 ;
-    return Array.from({ length: days }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-    }).reverse();
-  }, []);
+  
+  const trendByService = useMemo(() => {
+    let trend = {};
 
-  /**
-   * Prépare les datasets pour `ServicesChart`
-   */
-  const dataSets = useMemo(() => {
-    if (!reviewsPerPeriod || !reviewsPerPeriod[selectedFilter]) {
-      return {
-        today: { labels: ["Pas de données"], data: [0] },
-        "7days": { labels: ["Pas de données"], data: [0] },
-        "30days": { labels: ["Pas de données"], data: [0] },
-      };
-    }
+    const services = ["Monbien", "Startloc", "Marketing automobile", "Marketing immobilier", "Pige Online", "Sinimo"];
+    const platforms = ["Google", "Trustpilot"];
 
-    const filteredReviews = reviewsPerPeriod[selectedFilter] || [];
-    const labels = getDateLabels(selectedFilter);
+    services.forEach((service) => {
+        platforms.forEach((platform) => {
+            if (!trend[service]) trend[service] = {};
 
-    return {
-      today: {
-        labels,
-        data: [filteredReviews.length],
-      },
-      "7days": {
-        labels,
-        data: labels.map(labelDate => {
-            return filteredReviews.filter(r => {
-                const reviewDate = parseRelativeDate(r.date);
-                return reviewDate.getDate() === parseInt(labelDate.split('/')[0], 10) &&
-                      reviewDate.getMonth() + 1 === parseInt(labelDate.split('/')[1], 10);
-            }).length || 0;
-        }),
-      },
-      "30days": {
-        labels,
-        data: labels.map(labelDate => {
-            return filteredReviews.filter(r => {
-                const reviewDate = parseRelativeDate(r.date);
-                return reviewDate.getDate() === parseInt(labelDate.split('/')[0], 10) &&
-                      reviewDate.getMonth() + 1 === parseInt(labelDate.split('/')[1], 10);
-            }).length || 0;
-        }),
-      },
-    };
-  }, [reviewsPerPeriod, selectedFilter, parseRelativeDate, getDateLabels]);
+            // Vérifier si les valeurs existent avant d'accéder
+            const lastMonthData = averageRatingLastTwoMonths.lastMonth?.[service] || {};
+            const twoMonthsAgoData = averageRatingLastTwoMonths.twoMonthsAgo?.[service] || {};
 
-  console.log("📊 Vérification des avis dans '30days' :");
-  reviewsPerPeriod["30days"]?.forEach(r => {
-      const reviewDate = parseRelativeDate(r.date);
-      console.log(`📆 Avis ID: ${r.review_id} | Date brute: ${r.date} | Date calculée: ${reviewDate.toLocaleDateString('fr-FR')}`);
-  });
+            const lastMonthRating = parseFloat(lastMonthData[platform] || 0);
+            const twoMonthsAgoRating = parseFloat(twoMonthsAgoData[platform] || 0);
 
+            if (lastMonthRating > twoMonthsAgoRating) {
+                trend[service][platform] = "up";
+            } else if (lastMonthRating < twoMonthsAgoRating) {
+                trend[service][platform] = "down";
+            } else {
+                trend[service][platform] = "neutral";
+            }
+        });
+    });
 
+    return trend;
+  }, [averageRatingLastTwoMonths]);
 
 
   /**
    * Liste des services affichés dans le tableau avec leurs avis et notes
-   */
+  */
   const servicesData = useMemo(() => [
-    { id: 1, name: 'Monbien', icon: MONBIEN, trustpilot: totalReviews, google: totalReviews, appStore: '-', googlePlay: '-', avgRating: 4.8, trend: 'down' },
-    { id: 2, name: 'Startloc', icon: STARTLOC, trustpilot: totalReviews, google: totalReviews, appStore: '18 - 4.8/5', googlePlay: '36 - 4.8/5', avgRating: averageRating, trend: 'up' },
-    { id: 3, name: 'Marketing Automobile', icon: MARKETINGAUTO, trustpilot: '568 - 4.8/5', google: '568 - 4.8/5', appStore: '-', googlePlay: '-', avgRating: 4.1, trend: 'neutral' },
-    { id: 4, name: 'Marketing Immobilier', icon: MARKETINGIMMO, trustpilot: '260 - 4.8/5', google: '84 - 4.8/5', appStore: '-', googlePlay: '-', avgRating: 3.8, trend: 'down' },
-    { id: 5, name: 'Sinimo', icon: SINIMO, trustpilot: '260 - 4.8/5', google: '260 - 4.8/5', appStore: '360 - 4.8/5', googlePlay: '360 - 4.8/5', avgRating: 3.3, trend: 'up' },
-    { id: 6, name: 'Pige Online', icon: PIGEONLINE, trustpilot: '360 - 4.8/5', google: '360 - 4.8/5', appStore: '-', googlePlay: '-', avgRating: 2.2, trend: 'neutral' },
-  ], [totalReviews]);
+    { 
+      id: 1, 
+      name: 'Monbien', 
+      icon: MONBIEN, 
+      trustpilot: `${reviewsCountByService?.["Monbien"]?.trustpilot || 0} - ${(parseFloat(avgRatingByService?.["Monbien"]?.trustpilot) || 0).toFixed(1)}/5`, 
+      google: `${reviewsCountByService?.["Monbien"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Monbien"]?.google) || 0).toFixed(1)}/5`, 
+      avgRating: parseFloat(avgRatingByService?.["Monbien"]?.google) || parseFloat(avgRatingByService?.["Monbien"]?.trustpilot) || 0,
+      trend: trendByService["Monbien"]?.google || "neutral",
+      totalReviews: (reviewsCountByService?.["Monbien"]?.trustpilot || 0) + (reviewsCountByService?.["Monbien"]?.google || 0)
+    },
+    { 
+      id: 2, 
+      name: 'Startloc', 
+      icon: STARTLOC, 
+      trustpilot: `${reviewsCountByService?.["Startloc"]?.trustpilot || 0} - ${(parseFloat(avgRatingByService?.["Startloc"]?.trustpilot) || 0).toFixed(1)}/5`, 
+      google: `${reviewsCountByService?.["Startloc"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Startloc"]?.google) || 0).toFixed(1)}/5`, 
+      avgRating: parseFloat(avgRatingByService?.["Startloc"]?.google) || parseFloat(avgRatingByService?.["Startloc"]?.trustpilot) || 0,
+      trend: trendByService["Startloc"]?.google || "neutral",
+      totalReviews: (reviewsCountByService?.["Startloc"]?.trustpilot || 0) + (reviewsCountByService?.["Startloc"]?.google || 0)
+    },
+    { 
+      id: 3, 
+      name: 'Marketing automobile', 
+      icon: MARKETINGAUTO, 
+      trustpilot: `${reviewsCountByService?.["Marketing automobile"]?.trustpilot || 0} - ${(parseFloat(avgRatingByService?.["Marketing automobile"]?.trustpilot) || 0).toFixed(1)}/5`, 
+      google: `${reviewsCountByService?.["Marketing automobile"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Marketing automobile"]?.google) || 0).toFixed(1)}/5`, 
+      avgRating: parseFloat(avgRatingByService?.["Marketing automobile"]?.google) || parseFloat(avgRatingByService?.["Marketing automobile"]?.trustpilot) || 0,
+      trend: trendByService["Marketing automobile"]?.google || "neutral",
+      totalReviews: (reviewsCountByService?.["Marketing automobile"]?.trustpilot || 0) + (reviewsCountByService?.["Marketing automobile"]?.google || 0)
+    },
+    { 
+      id: 4, 
+      name: 'Marketing immobilier', 
+      icon: MARKETINGIMMO, 
+      trustpilot: `${reviewsCountByService?.["Marketing immobilier"]?.trustpilot || 0} - ${(parseFloat(avgRatingByService?.["Marketing immobilier"]?.trustpilot) || 0).toFixed(1)}/5`, 
+      google: `${reviewsCountByService?.["Marketing immobilier"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Marketing immobilier"]?.google) || 0).toFixed(1)}/5`, 
+      avgRating: parseFloat(avgRatingByService?.["Marketing immobilier"]?.google) || parseFloat(avgRatingByService?.["Marketing immobilier"]?.trustpilot) || 0,
+      trend: trendByService["Marketing immobilier"]?.google || "neutral",
+      totalReviews: (reviewsCountByService?.["Marketing immobilier"]?.trustpilot || 0) + (reviewsCountByService?.["Marketing immobilier"]?.google || 0)
+    },
+    { 
+      id: 5, 
+      name: 'Sinimo', 
+      icon: SINIMO, 
+      trustpilot: `${reviewsCountByService?.["Sinimo"]?.trustpilot || 0} - ${(parseFloat(avgRatingByService?.["Sinimo"]?.trustpilot) || 0).toFixed(1)}/5`, 
+      google: `${reviewsCountByService?.["Sinimo"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Sinimo"]?.google) || 0).toFixed(1)}/5`, 
+      avgRating: parseFloat(avgRatingByService?.["Sinimo"]?.google) || parseFloat(avgRatingByService?.["Sinimo"]?.trustpilot) || 0,
+      trend: trendByService["Sinimo"]?.google || "neutral",
+      totalReviews: (parseInt(reviewsCountByService?.["Sinimo"]?.trustpilot) || 0) + (parseInt(reviewsCountByService?.["Sinimo"]?.google) || 0)
+    },
+    { 
+      id: 6, 
+      name: 'Pige Online', 
+      icon: PIGEONLINE, 
+      trustpilot: `${reviewsCountByService?.["Pige Online"]?.trustpilot || 0} - ${(parseFloat(avgRatingByService?.["Pige Online"]?.trustpilot) || 0).toFixed(1)}/5`, 
+      google: `${reviewsCountByService?.["Pige Online"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Pige Online"]?.google) || 0).toFixed(1)}/5`, 
+      avgRating: parseFloat(avgRatingByService?.["Pige Online"]?.google) || parseFloat(avgRatingByService?.["Pige Online"]?.trustpilot) || 0,
+      trend: trendByService["Pige Online"]?.google || "neutral",
+      totalReviews: (parseInt(reviewsCountByService?.["Pige Online"]?.trustpilot) || 0) + (parseInt(reviewsCountByService?.["Pige Online"]?.google) || 0)
+    }
+  ], [reviewsCountByService, avgRatingByService, trendByService]);
+  
 
   /**
-   * 🛠️ Boutons d'action pour naviguer vers différentes pages
+   * Boutons d'action pour naviguer vers différentes pages
    */
   const myButtons = useMemo(() => [
     {
@@ -132,10 +157,14 @@ export default function MainGrid() {
       bgColor: "#6B5BFF",
     }
   ], [navigate]);
+  console.log("📊 Données envoyées à ServicesTable :", servicesData);
+
+
+  
 
   return (
     <Box sx={{ width: '100%', maxWidth: '1900px', margin: 'auto', p: 2 }}>
-      {/* 🏆 En-tête */}
+      {/* En-tête */}
       <Typography variant="h2" textAlign="center" gutterBottom>
         <span style={{ fontWeight: 'bold', color: "#121826" }}>Tableau de bord </span>
         <span style={{ color: '#8B5CF6', fontWeight: "200" }}>des performances et retours clients du groupe Realty</span>
@@ -144,7 +173,7 @@ export default function MainGrid() {
         Tous les retours clients pour l'ensemble des services en un seul coup d'œil
       </Typography>
 
-      {/* 🛠️ Statistiques et actions */}
+      {/* Statistiques et actions */}
       <Grid container sx={{ mb: 4, mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Grid item xs={12} sm={6} md={4}>
           <StatCard title="Avis collectés" value={totalReviews} />
@@ -156,13 +185,13 @@ export default function MainGrid() {
         </Grid>
       </Grid>
 
-      {/* 📊 Tableau des services et graphique */}
+      {/* Tableau des services et graphique */}
       <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
           <ServicesTable services={servicesData} />
         </Grid>
         <Grid item xs={12} md={6} mt={2}>
-          <ServicesChart dataSets={dataSets} title="d’avis par services" onFilterChange={changeFilter} onActiveFilterChange={setActiveFilter} />
+        <ServicesChart/>
         </Grid>
       </Grid>
     </Box>

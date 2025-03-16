@@ -6,50 +6,56 @@ import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
 import SINIMO from "../../image/SINIMO.png";
 import PIGEONLINE from "../../image/PIGEONLINE.png";
 
+
 const servicesData = [
     {
       name: "Monbien",
       icon: MONBIEN, 
       links: [
-        "https://monbien.fr/avis",
-        "https://monbien.fr/contact"
-      ],
+        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
+      ]
     },
     {
       name: "Startloc",
       icon: STARTLOC,
       links: [
-        "https://startloc.fr/avis",
-        "https://startloc.fr/contact"
+        { url: "https://g.page/r/CRiJxyA68Zl4EBE/review", platform: "Google" },
+        { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
     {
       name: "Marketing Automobile",
       icon: MARKETINGAUTO,
       links: [
-        "https://marketing-immo.fr/avis"
+        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
     {
       name: "Marketing Immobilier",
       icon: MARKETINGIMMO,
       links: [
-        "https://marketing-immo.fr/avis"
+        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
     {
       name: "Sinimo",
       icon: SINIMO,
       links: [
-        "https://marketing-immo.fr/avis"
+        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://fr.trustpilot.com/evaluate/sinimo.fr", platform: "Trustpilot" }
       ]
     },
     {
       name: "Pige Online",
       icon: PIGEONLINE,
       links: [
-        "https://marketing-immo.fr/avis"
+        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://fr.trustpilot.com/evaluate/pige-online.fr", platform: "Trustpilot" }
       ]
+      
     }
   ];
 
