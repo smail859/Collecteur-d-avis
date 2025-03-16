@@ -235,10 +235,10 @@ const ServicesChart = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: "column", marginTop: "25px" }}>
       <Typography variant="h4" fontWeight="bold" sx={{ color: '#333' }}>
-        {selectedFilters.rating ? "Nombre d'avis par service" : "Nombre d'avis par date"}
+      Évolution du nombre d’ avis par services
       </Typography>
       <Typography variant="body1" sx={{ color: '#8B5CF6', mt: 2, mb: 2 }}>
-        Analysez les performances de vos services grâce aux avis clients collectés sur chaque plateforme.
+        Suivez les performances de vos services et leur évolution au fil du temps
       </Typography>
 
       <Box
