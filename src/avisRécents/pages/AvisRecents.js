@@ -131,7 +131,7 @@ const AvisRecents = ({ onFilterChange }) => {
   const detectCommercial = (text) => {
     if (!text) return text;
   
-    const commerciaux = ["Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Johnny Sins", "Jean-Simon", "Océane", "Johanna", "Angela", "Esteban", "Anais", "Elodie"];
+    const commerciaux = ["Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Arnaud", "Jean-Simon", "Océane", "Johanna", "Angela", "Esteban", "Anais", "Elodie"];
   
     // Fonction pour normaliser le texte (enlever accents + minuscule)
     const normalize = (str) => deburr(str).toLowerCase();
