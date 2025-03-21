@@ -722,7 +722,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     setError(null);
   
     try {
-      const response = await axios.get("http://localhost:3000/api/reviews");
+      const response = await axios.get("https://collecteur-avis.onrender.com/api/reviews");
       const googleReviewsData = Object.entries(response.data).flatMap(([service, data]) =>
           (data.reviews || []).map(review => ({
               ...review,
@@ -730,7 +730,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
           }))
       );
   
-      const responseTrustpilot = await axios.get("http://localhost:3000/api/trustpilot");
+      const responseTrustpilot = await axios.get("https://collecteur-avis.onrender.com/api/trustpilot");
       const trustpilotReviewsData = responseTrustpilot.data;
       
       // Formatage des avis Trustpilot
