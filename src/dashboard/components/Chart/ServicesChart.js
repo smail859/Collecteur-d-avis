@@ -232,7 +232,6 @@ const ServicesChart = () => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  console.log("📊 reviewsPerPeriod:", reviewsPerPeriod);
 
 
   return (

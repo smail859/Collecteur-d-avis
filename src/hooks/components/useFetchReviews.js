@@ -110,8 +110,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         result.setHours(0, 0, 0, 0);
         return result;
     }
-    console.log("Raw relativeDate:", relativeDate, [...relativeDate]);
-
 
     console.warn("⚠️ Format de date non reconnu :", relativeDate);
     return now;
@@ -306,8 +304,9 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         "Monbien": {
           "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
           "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-          "joanna": ["Joanna", "Johanna", "Joana"],
-          "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"],
+          "joanna": ["Joanna", "Joana"],
+          "johanna": ["Johanna"],
+          "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
         },
         "Startloc": {
           "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
@@ -328,6 +327,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
           "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
           "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
           "johanna": ["Johanna"],
+          "joanna": ["Joanna", "Joana"]
         },
         "Pige Online": {
           "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
@@ -534,7 +534,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       "Monbien": {
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "joanna": ["Joanna", "Johanna", "Joana"],
+        "joanna": ["Joanna", "Joana"],
+        "johanna": ["Johanna"],
         "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
       },
       "Startloc": {
@@ -609,17 +610,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         }
       });
     });
-    const variantesTheo = ["théo", "theo", "teo", "téo", "Téo"];
 
-    const avisAvecTheo = currentMonthReviews.filter(review => {
-      const reviewText = normalizeText(review.snippet || review.text || "");
-      return variantesTheo.some(variant => reviewText.includes(variant));
-    });
-    
-    console.log("Avis du mois courant avec Théo (toutes variantes) inclus :", avisAvecTheo);
-    
-    
-  
     // On retourne directement le résultat global
     return Object.entries(counts).map(([name, count]) => ({ name, count }));
   
@@ -635,8 +626,9 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       "Monbien": {
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "joanna": ["Joanna", "Johanna", "Joana"],
-        "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"],
+        "joanna": ["Joanna", "Joana"],
+        "johanna": ["Johanna"],
+        "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
       },
       "Startloc": {
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
@@ -694,6 +686,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         });
       });
     });
+
   
     // Comptage exact des avis par service/mois/commercial sans doublon dans un même avis
     yearlyReviews.forEach((review) => {
@@ -707,9 +700,10 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   
       Object.entries(commerciauxParService[service]).forEach(([commercialKey, variants]) => {
         if (alreadyCountedCommercials.has(commercialKey)) return;
-  
         for (const variant of variants) {
-          if (reviewText.split(/\b/).includes(normalizeText(variant))) {
+          const variantRegex = new RegExp(`\\b${normalizeText(variant)}\\b`, "i");
+          if (variantRegex.test(reviewText)) {
+
             counts[moisLabel][service][commercialKey] += 1;
             alreadyCountedCommercials.add(commercialKey);
             break;
