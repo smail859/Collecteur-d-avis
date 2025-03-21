@@ -61,7 +61,7 @@ const Statistiques = () => {
     { label: "Monbien", icon: MonbienRadius, commerciaux: ["Joanna", "Théo"] },
     { label: "Startloc", icon: StartlocRadius, commerciaux: ["Mélanie", "Smaïl", "Lucas", "Deborah", "Manon"] },
     { label: "Sinimo", icon: SinimoRadius, commerciaux: ["Anaïs"] },
-    { label: "Marketing automobile", icon: MARadius, commerciaux: ["Elodie", "Johnny Sins"] },
+    { label: "Marketing automobile", icon: MARadius, commerciaux: ["Elodie", "Arnaud"] },
     { label: "Marketing immobilier", icon: MIRadius, commerciaux: ["Johanna", "Jean-Simon","Oceane"] },
     { label: "Pige Online", icon: PORadius, commerciaux: ["Angela", "Esteban"] },
   ];

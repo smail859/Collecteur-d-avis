@@ -475,7 +475,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     const counts = {}; 
     const commerciauxParService = {
       "Monbien": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "joanna": ["Joanna", "Johanna", "Joana"],
@@ -491,7 +490,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       "Marketing automobile": {
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "johnny Sins": ["Arnaud", "arnaud", "arnot", "Arno"],
+        "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
         "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
       },
       "Marketing immobilier": {
@@ -585,47 +584,40 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   
     const commerciauxParService = {
       "Monbien": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "joanna": ["Joanna", "Johanna", "Joana"],
         "theo": ["Théo", "Theo", "Teo", "Téo"],
-        "anais": ["Anaïs", "Anais"],
       },
       "Startloc": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "melanie": ["Mélanie", "Melanie", "Mel"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "deborah": ["Déborah", "Deborah", "Débora", "Debora", "Déborrah", "Deborrah", "Débby", "Debby", "Debbi", "Debi", "Débborah", "Déborha"],
         "manon": ["Manon", "Mano", "Mannon"],
       },
       "Marketing automobile": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "oceane": ["Océane", "Oceane"],
+        "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
         "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
       },
       "Marketing immobilier": {
         "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
+        "oceane": ["Océane", "Oceane"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "johanna": ["Johanna"],
       },
       "Pige Online": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
+        "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
       },
       "Sinimo": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "luna": ["Luna", "Louna"],
       }
     };
   

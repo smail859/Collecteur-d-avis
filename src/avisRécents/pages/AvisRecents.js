@@ -125,7 +125,7 @@ const AvisRecents = ({ onFilterChange }) => {
   const dataFilters = [
     { name: "service", label: "Sélectionner un service", options: ["Tous les services", "Startloc", "Monbien", "Pige Online", "Marketing automobile", "Marketing immobilier", "Sinimo"] },
     { name: "note", label: "Notes", options: ["Toutes les notes", "5 étoiles", "4 étoiles", "3 étoiles", "2 étoiles", "1 étoile"] },
-    { name: "commercial", label: "Toutes l'équipe Realty", options: ["Tous les commerciaux", "Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Johnny Sins", "Jean-Simon", "Océane","Johanna", "Angela", "Esteban", "Anais", "Elodie"] },
+    { name: "commercial", label: "Toutes l'équipe Realty", options: ["Tous les commerciaux", "Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Arnaud", "Jean-Simon", "Océane","Johanna", "Angela", "Esteban", "Anais", "Elodie"] },
     { name: "plateforme", label: "Toutes les plateformes", options: ["Toutes les plateformes", "Google", "Trustpilot"] },
   ];
   const detectCommercial = (text) => {

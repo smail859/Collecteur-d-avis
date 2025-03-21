@@ -1,0 +1,69 @@
+# Déploiement du backend "Collecteur d'Avis"
+
+## 🚀 1. Préparation du projet
+- Vérifier que le projet est bien fonctionnel en local.
+- Mettre à jour les dépendances si nécessaire.
+- Supprimer les `console.log()` inutiles.
+- Vérifier que toutes les variables d'environnement sont bien configurées (`.env`).
+
+---
+
+## 🌍 2. Déploiement du **Backend** (Render)
+### ✅ Étapes :
+1. **Créer un compte sur Render** (https://render.com/).
+2. **Créer un service Web sur Render** :
+   - Connecter Render à GitHub.
+   - Sélectionner le repo du projet.
+   - Définir `node server.js` comme `Start Command`.
+   - Ajouter les variables d'environnement (`MONGO_URI`, `SERPAPI_KEY`, etc.).
+   - Lancer le déploiement.
+
+### ❌ Erreur rencontrée : `EADDRINUSE` (port déjà utilisé)
+- **Cause :** Le serveur tente d'écouter sur un port déjà occupé.
+- **Solution :** Vérifier que `process.env.PORT` est bien utilisé dans `server.js`.
+
+### ✅ Solution implémentée :
+```js
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Serveur lancé sur le port ${PORT}`);
+});
+
+
+
+# 📦 Déploiement du Frontend sur Vercel
+
+## ✅ 1. Préparation du projet
+Avant de déployer, assure-toi que ton projet est prêt :
+- Vérifie que `vite.config.js` (ou `package.json` pour Create React App) est bien configuré.
+- Mets à jour les dépendances (`npm update`).
+- Assure-toi que les appels API pointent bien vers le backend déployé (`https://collecteur-avis.onrender.com`).
+- Supprime les `console.log()` inutiles.
+- Vérifie `.gitignore` pour éviter d'envoyer `node_modules`.
+
+---
+
+## 🌍 2. Déploiement sur **Vercel**
+### ✅ Étapes :
+1. **Créer un compte sur Vercel** → [https://vercel.com/](https://vercel.com/)
+2. **Connecter GitHub** et sélectionner le repo contenant le frontend.
+3. **Configurer le build** :
+   - **Build Command** → `npm run build`
+   - **Output Directory** → `build`
+   - **Install Command** → `npm install`
+4. **Ajouter les variables d’environnement** :
+   - `VITE_API_URL=https://collecteur-avis.onrender.com`
+5. **Lancer le déploiement !**
+
+---
+
+## ❌ Erreurs et solutions
+
+### 🛑 **1. Déploiement annulé ("Ignore backend files for frontend build")**
+- **Problème :** Vercel essaie de déployer tout le repo (backend + frontend).
+- **Solution :** Exclure les fichiers backend en créant `vercel.json` à la racine :
+
+```json
+{
+  "ignoreCommand": "echo 'Ignore backend files for frontend build'"
+}
