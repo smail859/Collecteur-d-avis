@@ -93,12 +93,10 @@ const CHECK_INTERVAL_DAYS = 2;
 // -------------------------
 const shouldUpdateReviews = async () => {
   const lastLog = await UpdateLog.findOne().sort({ updatedAt: -1 });
-  console.log("Dernière mise à jour enregistrée :", lastLog); // Ajoute ce log
   if (!lastLog) return true;
 
   const now = new Date();
   const diffDays = (now - lastLog.updatedAt) / (1000 * 60 * 60 * 24);
-  console.log("Jours écoulés depuis la dernière mise à jour :", diffDays); // Ajoute ce log
 
   return diffDays >= CHECK_INTERVAL_DAYS;
 };
@@ -175,9 +173,6 @@ const fetchReviewsForSite = async (site) => {
 
       if (newReviews.length > 0) {
         await Review.insertMany(newReviews, { ordered: false }).catch(() => {});
-        console.log(`${newReviews.length} nouveaux avis ajoutés pour ${site.name}`);
-      } else {
-        console.log(`Aucun nouvel avis à insérer pour ${site.name}`);
       }
 
       allReviews = [...allReviews, ...newReviews];
@@ -196,7 +191,6 @@ const fetchReviewsForSite = async (site) => {
 // Mise à jour globale
 // -------------------------
 const updateLatestReviews = async () => {
-  console.log("🔄 Vérification des nouveaux avis...");
 
   await Promise.all(
     sites.map(async (site) => {
@@ -246,9 +240,6 @@ const updateLatestReviews = async () => {
 
         if (newReviews.length > 0) {
           await Review.insertMany(newReviews, { ordered: false });
-          console.log(`${newReviews.length} nouveaux avis ajoutés pour ${site.name}`);
-        } else {
-          console.log(`Aucun nouvel avis pour ${site.name}`);
         }
       } catch (error) {
         console.error(`Erreur de mise à jour pour ${site.name} :`, error.message);
@@ -257,7 +248,6 @@ const updateLatestReviews = async () => {
   );
 
   await UpdateLog.findOneAndUpdate({}, { updatedAt: new Date() }, { upsert: true });
-  console.log("Date de dernière mise à jour enregistrée.");
 };
 
 
@@ -268,11 +258,9 @@ const updateLatestReviews = async () => {
 // GET /api/reviews
 app.get("/api/reviews", async (req, res) => {
   try {
-    console.log("Récupération des avis depuis la base de données...");
     const dbReviews = await Review.find();
 
     if (dbReviews.length > 0) {
-      console.log("Données trouvées en base, envoi des avis !");
       const groupedReviews = dbReviews.reduce((acc, review) => {
         if (!acc[review.site]) acc[review.site] = { 
           data_id: review.data_id, 
@@ -284,8 +272,6 @@ app.get("/api/reviews", async (req, res) => {
 
       return res.json(groupedReviews);
     }
-
-    console.log("Aucun avis trouvé en base, récupération depuis SerpAPI...");
     const reviewsPromises = sites.map(fetchReviewsForSite);
     const allReviews = await Promise.all(reviewsPromises);
 
@@ -293,7 +279,6 @@ app.get("/api/reviews", async (req, res) => {
     
     if (newReviews.length > 0) {
       await Review.insertMany(newReviews, { ordered: false });
-      console.log(`${newReviews.length} avis ajoutés en base !`);
     }
 
     const groupedReviews = newReviews.reduce((acc, review) => {
@@ -367,24 +352,29 @@ app.get("/api/force-update", async (req, res) => {
 const startServer = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ Connecté à MongoDB");
 
     // Vérifier s'il faut faire une màj dès le démarrage
     if (await shouldUpdateReviews()) {
-      console.log("📌 Mise à jour nécessaire au démarrage");
+      console.log("📦 Mise à jour automatique au démarrage...");
       await updateLatestReviews();
     } else {
-      console.log("Dernière mise à jour récente, pas besoin au démarrage.");
+      console.log("🔄 Pas besoin de mise à jour au démarrage.");
     }
+    
 
     app.listen(PORT, () => {
-      console.log(`Serveur lancé sur http://localhost:${PORT}`);
     });
   } catch (err) {
     console.error("Erreur MongoDB :", err.message);
     process.exit(1);
   }
 };
+
+
+app.listen(PORT, () => {
+  console.log(`✅ Serveur lancé sur le port ${PORT}`);
+});
+
 
 
 startServer();
