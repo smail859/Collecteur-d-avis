@@ -17,7 +17,7 @@ import html2canvas from "html2canvas";
 
 const Statistiques = () => {
   const { commercialCounts, commercialCountsYears } = useFetchReviews();
-  
+
   // Fonction pour générer le PDF à partir de l'élément avec id "pdf-content"
   const generatePDF = () => {
     const input = document.getElementById("pdf-content");
@@ -66,10 +66,10 @@ const Statistiques = () => {
     { label: "Pige Online", icon: PORadius, commerciaux: ["Angela", "Esteban"] },
   ];
 
-  
-
   // Couleurs
   const colors = ["#7B61FF", "#E3E4FE"];
+
+  
 
 
   return (

@@ -18,7 +18,6 @@ const ProgressionSection = ({ commercialCountMount, commercialCountYears, isYear
     ? Math.round((commercialCountYears / OBJECTIF_ANNUEL) * 5)
     : Math.round((commercialCountMount / OBJECTIF_MENSUEL) * 5);
 
-  console.log("Progression calculée :", computedProgression, "| Flammes allumées :", flamesToLight);
 
   return (
     <Box

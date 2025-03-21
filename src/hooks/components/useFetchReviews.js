@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import useFilterService from "../components/utils/useFilterService";
 
-
 const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", service: "" }) => {
   
   // États principaux
@@ -301,16 +300,73 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         result = result.filter(review => review.rating === noteValue);
     }
 
-    // Filtrage par commercial (via `text` ou `snippet`)
+    // Filtrage par commercial (via la fonction `searchCommercialName`)
     if (externalFilters.commercial && externalFilters.commercial !== "Tous les commerciaux") {
-        const normalizeText = (text) => text?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const normalizedFilter = normalizeText(externalFilters.commercial);
+      const commerciauxParService = {
+        "Monbien": {
+          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+          "joanna": ["Joanna", "Johanna", "Joana"],
+          "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"],
+        },
+        "Startloc": {
+          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+          "melanie": ["Mélanie", "Melanie", "Mel"],
+          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+          "deborah": ["Déborah", "Deborah", "Débora", "Debora", "Déborrah", "Deborrah", "Débby", "Debby", "Debbi", "Debi", "Débborah", "Déborha"],
+          "manon": ["Manon", "Mano", "Mannon"],
+        },
+        "Marketing automobile": {
+          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+          "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
+          "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
+        },
+        "Marketing immobilier": {
+          "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
+          "oceane": ["Océane", "Oceane"],
+          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+          "johanna": ["Johanna"],
+        },
+        "Pige Online": {
+          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+          "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
+          "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
+        },
+        "Sinimo": {
+          "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
+          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+        }
+      };
 
-        result = result.filter(review => {
-            const reviewText = normalizeText(review.text || review.snippet || "");
-            return reviewText.includes(normalizedFilter);
-        });
+      const normalizeText = (text) => text?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normalizedFilter = normalizeText(externalFilters.commercial);
+    
+      result = result.filter(review => {
+        const service = review.service;
+        const reviewText = normalizeText(review.text || review.snippet || "");
+    
+        if (!commerciauxParService[service]) return false;
+    
+        // Recherche stricte (exact match) dans les variantes
+        const matchedCommercialKey = Object.entries(commerciauxParService[service]).find(([key, variants]) =>
+          variants.some(variant => normalizeText(variant) === normalizedFilter)
+        );
+    
+        if (!matchedCommercialKey) return false;
+    
+        const matchedVariants = matchedCommercialKey[1];
+    
+        // Vérifie que le texte contient EXACTEMENT l'une des variantes du commercial recherché
+        return matchedVariants.some(variant =>
+          reviewText.split(/\b/).includes(normalizeText(variant))
+        );
+      });
     }
+
 
     // Filtrage par période (Cette semaine, Ce mois, Cette année)
     if (externalFilters.periode && externalFilters.periode !== "Toutes les périodes") {
@@ -347,6 +403,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
 
     return result;
   }, [allReviews, externalFilters, reviewsPerPeriod]);
+  
 
 
   
@@ -468,17 +525,17 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     return counts;
   }, [googleReviews, formattedTrustpilotReviews]);
 
-  
- 
+
 
   const commercialCounts = useMemo(() => {
-    const counts = {}; 
+    const counts = {};
+  
     const commerciauxParService = {
       "Monbien": {
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "joanna": ["Joanna", "Johanna", "Joana"],
-        "theo": ["Théo", "Theo", "Teo", "Téo"],
+        "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
       },
       "Startloc": {
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
@@ -516,68 +573,60 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     const now = new Date();
     const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDayCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
   
     const normalizeText = (text) =>
       text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
-    // Filtrer les avis du mois en cours
+    // Créer une liste de TOUS les commerciaux (sans service pour éviter les doublons)
+    const allCommercials = {};
+    Object.values(commerciauxParService).forEach(serviceCom => {
+      Object.entries(serviceCom).forEach(([key, variants]) => {
+        if (!allCommercials[key]) {
+          allCommercials[key] = new Set();
+        }
+        variants.forEach(variant => allCommercials[key].add(normalizeText(variant)));
+      });
+    });
+  
     const currentMonthReviews = filteredReviews.filter((review) => {
       const reviewDate = parseRelativeDate(review.date);
       return reviewDate >= firstDayCurrentMonth && reviewDate <= lastDayCurrentMonth;
     });
-
-    // Parcours des avis pour compter par service et commercial
+    
     currentMonthReviews.forEach((review) => {
-      if (review.snippet || review.text) {
-        const normalizedText = normalizeText(review.snippet || review.text || "");
-        const detectedCommercials = new Set();
-        const service = review.service;
-    
-        if (!counts[service]) {
-          counts[service] = {};
+      const reviewText = normalizeText(review.snippet || review.text || "");
+      const alreadyCounted = new Set();
+  
+      Object.entries(allCommercials).forEach(([commercialKey, variantsSet]) => {
+        if (alreadyCounted.has(commercialKey)) return;
+  
+        for (const variant of variantsSet) {
+          if (reviewText.split(/\b/).includes(variant)) {
+            counts[commercialKey] = (counts[commercialKey] || 0) + 1;
+            alreadyCounted.add(commercialKey);
+            break; // On sort dès la première correspondance trouvée
+          }
         }
-    
-        if (commerciauxParService[service]) {
-          Object.entries(commerciauxParService[service]).forEach(([key, variations]) => {
-            variations.forEach((variant) => {
-              const normalizedVariant = normalizeText(variant);
-              const regex = new RegExp(`\\b${normalizedVariant}\\b`, "i");
-              if (
-                regex.test(normalizedText) &&
-                !detectedCommercials.has(key)
-              ) {
-                counts[service][key] = (counts[service][key] || 0) + 1;
-                detectedCommercials.add(key);
-              }
-            });
-          });
-  
-        }
-      }
-    });
-
-  
-    // Récupérer les compteurs par service sous forme de tableau
-    const resultPerService = Object.entries(counts).map(([service, commerciaux]) => ({
-      service,
-      commerciaux: Object.entries(commerciaux).map(([name, count]) => ({ name, count }))
-    }));
-  
-    // Fusionner les résultats pour obtenir un total global par commercial
-    // Pour "smail" et "lucas" on additionne, pour les autres on prend le maximum
-    const globalCounts = {};
-    resultPerService.forEach(({ service, commerciaux }) => {
-      commerciaux.forEach(({ name, count }) => {
-        const normalizedName = normalizeText(name);
-        globalCounts[normalizedName] = (globalCounts[normalizedName] || 0) + count;
       });
     });
-    // globalCounts contient désormais le total global par commercial selon votre règle
-    return Object.entries(globalCounts).map(([name, count]) => ({ name, count }));
+    const variantesTheo = ["théo", "theo", "teo", "téo", "Téo"];
+
+    const avisAvecTheo = currentMonthReviews.filter(review => {
+      const reviewText = normalizeText(review.snippet || review.text || "");
+      return variantesTheo.some(variant => reviewText.includes(variant));
+    });
+    
+    console.log("Avis du mois courant avec Théo (toutes variantes) inclus :", avisAvecTheo);
+    
+    
+  
+    // On retourne directement le résultat global
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  
   }, [filteredReviews, parseRelativeDate]);
 
   
+
 
   const commercialCountsYears = useMemo(() => {
     const counts = {};
@@ -587,7 +636,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "joanna": ["Joanna", "Johanna", "Joana"],
-        "theo": ["Théo", "Theo", "Teo", "Téo"],
+        "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"],
       },
       "Startloc": {
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
@@ -621,68 +670,67 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       }
     };
   
-    const now = new Date();
-    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-    const lastDayOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+    const moisLabels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
   
     const normalizeText = (text) =>
       text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
-  
-    const moisLabels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-  
-    // Initialiser counts par mois
-    moisLabels.forEach((mois) => {
-      counts[mois] = {};
-    });
+    const now = new Date();
+    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+    const lastDayOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
   
     const yearlyReviews = filteredReviews.filter((review) => {
       const reviewDate = parseRelativeDate(review.date);
       return reviewDate >= firstDayOfYear && reviewDate <= lastDayOfYear;
     });
   
-    yearlyReviews.forEach((review) => {
-      if ((review.snippet || review.text) && review.service) {
-        const normalizedText = normalizeText(review.snippet || review.text || "");
-        const detectedCommercials = new Set();
-        const reviewDate = parseRelativeDate(review.date);
-        const moisIndex = reviewDate.getMonth();
-        const moisLabel = moisLabels[moisIndex];
-        const service = review.service;
-  
-        if (!counts[moisLabel][service]) {
-          counts[moisLabel][service] = {};
-        }
-  
-        if (commerciauxParService[service]) {
-          Object.entries(commerciauxParService[service]).forEach(([key, variations]) => {
-            variations.forEach((variant) => {
-              const normalizedVariant = normalizeText(variant);
-              const regex = new RegExp(`\\b${normalizedVariant}\\b`, "i");
-  
-              if (regex.test(normalizedText) && !detectedCommercials.has(key)) {
-                counts[moisLabel][service][key] = (counts[moisLabel][service][key] || 0) + 1;
-                detectedCommercials.add(key);
-              }
-            });
-          });
-        }
-      }
+    // Initialisation de la structure exacte initiale
+    moisLabels.forEach((mois) => {
+      counts[mois] = {};
+      Object.entries(commerciauxParService).forEach(([service, commerciaux]) => {
+        counts[mois][service] = {};
+        Object.keys(commerciaux).forEach((commercial) => {
+          counts[mois][service][commercial] = 0;
+        });
+      });
     });
   
-    // Construire resultYears : un tableau avec pour chaque mois, la liste des services et leurs commerciaux
+    // Comptage exact des avis par service/mois/commercial sans doublon dans un même avis
+    yearlyReviews.forEach((review) => {
+      const reviewDate = parseRelativeDate(review.date);
+      const moisLabel = moisLabels[reviewDate.getMonth()];
+      const reviewText = normalizeText(review.snippet || review.text || "");
+      const service = review.service;
+      if (!commerciauxParService[service]) return;
+  
+      const alreadyCountedCommercials = new Set();
+  
+      Object.entries(commerciauxParService[service]).forEach(([commercialKey, variants]) => {
+        if (alreadyCountedCommercials.has(commercialKey)) return;
+  
+        for (const variant of variants) {
+          if (reviewText.split(/\b/).includes(normalizeText(variant))) {
+            counts[moisLabel][service][commercialKey] += 1;
+            alreadyCountedCommercials.add(commercialKey);
+            break;
+          }
+        }
+      });
+    });
+  
+    // Conversion finale exactement comme initialement
     const resultYears = moisLabels.map((mois) => {
-      const servicesData = Object.entries(counts[mois]).map(([service, commerciaux]) => {
-        const commerciauxAvecZero = Object.keys(commerciauxParService[service] || {}).map((label) => ({
+      const services = Object.entries(counts[mois]).map(([service, commerciaux]) => {
+        const commerciauxAvecZero = Object.entries(commerciaux).map(([label, count]) => ({
           label,
-          count: commerciaux[label] || 0
+          count,
         }));
         return { service, commerciaux: commerciauxAvecZero };
       });
-      return { mois, services: servicesData };
+      return { mois, services };
     });
   
-    // Fusionner les résultats pour obtenir un total global par commercial (sur tous les services)
+    // Fusion des résultats annuels globaux par commercial
     const globalCounts = {};
     resultYears.forEach(({ services }) => {
       services.forEach(({ commerciaux }) => {
@@ -691,15 +739,12 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         });
       });
     });
-
   
-    // Ici, globalCounts contient le total par commercial en appliquant la règle.
-    // Vous pouvez renommer cette variable pour qu'elle corresponde à l'usage en aval.
     const totalAvisParCommercialParService = globalCounts;
-
-    
+  
     return { resultYears, totalAvisParCommercialParService };
   }, [filteredReviews, parseRelativeDate]);
+  
 
 
   /**

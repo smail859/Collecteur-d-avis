@@ -24,6 +24,9 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => 
     }
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
+
+  
+
     
 
   const selectedCommercialData = tableauCommerciaux.find(
@@ -35,6 +38,9 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => 
   const progressionCommercial = selectedCommercial
     ? Math.min(100, Math.round((commercialCountMount / OBJECTIF_MENSUEL) * 100))
     : 0;
+  
+
+
 
 
   return (
