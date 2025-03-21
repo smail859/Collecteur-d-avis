@@ -2,12 +2,12 @@ import ChartStatistiques from "../components/ChartStatistiques";
 import ChartBarStatistiques from "../components/ChartBarStatistiques";
 import { Typography, Button, Box } from "@mui/material";
 import { useState } from "react";
-import MONBIEN from "../../image/MONBIEN.png";
-import STARTLOC from "../../image/STARTLOC.png";
-import MARKETINGAUTO from "../../image/MARKETINGAUTO.png";
-import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
-import SINIMO from "../../image/SINIMO.png";
-import PIGEONLINE from "../../image/PIGEONLINE.png";
+import MonbienRadius from "../../image/MonbienRadius.png";
+import MARadius from "../../image/MARadius.png";
+import MIRadius from "../../image/MIRadius.png";
+import PORadius from "../../image/PORadius.png";
+import SinimoRadius from "../../image/SinimoRadius.png";
+import StartlocRadius from "../../image/StartlocRadius.png";
 import ListChip from "../../avisRécents/components/ListChip";
 import useFetchReviews from "../../hooks/components/useFetchReviews";
 import CommercialTable from "../components/CommercialTable";
@@ -58,16 +58,19 @@ const Statistiques = () => {
 
   // Données des services et leurs commerciaux (pour le sélecteur)
   const servicesData = [
-    { label: "Monbien", icon: MONBIEN, commerciaux: ["Joanna", "Théo"] },
-    { label: "Startloc", icon: STARTLOC, commerciaux: ["Mélanie", "Smaïl", "Lucas", "Deborah", "Manon"] },
-    { label: "Sinimo", icon: SINIMO, commerciaux: ["Anaïs"] },
-    { label: "Marketing automobile", icon: MARKETINGAUTO, commerciaux: ["Elodie", "Oceane"] },
-    { label: "Marketing immobilier", icon: MARKETINGIMMO, commerciaux: ["Johanna", "Jean-Simon"] },
-    { label: "Pige Online", icon: PIGEONLINE, commerciaux: ["Angela"] },
+    { label: "Monbien", icon: MonbienRadius, commerciaux: ["Joanna", "Théo"] },
+    { label: "Startloc", icon: StartlocRadius, commerciaux: ["Mélanie", "Smaïl", "Lucas", "Deborah", "Manon"] },
+    { label: "Sinimo", icon: SinimoRadius, commerciaux: ["Anaïs"] },
+    { label: "Marketing automobile", icon: MARadius, commerciaux: ["Elodie", "Johnny Sins"] },
+    { label: "Marketing immobilier", icon: MIRadius, commerciaux: ["Johanna", "Jean-Simon","Oceane"] },
+    { label: "Pige Online", icon: PORadius, commerciaux: ["Angela", "Esteban"] },
   ];
+
+  
 
   // Couleurs
   const colors = ["#7B61FF", "#E3E4FE"];
+
 
   return (
     <Box>

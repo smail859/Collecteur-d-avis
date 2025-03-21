@@ -76,10 +76,11 @@ const CollecterAvis = ({ title, subtitle, services }) => {
                           sx={{
                             backgroundColor: "white",
                             color: "#8B5CF6",
+                            width: "190px",
+                            height: "60px",
                             fontWeight: "bold",
                             boxShadow: 1,
-                            borderRadius: "20px",
-                            "&:hover": { backgroundColor: "#F0E8FF" },
+                            borderRadius: "14px",
                           }}
                           endIcon={<ContentCopyIcon />}
                           onClick={() => handleCopy(service.name, linkObj.url, linkObj.platform)}

@@ -42,59 +42,84 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   const parseRelativeDate = useCallback((relativeDate) => {
     if (!relativeDate) return new Date();
 
-
     const now = new Date();
-    const result = new Date(now);
+    let result = new Date(now);
 
-    if (relativeDate.trim() === "il y a un jour") {
-        result.setDate(now.getDate() - 1);
-    } else if (relativeDate.trim() === "il y a une semaine") {
-        result.setDate(now.getDate() - 7);
-    } else if (relativeDate.trim() === "il y a un mois") {
-        result.setMonth(now.getMonth() - 1);
-    } else if (relativeDate.trim() === "il y a un an") {
-        result.setFullYear(now.getFullYear() - 1);
-    } else {
-        const moisFrancais = {
-            "janv.": 0, "févr.": 1, "mars": 2, "avr.": 3, "mai": 4, "juin": 5,
-            "juil.": 6, "août": 7, "sept.": 8, "oct.": 9, "nov.": 10, "déc.": 11
-        };
+    // Normalisation (suppression des espaces insécables et uniformisation)
+    relativeDate = relativeDate.replace(/\u00A0/g, " ").trim().toLowerCase();
 
-        const matchFullDate = relativeDate.match(/(\d{1,2})\s+([a-zéû.]+)\s+(\d{4})/i);
+    // Correspondance des mois français
+    const moisFrancais = {
+      "janv.": 0, "janvier": 0,
+      "févr.": 1, "février": 1,
+      "mars": 2,
+      "avr.": 3, "avril": 3,
+      "mai": 4,
+      "juin": 5,
+      "juil.": 6, "juillet": 6,
+      "août": 7,
+      "sept.": 8, "septembre": 8,
+      "oct.": 9, "octobre": 9,
+      "nov.": 10, "novembre": 10,
+      "déc.": 11, "décembre": 11
+    };
+   // Gestion des dates absolues (ex: "15 févr. 2025")
+  const matchFullDate = relativeDate.match(/^(\d{1,2})\s+([a-zéûôî.]+)\s+(\d{4})$/iu);
+  if (matchFullDate) {
+    const [, day, monthStringRaw, year] = matchFullDate;
+    const monthString = monthStringRaw.toLowerCase().replace(".", "").trim();
 
-        if (matchFullDate) {
-            const day = parseInt(matchFullDate[1], 10);
-            const monthString = matchFullDate[2].toLowerCase();
-            const year = parseInt(matchFullDate[3], 10);
+    // Trouver la clé correspondante
+    const matchedKey = Object.keys(moisFrancais).find(key =>
+      key.replace(".", "").toLowerCase() === monthString
+    );
 
-            const month = moisFrancais[monthString];
+    const month = moisFrancais[matchedKey];
 
-            if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-                const parsedDate = new Date(Date.UTC(year, month, day)); // Création en UTC
-                parsedDate.setUTCDate(day); // Force le bon jour
-                return parsedDate;
-            } else {
-                console.error("❌ Erreur de conversion :", { day, month, year });
-            }
-        }
+    const parsedDay = parseInt(day, 10);
+    const parsedYear = parseInt(year, 10);
 
-        const match = relativeDate.match(/(\d+)\s*(jour|jours|semaine|semaines|mois|an|ans)/i);
-        if (match) {
-            const value = parseInt(match[1], 10);
-            const unit = match[2];
+    if (!isNaN(parsedDay) && !isNaN(parsedYear) && month !== undefined) {
+      result = new Date(parsedYear, month, parsedDay);
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+  }
 
-            if (unit.includes("jour")) result.setDate(now.getDate() - value);
-            else if (unit.includes("semaine")) result.setDate(now.getDate() - value * 7);
-            else if (unit.includes("mois")) result.setMonth(now.getMonth() - value);
-            else if (unit.includes("an")) result.setFullYear(now.getFullYear() - value);
-        }
+    // Gestion des dates relatives (ex: "il y a 3 jours", "il y a un mois")
+    const matchRelative = relativeDate.match(/il y a (\d+|un|une) (jour|jours|semaine|semaines|mois|an|ans)/i);
+    if (matchRelative) {
+      const value = matchRelative[1] === "un" || matchRelative[1] === "une" ? 1 : parseInt(matchRelative[1], 10);
+      const unit = matchRelative[2];
+
+      if (unit.includes("jour")) result.setDate(now.getDate() - value);
+      else if (unit.includes("semaine")) result.setDate(now.getDate() - value * 7);
+      else if (unit.includes("mois")) result.setMonth(now.getMonth() - value);
+      else if (unit.includes("an")) result.setFullYear(now.getFullYear() - value);
+
+      result.setHours(0, 0, 0, 0);
+      return result;
     }
 
+    if (relativeDate === "hier") {
+      result.setDate(now.getDate() - 1);
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+    
+    if (relativeDate === "aujourd’hui" || relativeDate === "aujourd'hui") {
+        result.setHours(0, 0, 0, 0);
+        return result;
+    }
+    console.log("Raw relativeDate:", relativeDate, [...relativeDate]);
 
 
-    result.setHours(0, 0, 0, 0);
-    return result;
+    console.warn("⚠️ Format de date non reconnu :", relativeDate);
+    return now;
   }, []);
+
+  
+
 
 
 
@@ -205,11 +230,14 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       data.reviews.map(review => ({ ...review, service }))
     );
   }, [trustpilotReviews]);
+  
 
   const trustpilotPeriods = getReviewsPerPeriod(formattedTrustpilotReviews);
 
   // Fusionner les résultats pour avoir `reviewsPerPeriod`
   const reviewsPerPeriod = useMemo(() => {
+
+
     const periods = { today: {}, "7days": {}, "30days": {} };
     const services = ["Monbien", "Startloc", "Marketing automobile", "Marketing immobilier", "Pige Online", "Sinimo"];
     const plateformes = ["Google", "Trustpilot"];
@@ -229,14 +257,12 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         });
       });
     });
-  
     return periods;
   }, [googlePeriods, trustpilotPeriods]);
 
+
   
-  /**
-   * Gestion de l'affichage des avis
-   */
+
   // Tri des avis directement sur le tableau
   const sortedReviews = useMemo(() => {
     if (!reviews || !Array.isArray(reviews)) return [];
@@ -259,23 +285,23 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   const filteredReviews = useMemo(() => {
     let result = [...allReviews];
 
-    // 🔍 1️⃣ Filtrage par service
+    // Filtrage par service
     if (externalFilters.service && externalFilters.service !== "Tous les services") {
         result = result.filter(review => review.service === externalFilters.service);
     }
 
-    // 🔍 2️⃣ Filtrage par plateforme (Google, Trustpilot)
+    // Filtrage par plateforme (Google, Trustpilot)
     if (externalFilters.plateforme && externalFilters.plateforme !== "Toutes les plateformes") {
         result = result.filter(review => review.source?.toLowerCase() === externalFilters.plateforme.toLowerCase());
     }
 
-    // 🔍 3️⃣ Filtrage par note
+    // Filtrage par note
     if (externalFilters.note && externalFilters.note !== "Toutes les notes") {
         const noteValue = parseInt(externalFilters.note[0], 10);
         result = result.filter(review => review.rating === noteValue);
     }
 
-    // 🔍 4️⃣ Filtrage par commercial (via `text` ou `snippet`)
+    // Filtrage par commercial (via `text` ou `snippet`)
     if (externalFilters.commercial && externalFilters.commercial !== "Tous les commerciaux") {
         const normalizeText = (text) => text?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const normalizedFilter = normalizeText(externalFilters.commercial);
@@ -286,25 +312,37 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         });
     }
 
-    // 🔍 5️⃣ Filtrage par période (Cette semaine, Ce mois, Cette année)
+    // Filtrage par période (Cette semaine, Ce mois, Cette année)
     if (externalFilters.periode && externalFilters.periode !== "Toutes les périodes") {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      let startDate = null;
+
       if (externalFilters.periode === "Cette semaine") {
-        const now = new Date();
-        const sevenDaysAgo = new Date(now);
-        sevenDaysAgo.setDate(now.getDate() - 7);
-        result = result.filter(review => {
-          const reviewDate = parseRelativeDate(review.date);
-          return reviewDate >= sevenDaysAgo && reviewDate <= now;
-        });
+          startDate = new Date(now);
+          startDate.setDate(now.getDate() - 7);
+      } else if (externalFilters.periode === "Ce mois") {
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (externalFilters.periode === "Cette année") {
+          startDate = new Date(now.getFullYear(), 0, 1);
+      } else if (typeof externalFilters.periode === "object" && externalFilters.periode.start && externalFilters.periode.end) {
+          // Période personnalisée
+          startDate = new Date(externalFilters.periode.start);
+          const endDate = new Date(externalFilters.periode.end);
+          result = result.filter((review) => {
+              const reviewDate = parseRelativeDate(review.date);
+              return reviewDate >= startDate && reviewDate <= endDate;
+          });
+          return result; // On retourne directement si plage personnalisée
       }
-      else if (externalFilters.periode === "Ce mois") {
-            result = result.filter((review) => {
-                const reviewDate = parseRelativeDate(review.date);
-                const now = new Date();
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                return reviewDate >= startOfMonth && reviewDate <= now;
-            });
-        }
+
+      // Filtrage basé sur `startDate`
+      if (startDate) {
+          result = result.filter((review) => {
+              const reviewDate = parseRelativeDate(review.date);
+              return reviewDate >= startDate && reviewDate <= now;
+          });
+      }
     }
 
     return result;
@@ -442,10 +480,8 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "joanna": ["Joanna", "Johanna", "Joana"],
         "theo": ["Théo", "Theo", "Teo", "Téo"],
-        "anais": ["Anaïs", "Anais"],
       },
       "Startloc": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "melanie": ["Mélanie", "Melanie", "Mel"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
@@ -453,70 +489,71 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         "manon": ["Manon", "Mano", "Mannon"],
       },
       "Marketing automobile": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "oceane": ["Océane", "Oceane"],
+        "johnny Sins": ["Arnaud", "arnaud", "arnot", "Arno"],
         "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
       },
       "Marketing immobilier": {
         "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
+        "oceane": ["Océane", "Oceane"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "johanna": ["Johanna"],
       },
       "Pige Online": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
         "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
+        "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
       },
       "Sinimo": {
-        "benoit": ["Benoit", "Benoît", "Ben", "Benoi", "Beno"],
         "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
         "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
         "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "luna": ["Luna", "Louna"],
       }
     };
   
     const now = new Date();
-    const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDayCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
   
     const normalizeText = (text) =>
       text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
-    // Filtrer les avis du mois dernier
-    const lastMonthReviews = filteredReviews.filter((review) => {
+    // Filtrer les avis du mois en cours
+    const currentMonthReviews = filteredReviews.filter((review) => {
       const reviewDate = parseRelativeDate(review.date);
-      return reviewDate >= firstDayLastMonth && reviewDate <= lastDayLastMonth;
+      return reviewDate >= firstDayCurrentMonth && reviewDate <= lastDayCurrentMonth;
     });
-  
+
     // Parcours des avis pour compter par service et commercial
-    lastMonthReviews.forEach((review) => {
-      if ((review.snippet || review.text) && review.service) {
+    currentMonthReviews.forEach((review) => {
+      if (review.snippet || review.text) {
         const normalizedText = normalizeText(review.snippet || review.text || "");
         const detectedCommercials = new Set();
         const service = review.service;
-  
+    
         if (!counts[service]) {
           counts[service] = {};
         }
-  
+    
         if (commerciauxParService[service]) {
           Object.entries(commerciauxParService[service]).forEach(([key, variations]) => {
             variations.forEach((variant) => {
               const normalizedVariant = normalizeText(variant);
               const regex = new RegExp(`\\b${normalizedVariant}\\b`, "i");
-  
-              if (regex.test(normalizedText) && !detectedCommercials.has(key)) {
+              if (
+                regex.test(normalizedText) &&
+                !detectedCommercials.has(key)
+              ) {
                 counts[service][key] = (counts[service][key] || 0) + 1;
                 detectedCommercials.add(key);
               }
             });
           });
+  
         }
       }
     });
@@ -541,7 +578,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     return Object.entries(globalCounts).map(([name, count]) => ({ name, count }));
   }, [filteredReviews, parseRelativeDate]);
 
-  console.log("commercialCounts : ", commercialCounts)
   
 
   const commercialCountsYears = useMemo(() => {
@@ -679,42 +715,46 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
    */
   const fetchReviews = useCallback(async () => {
     if (googleReviews.length > 0 && trustpilotReviews.length > 0) {
-        return;
+      return;
     }
-
+  
     setLoading(true);
     setError(null);
-
+  
     try {
-      const response = await axios.get("http://localhost:5000/api/reviews");
+      const response = await axios.get("http://localhost:3000/api/reviews");
       const googleReviewsData = Object.entries(response.data).flatMap(([service, data]) =>
           (data.reviews || []).map(review => ({
               ...review,
               service // Ajoute la clé `service` à chaque avis
           }))
       );
-
-      const responseTrustpilot = await axios.get("http://localhost:5000/api/trustpilot");
+  
+      const responseTrustpilot = await axios.get("http://localhost:3000/api/trustpilot");
       const trustpilotReviewsData = responseTrustpilot.data;
-
+      
+      // Formatage des avis Trustpilot
       const formattedTrustpilotReviews = Object.entries(trustpilotReviewsData).flatMap(([service, data]) =>
         (data.reviews || []).map(review => ({ ...review, service, source: "Trustpilot" })) 
       );
-    
+  
+      // Fusion des avis
       const combinedReviews = [...googleReviewsData, ...formattedTrustpilotReviews];
-
+  
       setGoogleReviews(googleReviewsData);
       setTruspilotReviews(trustpilotReviewsData);
       setReviews(combinedReviews);
       setTotalReviewsAPI(combinedReviews.length);
-
+  
     } catch (error) {
+        console.error("Erreur lors de la récupération des avis :", error.message);
         setError(error?.message || " Une erreur est survenue");
     } finally {
         setLoading(false);
         setRefresh(false);
     }
   }, []);
+  
 
   useEffect(() => {
     if (!loading && googleReviews.length === 0 && trustpilotReviews.length === 0) {
@@ -793,6 +833,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     setAvgRatingByService(avgRatingByService);
   
   }, [reviews, googleReviews, trustpilotReviews]); // Ajout des dépendances
+
 
   return {
     reviews: displayedReviews,

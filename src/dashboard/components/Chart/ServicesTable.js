@@ -11,7 +11,11 @@ import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
 export default function ServicesTable({ services }) {
 
   // Styles factorisés
-  const headerCellStyle = { fontWeight: '600', color: '#8B5CF6', fontSize: '16px' };
+  const headerCellStyle = { fontWeight: '600', color: '#8B5CF6', fontSize: '14px'  };
+
+  // Styles spécifiques pour "Services" et "Note Moyenne"
+  const boldHeaders = ["Services", "Note moyenne"];
+  
 
   // Fonction optimisée avec useMemo pour éviter de recalculer inutilement
   const getTrendIcon = useMemo(() => {
@@ -41,7 +45,7 @@ export default function ServicesTable({ services }) {
           <TableHead>
             <TableRow>
               {['Services', 'Trustpilot avis/notes', 'Google avis/notes', 'App Store avis/notes', 'Google Play avis/notes', 'Total d’avis', 'Note moyenne'].map((header) => (
-                <TableCell key={header} sx={headerCellStyle}>{header}</TableCell>
+                <TableCell key={header}  sx={{ ...headerCellStyle, fontWeight: boldHeaders.includes(header) ? 'bold' : 'normal'}}>{header}</TableCell> // Gras uniquement sur les colonnes souhaitées
               ))}
             </TableRow>
           </TableHead>

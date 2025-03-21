@@ -5,12 +5,12 @@ import PropTypes from "prop-types";
 import SouthEastOutlinedIcon from '@mui/icons-material/SouthEastOutlined';
 
 const CustomLinearProgress = styled(LinearProgress)(() => ({
-  height: 10,
+  height: "17px",
   borderRadius: 5,
   backgroundColor: "#E0E0E0",
   '& .MuiLinearProgress-bar': {
-    borderRadius: 5,
-    backgroundImage: 'linear-gradient(to right, #1CB5E0, #e01cd5)',
+    borderRadius: "20px",
+    background: "linear-gradient(180deg, #2972FF -123%, #8B5CF6 100%)",
   },
 }));
 
@@ -28,7 +28,7 @@ const NoteParService = ({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        minWidth: "1300px",  
+        minWidth: "1599px",  
         height: "auto",
         padding: "34px",
         backgroundColor: '#F2F3FB',
@@ -36,6 +36,7 @@ const NoteParService = ({
         border: '1px solid #F2F3FB',
         margin: 'auto',
         marginBottom: '34px',
+        boxShadow:" rgba(0, 0, 0, 0.10) 0px 1px 4px"
       }}
     >
       {/* Première Card */}
@@ -71,8 +72,8 @@ const NoteParService = ({
 
               {/* Texte à côté du logo */}
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <Typography fontWeight="bold">{labelService}</Typography>
-                  <Typography color="black">{nombreAvis} avis</Typography>
+                  <Typography fontWeight="bold" fontSize={"20px"}>{labelService}</Typography>
+                  <Typography color="black" fontSize={"16px"}>{nombreAvis} avis</Typography>
               </Box>
             </Box>
 
@@ -80,13 +81,14 @@ const NoteParService = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Typography sx={{ display: 'flex', alignItems: 'center', fontSize: '54px', fontWeight: '800'}}>
                 {noteService}
-                <SouthEastOutlinedIcon sx={{ color: 'red', width: '32px', height: '32px', marginLeft: '4px' }}/>
+                <SouthEastOutlinedIcon sx={{ color: 'red', fontSize: "40px", marginLeft: '4px' }}/>
               </Typography>
               <Rating 
                 name="half-rating-read" 
-                value={parseFloat(noteService) || 0} // ✅ Utilise directement `noteService`
+                value={parseFloat(noteService) || 0}
                 precision={0.1} 
                 readOnly 
+                sx={{fontSize: "40px"}}
               />
 
             </Box>
@@ -115,7 +117,7 @@ const NoteParService = ({
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                width: '63px',
+                width: '62px',
                 height: '48px',
                 justifyContent: 'center',
                 textAlign: 'center',

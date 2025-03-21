@@ -157,19 +157,17 @@ export default function MainGrid() {
       bgColor: "#6B5BFF",
     }
   ], [navigate]);
-  console.log("📊 Données envoyées à ServicesTable :", servicesData);
 
 
-  
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '1900px', margin: 'auto', p: 2 }}>
+    <Box sx={{ width: '100%', maxWidth: '1900px', margin: 'auto', p: 2, marginTop: "100px" }}>
       {/* En-tête */}
       <Typography variant="h2" textAlign="center" gutterBottom>
         <span style={{ fontWeight: 'bold', color: "#121826" }}>Tableau de bord </span>
         <span style={{ color: '#8B5CF6', fontWeight: "200" }}>des performances et retours clients du groupe Realty</span>
       </Typography>
-      <Typography variant="h6" sx={{ color: "#121826", textAlign: 'center', mb: 4 }}>
+      <Typography variant="h6" sx={{ color: "#121826", textAlign: 'center', mb: "64px", mt: "80px" }}>
         Tous les retours clients pour l'ensemble des services en un seul coup d'œil
       </Typography>
 

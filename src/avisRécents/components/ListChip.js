@@ -1,7 +1,118 @@
-import { Chip, Stack, Box, MenuItem, Select, FormControl } from "@mui/material";
+import  {useState,useEffect} from "react";
+import { Chip, Stack, Box} from "@mui/material";
 import PropTypes from "prop-types";
 
+
+const CustomDropdown = ({ label, options, value, isOpen, onChange, onToggle }) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Gère le délai d'affichage après le début de l'animation
+  useEffect(() => {
+    if (isOpen) {
+      setShowMenu(true);
+    } else {
+      setTimeout(() => setShowMenu(false), 300); // Cache après animation
+    }
+  }, [isOpen]);
+
+  const selectOption = (selectedValue) => {
+    onChange(selectedValue);
+    onToggle(); // Ferme le menu après sélection
+  };
+
+  return (
+    <div style={{ position: "relative", width: "150px" }}>
+      {/* Bouton du dropdown */}
+      <div
+        onClick={onToggle}
+        style={{
+          minWidth: "150px",
+          height: "40px",
+          borderRadius: "20px",
+          fontWeight: "600",
+          fontSize: "14px",
+          color: "black",
+          border: "none",
+          padding: "14px",
+          cursor: "pointer",
+          outline: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "relative",
+          transition: "all 0.3s ease-in-out",
+        }}
+      >
+        {value}
+        <span style={{ color: "#8B5CF6", fontSize: "14px" }}>{isOpen ? "ᐱ" : "ᐯ"}</span>
+      </div>
+
+      {/* Menu déroulant avec animation */}
+      {showMenu && (
+        <ul
+          style={{
+            position: "absolute",
+            top: "calc(100% + 5px)",
+            left: "0",
+            width: "100%",
+            backgroundColor: "#fff",
+            borderRadius: "15px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            padding: "10px 0",
+            listStyle: "none",
+            zIndex: 100,
+            maxHeight: isOpen ? "200px" : "0px", // Animation max-height
+            overflowY: "auto",
+            opacity: isOpen ? 1 : 0, // Animation d'opacité
+            transform: isOpen ? "translateY(0px)" : "translateY(-10px)", // Animation fluide
+            transition: "opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease-in-out",
+          }}
+        >
+          {options.map((option) => (
+            <li
+              key={option}
+              onClick={() => selectOption(option)}
+              style={{
+                padding: "10px",
+                cursor: "pointer",
+                color: "#8B5CF6",
+                textAlign: "center",
+                transition: "background 0.2s",
+              }}
+            >
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+
+
+
+
+
 const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, handleCommercialChange, selectedService }) => {
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [selectedValues, setSelectedValues] = useState(
+    servicesChip.reduce((acc, service) => {
+      acc[service.label] = ""; // On commence sans commercial sélectionné
+      return acc;
+    }, {})
+  );
+
+  const handleSelection = (serviceLabel, newValue) => {
+    setSelectedValues({
+      [serviceLabel]: newValue, // Réinitialise toutes les autres sélections
+    });
+    handleCommercialChange(serviceLabel, newValue);
+    setOpenDropdown(null); // Ferme le dropdown après sélection
+  };
+  
+
+
   return (
     <Box maxWidth="100%" mx="auto" p={2}>
       <Stack
@@ -28,7 +139,7 @@ const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, ha
             ...sx,
           }}
         >
-          {/* 🔥 Mode Chip */}
+          {/*Mode Chip pour NoteParService*/}
           {variant === "chip" &&
             servicesChip.map((service) => (
               <Chip
@@ -40,8 +151,8 @@ const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, ha
                       src={service.icon}
                       alt={service.label}
                       style={{
-                        width: 20,
-                        height: 20,
+                        width: "38px",
+                        height: "38px",
                         marginRight: 8,
                       }}
                     />
@@ -52,11 +163,21 @@ const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, ha
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "flex-start",
-                  padding: "20px 20px",
+                  width: "auto",
+                  height: "auto",
+                  padding: "7px",
                   color: selected === service.label ? "white" : "black",
-                  backgroundColor: selected === service.label ? "#8B5CF6" : "white",
+                  backgroundImage: selected === service.label 
+                    ? "linear-gradient(180deg, #2972FF -123%, #8B5CF6 100%)" 
+                    : "none",
+                  backgroundColor: selected === service.label ? "white" : "white",
+                  "&:hover": {
+                    backgroundColor: selected === service.label ? "transparent" : "white",
+                    boxShadow: 3, // Garde l'ombre mais empêche le changement de couleur
+                  },
+                  
                   boxShadow: 1,
-                  borderRadius: "15px",
+                  borderRadius: "20px",
                   "& .MuiChip-label": {
                     display: "flex",
                     alignItems: "center",
@@ -70,51 +191,40 @@ const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, ha
                   "& .MuiChip-icon": { marginRight: "8px" },
                 }}
               />
-            ))}
+            ))} 
 
-          {/* 🔥 Mode Select avec commerciaux */}
+           {/* Mode Select avec le dropdown animé */}
           {variant === "select" &&
             servicesChip.map((service) => (
-              <FormControl
+              <div
                 key={service.label}
-                sx={{
-                  minWidth: 150,
+                style={{
                   backgroundColor: selected === service.label ? "#8B5CF6" : "white",
-                  borderRadius: "15px",
-                  boxShadow: 1,
+                  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                  padding: "7px",
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  borderRadius: "20px",
                 }}
               >
-                <Select
-                  value={selected === service.label ? service.selectedCommercial : ""}
-                  onChange={(e) => handleCommercialChange(selectedService, e.target.value)} // ✅ Utilise handleCommercialChange
-                  displayEmpty
-                  sx={{
-                    borderRadius: "15px",
-                    fontSize: "16px",
-                    fontWeight: "400",
-                    color: selected === service.label ? "white" : "black",
-                    backgroundColor: selected === service.label ? "#8B5CF6" : "white",
-                    "& .MuiSelect-icon": { color: selected === service.label ? "white" : "#8B5CF6" },
-                  }}
-                  renderValue={(selectedValue) => (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {typeof service.icon === "string" ? (
-                        <img src={service.icon} alt={service.label} style={{ width: 30, height: 30 }} />
-                      ) : service.icon}
-                      {selectedValue || service.label}
-                    </Box>
-                  )}
-                >
-                  <MenuItem value="" disabled>
-                    {service.label}
-                  </MenuItem>
-                  {service.commerciaux.map((commercial) => (
-                    <MenuItem key={commercial} value={commercial}>
-                      {commercial}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                {typeof service.icon === "string" ? (
+                  <img src={service.icon} alt={service.label} style={{ width: 30, height: 30, marginRight: 8 }} />
+                ) : (
+                  service.icon
+                )}
+
+                <CustomDropdown
+                  label={service.label}
+                  options={service.commerciaux}
+                  value={openDropdown === service.label ? service.label : selectedValues[service.label] || service.label}
+                  isOpen={openDropdown === service.label}
+                  onChange={(newValue) => handleSelection(service.label, newValue)}
+                  onToggle={() =>
+                    setOpenDropdown(openDropdown === service.label ? null : service.label)
+                  }
+                />
+              </div>
             ))}
         </Box>
       </Stack>
@@ -129,7 +239,7 @@ ListChip.propTypes = {
       label: PropTypes.string.isRequired,
       icon: PropTypes.node,
       commerciaux: PropTypes.arrayOf(PropTypes.string).isRequired,
-      selectedCommercial: PropTypes.string, // 🔥 Ajout de la prop pour le commercial sélectionné
+      selectedCommercial: PropTypes.string, // Ajout de la prop pour le commercial sélectionné
     })
   ).isRequired,
   handleServiceChange: PropTypes.func.isRequired,

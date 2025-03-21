@@ -1,3 +1,6 @@
 Ajouter l'ia pour suggerer des reponses et analyser les avis pour données des axes d'améliorations
 Ajouter la possiblité denvoyer un email avec le lien de l'avis
 mettre les données à 0 lorsque le commercial n'a pas d'avis ChartStatistiques
+Ajouter les réponses que nous avons faites
+installer docker dekstop
+2TgpQPcEtQjF9dHh

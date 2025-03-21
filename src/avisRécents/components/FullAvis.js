@@ -5,7 +5,7 @@ import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-const FullAvis = ({ avisData, defaultValueAvis }) => {
+const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -16,17 +16,19 @@ const FullAvis = ({ avisData, defaultValueAvis }) => {
   const truncatedText = isLongText ? text.slice(0, MAX_LENGTH) + "..." : text;
 
   return (
-    <Card sx={{ 
-      width: "350px", 
-      minHeight: "200px",
-      backgroundColor: '#F2F3FB', 
-      borderRadius: '15px', 
-      boxShadow: 2, 
-      padding: 2,
-      display: 'flex',
-      flexDirection: 'column', 
-      justifyContent: 'space-between' 
-    }}>
+    <Card 
+      sx={{ 
+        width: "494px",
+        height: "377px",
+        padding: "34px",
+        backgroundColor: "#F2F3FB", 
+        borderRadius: "20px", 
+        display: "flex",
+        flexDirection: "column", 
+        justifyContent: "space-between",
+        boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.05)", // Effet doux
+        }}
+    >
       {/* En-tête de l'avis */}
       <CardHeader
         avatar={
@@ -41,22 +43,33 @@ const FullAvis = ({ avisData, defaultValueAvis }) => {
             target="_blank" 
             rel="noopener noreferrer" 
             underline="none"
+            sx={{ color: "black" }} 
           >
             {avisData.user?.name || "Utilisateur inconnu"}
           </Link>
         }
-        subheader={avisData.date}
+        subheader={
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="body2" color="text.secondary">
+              {avisData.date}
+            </Typography>
+            <Rating 
+              name="half-rating-read" 
+              value={defaultValueAvis} 
+              readOnly 
+              precision={0.5} 
+              sx={{ fontSize: "20px" }}
+            />
+          </Stack>
+        }
         sx={{ paddingBottom: 0 }}
+
       />
 
       {/* Contenu de l'avis */}
       <CardContent sx={{ paddingTop: 1, flexGrow: 1 }}>
-        <Stack direction="row" spacing={0.5} alignItems="center">
-          <Rating name="half-rating-read" value={defaultValueAvis} readOnly precision={0.5} />
-        </Stack>
-
         <Typography variant="body2" color="text.secondary" mt={1}>
-          {truncatedText}
+          {detectCommercial(truncatedText)}
         </Typography>
 
         {isLongText && (
@@ -126,7 +139,14 @@ const FullAvis = ({ avisData, defaultValueAvis }) => {
           )}
 
           {/* Contenu complet de l'avis */}
-          <Typography sx={styles.commentText}>{avisData?.text || avisData?.snippet}</Typography>
+          <Typography sx={styles.commentText}>
+            {detectCommercial(avisData?.text || avisData?.snippet)}
+          </Typography>
+
+          <Typography >
+            {avisData.response?.snippet || "Aucune réponse disponible"}
+          </Typography>
+          
 
           {/* Boutons secondaires */}
           <Box sx={styles.actions}>
@@ -142,11 +162,6 @@ const FullAvis = ({ avisData, defaultValueAvis }) => {
               </Link>
             )}
           </Box>
-
-          {/* Bouton principal */}
-          <Button variant="contained" sx={styles.sendButton}>
-            Envoyer
-          </Button>
         </Box>
       </Modal>
     </Card>
@@ -230,6 +245,7 @@ FullAvis.propTypes = {
     reviewCount: PropTypes.number,
     likes: PropTypes.number,
   }).isRequired,
+  detectCommercial: PropTypes.func.isRequired, // Déclarer la fonction en prop
 };
 
 export default FullAvis;

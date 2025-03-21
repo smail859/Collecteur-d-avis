@@ -232,10 +232,13 @@ const ServicesChart = () => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  console.log("📊 reviewsPerPeriod:", reviewsPerPeriod);
+
+
   return (
     <Box sx={{ display: 'flex', flexDirection: "column", marginTop: "25px" }}>
       <Typography variant="h4" fontWeight="bold" sx={{ color: '#333' }}>
-      Évolution du nombre d’ avis par services
+      Évolution du nombre <span style={{ color: '#6B5BFF' }}>d’avis par services</span>
       </Typography>
       <Typography variant="body1" sx={{ color: '#8B5CF6', mt: 2, mb: 2 }}>
         Suivez les performances de vos services et leur évolution au fil du temps

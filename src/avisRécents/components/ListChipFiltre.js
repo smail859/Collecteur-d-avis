@@ -1,55 +1,94 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Select, Flex } from "antd";
+import React, { useState } from "react";
 
-/**
- * Filtrer les avis par services, notes, commerciaux, plateformes et période.
- */
 const ListChipFiltre = ({ filters, onChangeFilters, dataFilters }) => {
-  const handleChange = (key, value) => {
-    onChangeFilters({
-      ...filters,
-      [key]: value,
-    });
-  };
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   return (
-    <Flex wrap="wrap" justify="center" gap="10px" style={{ width: "100%" }}>
-      {dataFilters.map((filter) => (
-        <Select
-          key={filter.name}
-          value={filters[filter.name] || filter.options[0]} 
-          onChange={(value) => handleChange(filter.name, value)}
-          style={{
-            width: 180,
-            height: 48,
-            borderRadius: 12,
-            fontWeight: "bold",
-            fontSize: 14,
-            color: "#6B5BFF",
-            backgroundColor: "#FFFFFF",
-            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-          }}
-          options={filter.options.map((option) => ({
-            label: option,
-            value: option,
-          }))}
+    <div style={{ display: "flex", justifyContent: "center", gap: "10px"}}>
+      {dataFilters.map(({ name, label, options }) => (
+        <CustomDropdown
+          key={name}
+          label={label}
+          options={options}
+          value={filters[name] || options[0]}
+          isOpen={openDropdown === name}
+          onChange={(newValue) => onChangeFilters({ ...filters, [name]: newValue })}
+          onToggle={() => setOpenDropdown(openDropdown === name ? null : name)} // Ferme l'autre dropdown
         />
       ))}
-    </Flex>
+    </div>
   );
 };
 
-ListChipFiltre.propTypes = {
-  filters: PropTypes.object.isRequired,
-  onChangeFilters: PropTypes.func.isRequired,
-  dataFilters: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      options: PropTypes.arrayOf(PropTypes.string).isRequired,
-    })
-  ).isRequired,
+const CustomDropdown = ({ label, options, value, isOpen, onChange, onToggle }) => {
+  const selectOption = (selectedValue) => {
+    onChange(selectedValue);
+    onToggle(); // Ferme le menu après sélection
+  };
+
+  return (
+    <div style={{ position: "relative", minWidth: "200px" }}>
+      <div
+        onClick={onToggle}
+        style={{
+          width: "auto",
+          height: "40px",
+          borderRadius: "20px",
+          fontWeight: "600",
+          fontSize: "14px",
+          color: "#8B5CF6",
+          backgroundColor: "#F2F3FB",
+          border: "none",
+          padding: "14px",
+          cursor: "pointer",
+          outline: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "relative",
+          
+        }}
+      >
+        {value}
+        <span style={{ color: "#8B5CF6", fontSize: "14px" }}>{isOpen ? "ᐱ" : "ᐯ"}</span>
+      </div>
+
+      {isOpen && (
+        <ul
+          style={{
+            position: "absolute",
+            top: "calc(100% + 5px)",
+            left: "0",
+            width: "100%",
+            backgroundColor: "#fff",
+            borderRadius: "15px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            padding: "10px 0",
+            listStyle: "none",
+            zIndex: 100,
+            maxHeight: "250px", // Hauteur max
+            overflowY: "auto", // Scroll activé
+          }}
+        >
+          {options.map((option) => (
+            <li
+              key={option}
+              onClick={() => selectOption(option)}
+              style={{
+                padding: "10px",
+                cursor: "pointer",
+                color: "#8B5CF6",
+                textAlign: "center",
+                transition: "background 0.2s",
+              }}
+            >
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 };
 
 export default ListChipFiltre;

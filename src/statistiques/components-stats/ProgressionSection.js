@@ -3,19 +3,22 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import { Box, Typography } from "@mui/material";
 
 // Composant pour la progression avec les flammes et la vague animée
-const ProgressionSection = ({
-  commercialCountMount,
-  commercialCountYears,
-  isYearly,
-}) => {
-  const OBJECTIF_MENSUEL = 5; 
+const ProgressionSection = ({ commercialCountMount, commercialCountYears, isYearly }) => {
+  const OBJECTIF_MENSUEL = 5;
   const OBJECTIF_ANNUEL = 60;
   const BASE_HEIGHT = 0; // La vague commence avec une hauteur de 0%
 
-  // Calcul interne de la progression
+  // Calcul de la progression en pourcentage
   const computedProgression = isYearly
     ? Math.min((commercialCountYears / OBJECTIF_ANNUEL) * 100, 100)
     : Math.min((commercialCountMount / OBJECTIF_MENSUEL) * 100, 100);
+
+  // Nombre de flammes à allumer (entre 0 et 5)
+  const flamesToLight = isYearly
+    ? Math.round((commercialCountYears / OBJECTIF_ANNUEL) * 5)
+    : Math.round((commercialCountMount / OBJECTIF_MENSUEL) * 5);
+
+  console.log("Progression calculée :", computedProgression, "| Flammes allumées :", flamesToLight);
 
   return (
     <Box
@@ -28,7 +31,7 @@ const ProgressionSection = ({
         borderRadius: "20px",
         bgcolor: "#F2F3FB",
         position: "relative",
-        overflow: "hidden", 
+        overflow: "hidden",
       }}
     >
       {/* Texte du pourcentage */}
@@ -39,26 +42,27 @@ const ProgressionSection = ({
         sx={{
           position: "absolute",
           top: "25%",
-          zIndex: 2, 
+          zIndex: 2,
         }}
       >
         {Math.round(computedProgression)}%
       </Typography>
 
+      {/* Vague animée */}
       <Wave
         fill="#8B5CF6"
         paused={false}
         options={{
           height: 30,
-          amplitude: 30, 
+          amplitude: 30,
           speed: 0.3,
           points: 3,
         }}
         style={{
           position: "absolute",
-          bottom: "0%", // La vague commence bien depuis le bas
+          bottom: "0%",
           width: "100%",
-          height: `${BASE_HEIGHT + (computedProgression * (100 - BASE_HEIGHT) / 100)}%`, 
+          height: `${BASE_HEIGHT + (computedProgression * (100 - BASE_HEIGHT) / 100)}%`,
           zIndex: 1,
         }}
       />
@@ -100,15 +104,14 @@ const ProgressionSection = ({
             )
           )}
         </Typography>
+
+        {/* Flammes */}
         <Box sx={{ display: "flex", gap: 0.5 }}>
           {Array.from({ length: 5 }, (_, index) => (
             <LocalFireDepartmentIcon
               key={index}
-              sx={{ 
-                color: (isYearly 
-                  ? commercialCountYears / (OBJECTIF_ANNUEL / 5) 
-                  : commercialCountMount / (OBJECTIF_MENSUEL / 5)
-                ) > index ? "#FFA500" : "#ddd" 
+              sx={{
+                color: index < flamesToLight ? "#FFA500" : "#ddd",
               }}
             />
           ))}
