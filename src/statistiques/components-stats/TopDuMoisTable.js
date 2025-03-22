@@ -48,9 +48,12 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
           const isActive = commercial.name === selectedCommercial;
 
           // Calcul des gains nets (plafonnés)
-          let gainNet = commercial.avis * 10;
+          let gainBrut = commercial.avis * 10;
+          let gainNet = ((gainBrut * 7.96) / 10).toFixed(2);
+
           if (commercial.name === "Lucas" || commercial.name === "Smaïl") gainNet = Math.min(gainNet, 200);
           else gainNet = Math.min(gainNet, 100);
+
 
           return (
             <Box key={commercial.name} sx={{ display: "flex", alignItems: "center", padding: "16px", borderRadius: "20px", ...getRankStyle(commercial.top, isActive) }}>
