@@ -1,15 +1,13 @@
-version: "3.8"
-
 services:
   app:
     build: .
     ports:
-      - "5000:5000"
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/reviews
-      - SERPAPI_KEY=your_serpapi_key
+      - "3000:3000"
+    env_file:
+      - .env
     depends_on:
       - mongo
+    entrypoint: ["./wait-for-it.sh", "mongo", "27017", "--", "node", "server.js"]
 
   mongo:
     image: mongo

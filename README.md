@@ -1,70 +1,136 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 📊 Collecteur d'Avis
 
-## Available Scripts
+**Collecteur d'Avis** est une application complète en React + Node.js permettant de collecter, centraliser, filtrer et analyser automatiquement des avis clients provenant de **Google Maps** et **Trustpilot** pour différents services :  
+Monbien, Startloc, Sinimo, Marketing Automobile, Marketing Immobilier, Pige Online.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🚀 Fonctionnalités principales
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- 🔁 Récupération automatique des avis Google & Trustpilot via SerpAPI
+- 📊 Statistiques dynamiques par période (aujourd’hui, 7 jours, 30 jours)
+- ⭐ Analyse des notes moyennes, avis par étoiles
+- 👤 Détection intelligente des commerciaux mentionnés dans les avis
+- 📅 Suivi de l’évolution mensuelle des notes par service
+- 🔍 Filtres avancés : période, note, service, plateforme, commercial
+- 📦 Affichage progressif des avis + système de pagination
+- 📈 Visualisation des données via MUI, Charts, Recharts
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠️ Technologies utilisées
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Frontend
+- React 18 (CRA)
+- Material UI (MUI)
+- Recharts
+- Ant Design
+- Date-fns, Day.js
 
-### `npm run build`
+### Backend
+- Express
+- MongoDB + Mongoose
+- SerpAPI
+- Axios
+- Node-cron (prévu pour automatisation)
+- Docker / Docker Compose
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🧪 Structure du projet
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+/src
+├── avisRécents
+├── collecterAvis
+├── dashboard
+├── hooks
+│   └── useFetchReviews.js   ← 💡 Hook principal ultra-complet de gestion des avis
+├── login / statistiques / date / utils
+├── components-not-use       ← (à nettoyer si obsolète)
+public/
+server.js                    ← Serveur Express + routes API
+Dockerfile / docker-compose.yml
+```
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## ⚙️ Lancer le projet en local
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 1. Clone le repo
+```bash
+git clone https://github.com/ton-utilisateur/collecteur-avis.git
+cd collecteur-avis
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 2. Crée un fichier `.env` (non versionné)
+```env
+MONGO_URI=mongodb://mongo:27017/reviewapp
+SERPAPI_KEY=ta_clé
+PORT=3000
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 3. Démarre avec Docker
+```bash
+docker compose up --build
+```
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🌍 Déploiement
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Tu peux déployer sur **Render** (backend) et **Vercel** (frontend) :
 
-### Code Splitting
+- **Ne push jamais ton `.env`** → `.gitignore` doit le contenir.
+- Déclare les variables d’environnement directement dans l’interface de Render / Vercel.
+- Utilise en production une URI Mongo Atlas du type :
+```env
+MONGO_URI=mongodb+srv://utilisateur:motdepasse@cluster.mongodb.net/dbname
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## 🔐 Sécurité
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- `.env` est ignoré (`.gitignore`)
+- Les clés sensibles ne sont pas versionnées
+- Privilégie toujours un backend sécurisé via HTTPS en production
+- Révoque les clés exposées si jamais tu les avais déjà poussées
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📜 Scripts disponibles
 
-### Advanced Configuration
+```bash
+npm start       # Lance React en dev
+npm run build   # Build de l'app React
+npm test        # Lance les tests
+npm run eject   # Déstructure le CRA
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🧩 Bonus : Idées d’améliorations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- Authentification + dashboard privé
+- Planification automatique des fetch via `node-cron`
+- Ajout de graphiques évolutifs (comparaison mois / année)
+- Export CSV / PDF des statistiques
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 👨‍💻 Auteur
+
+Ce projet est développé par [Ton Nom ou Ton Pseudo].  
+Contact : [Ton Email ou LinkedIn ou rien selon ta préférence]
+
+---
+
+## 📝 Licence
+
+Ce projet est sous licence ISC.
+
+---
+
+**Tu veux contribuer ?** Forke, clone, installe et propose une PR ! 😎

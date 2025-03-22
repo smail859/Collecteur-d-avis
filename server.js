@@ -346,6 +346,12 @@ app.get("/api/force-update", async (req, res) => {
   }
 });
 
+
+app.get("/", (req, res) => {
+  res.send("🎉 API Reviews opérationnelle !");
+});
+
+
 // -------------------------
 // Démarrage du serveur
 // -------------------------
@@ -362,7 +368,8 @@ const startServer = async () => {
     }
     
 
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Serveur démarré sur http://localhost:${PORT}`);
     });
   } catch (err) {
     console.error("Erreur MongoDB :", err.message);
