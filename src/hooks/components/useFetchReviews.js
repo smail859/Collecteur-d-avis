@@ -753,15 +753,15 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     setError(null);
   
     try {
-      const response = await axios.get("https://collecteur-avis.onrender.com/api/reviews");
+      const baseURL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const response = await axios.get(`${baseURL}/api/reviews`);
       const googleReviewsData = Object.entries(response.data).flatMap(([service, data]) =>
           (data.reviews || []).map(review => ({
               ...review,
               service // Ajoute la clé `service` à chaque avis
           }))
       );
-  
-      const responseTrustpilot = await axios.get("https://collecteur-avis.onrender.com/api/trustpilot");
+      const responseTrustpilot = await axios.get(`${baseURL}/api/trustpilot`);
       const trustpilotReviewsData = responseTrustpilot.data;
       
       // Formatage des avis Trustpilot
