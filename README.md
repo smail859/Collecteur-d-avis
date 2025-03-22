@@ -1,25 +1,25 @@
 
-# 📊 Collecteur d'Avis
+# Collecteur d'Avis
 
 **Collecteur d'Avis** est une application complète en React + Node.js permettant de collecter, centraliser, filtrer et analyser automatiquement des avis clients provenant de **Google Maps** et **Trustpilot** pour différents services :  
 Monbien, Startloc, Sinimo, Marketing Automobile, Marketing Immobilier, Pige Online.
 
 ---
 
-## 🚀 Fonctionnalités principales
+## Fonctionnalités principales
 
-- 🔁 Récupération automatique des avis Google & Trustpilot via SerpAPI
-- 📊 Statistiques dynamiques par période (aujourd’hui, 7 jours, 30 jours)
-- ⭐ Analyse des notes moyennes, avis par étoiles
-- 👤 Détection intelligente des commerciaux mentionnés dans les avis
-- 📅 Suivi de l’évolution mensuelle des notes par service
-- 🔍 Filtres avancés : période, note, service, plateforme, commercial
-- 📦 Affichage progressif des avis + système de pagination
-- 📈 Visualisation des données via MUI, Charts, Recharts
+- Récupération automatique des avis Google & Trustpilot via SerpAPI
+- Statistiques dynamiques par période (aujourd’hui, 7 jours, 30 jours)
+- Analyse des notes moyennes, avis par étoiles
+- Détection intelligente des commerciaux mentionnés dans les avis
+- Suivi de l’évolution mensuelle des notes par service
+- Filtres avancés : période, note, service, plateforme, commercial
+- Affichage progressif des avis + système de pagination
+- Visualisation des données via MUI, Charts, Recharts
 
 ---
 
-## 🛠️ Technologies utilisées
+## Technologies utilisées
 
 ### Frontend
 - React 18 (CRA)
@@ -38,7 +38,7 @@ Monbien, Startloc, Sinimo, Marketing Automobile, Marketing Immobilier, Pige Onli
 
 ---
 
-## 🧪 Structure du projet
+## Structure du projet
 
 ```
 /src
@@ -46,7 +46,7 @@ Monbien, Startloc, Sinimo, Marketing Automobile, Marketing Immobilier, Pige Onli
 ├── collecterAvis
 ├── dashboard
 ├── hooks
-│   └── useFetchReviews.js   ← 💡 Hook principal ultra-complet de gestion des avis
+│   └── useFetchReviews.js   ← Hook principal ultra-complet de gestion des avis
 ├── login / statistiques / date / utils
 ├── components-not-use       ← (à nettoyer si obsolète)
 public/
@@ -56,7 +56,7 @@ Dockerfile / docker-compose.yml
 
 ---
 
-## ⚙️ Lancer le projet en local
+## Lancer le projet en local
 
 ### 1. Clone le repo
 ```bash
@@ -78,7 +78,7 @@ docker compose up --build
 
 ---
 
-## 🌍 Déploiement
+## Déploiement
 
 Tu peux déployer sur **Render** (backend) et **Vercel** (frontend) :
 
@@ -91,7 +91,7 @@ MONGO_URI=mongodb+srv://utilisateur:motdepasse@cluster.mongodb.net/dbname
 
 ---
 
-## 🔐 Sécurité
+## Sécurité
 
 - `.env` est ignoré (`.gitignore`)
 - Les clés sensibles ne sont pas versionnées
@@ -100,7 +100,7 @@ MONGO_URI=mongodb+srv://utilisateur:motdepasse@cluster.mongodb.net/dbname
 
 ---
 
-## 📜 Scripts disponibles
+## Scripts disponibles
 
 ```bash
 npm start       # Lance React en dev
@@ -111,26 +111,23 @@ npm run eject   # Déstructure le CRA
 
 ---
 
-## 🧩 Bonus : Idées d’améliorations
+## Bonus : Idées d’améliorations
 
 - Authentification + dashboard privé
-- Planification automatique des fetch via `node-cron`
 - Ajout de graphiques évolutifs (comparaison mois / année)
 - Export CSV / PDF des statistiques
 
 ---
 
-## 👨‍💻 Auteur
+## Auteur
 
-Ce projet est développé par [Ton Nom ou Ton Pseudo].  
-Contact : [Ton Email ou LinkedIn ou rien selon ta préférence]
+Ce projet est développé par El Hajjar Smaïl.  
+Contact : elhajjarsmail70000@gmail.com
 
 ---
 
-## 📝 Licence
+## Licence
 
 Ce projet est sous licence ISC.
 
----
 
-**Tu veux contribuer ?** Forke, clone, installe et propose une PR ! 😎
