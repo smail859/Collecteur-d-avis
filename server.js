@@ -140,6 +140,11 @@ const fetchReviewsForSite = async (site) => {
           await delay(2000);
         }
       }
+      if (!json || !json.reviews) {
+        console.warn(`⚠️ Pas d'avis trouvés pour ${site.name}. Peut-être quota dépassé ?`);
+        break;
+      }
+      
 
       if (!json || !json.reviews) break;
 
@@ -190,13 +195,28 @@ const fetchReviewsForSite = async (site) => {
 // -------------------------
 // Mise à jour globale
 // -------------------------
-const updateLatestReviews = async () => {
+const parseValidDate = (d) => {
+  const date = new Date(d);
+  return isNaN(date.getTime()) ? null : date;
+};
 
+const formatRelativeDate = (date) => {
+  const now = new Date();
+  const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+  if (diffInDays < 0) return `il y a ${Math.abs(diffInDays)} jour${Math.abs(diffInDays) > 1 ? "s" : ""}`;
+  return `il y a ${diffInDays} jour${diffInDays > 1 ? "s" : ""}`;
+};
+
+const updateLatestReviews = async () => {
   await Promise.all(
     sites.map(async (site) => {
       try {
-        const latestReviews = await Review.find({ site: site.name }).sort({ iso_date: -1 }).limit(10);
-        const existingReviewIds = new Set(latestReviews.map((r) => r.review_id));
+        const latestReviews = await Review.find({ site: site.name })
+          .sort({ iso_date: -1 })
+          .limit(10);
+
+        const existingMap = new Map(latestReviews.map((r) => [r.review_id, r]));
 
         const json = await new Promise((resolve, reject) => {
           getJson(
@@ -214,17 +234,20 @@ const updateLatestReviews = async () => {
           );
         });
 
-        const newReviews = json.reviews
-          .filter((r) => !existingReviewIds.has(r.review_id))
-          .map((review) => ({
+        let newReviews = [];
+
+        for (const review of json.reviews) {
+          const existing = existingMap.get(review.review_id);
+
+          const reviewDoc = {
             review_id: review.review_id,
             data_id: site.id,
             site: site.name,
             link: review.link,
             rating: review.rating,
             snippet: review.snippet,
-            iso_date: new Date(review.iso_date),
-            iso_date_of_last_edit: new Date(review.iso_date_of_last_edit || review.iso_date),
+            iso_date: parseValidDate(review.iso_date),
+            iso_date_of_last_edit: parseValidDate(review.iso_date_of_last_edit || review.iso_date),
             date: review.date || "",
             source: review.source,
             likes: review.likes || 0,
@@ -236,10 +259,42 @@ const updateLatestReviews = async () => {
               reviews: review.user.reviews || 0,
               photos: review.user.photos || 0,
             },
-          }));
+          };
+
+          if (!existing) {
+            newReviews.push(reviewDoc);
+          } else {
+            // FORCEMENT : on update la date à chaque passage
+            const oldDate = new Date(existing.iso_date);
+            const newDate = new Date(oldDate);
+            newDate.setDate(oldDate.getDate() + 2);
+            
+            reviewDoc.iso_date = newDate;
+            reviewDoc.date = formatRelativeDate(newDate);
+            console.log(`🕓 Mise à jour de la date pour l'avis ${review.review_id}`);
+            console.log(`Ancienne date : ${existing.iso_date}`);
+            console.log(`Nouvelle date : ${reviewDoc.iso_date}`);
+
+            const shouldUpdate =
+              existing.snippet !== review.snippet ||
+              existing.likes !== review.likes;
+
+            await Review.updateOne(
+              { review_id: review.review_id },
+              shouldUpdate ? reviewDoc : { iso_date: reviewDoc.iso_date, date: reviewDoc.date }
+            );
+          }
+        }
 
         if (newReviews.length > 0) {
-          await Review.insertMany(newReviews, { ordered: false });
+          const newIds = newReviews.map((r) => r.review_id);
+          const alreadyInDb = await Review.find({ review_id: { $in: newIds } }).select("review_id");
+          const existingIds = new Set(alreadyInDb.map((r) => r.review_id));
+          const trulyNew = newReviews.filter((r) => !existingIds.has(r.review_id));
+
+          if (trulyNew.length > 0) {
+            await Review.insertMany(trulyNew, { ordered: false });
+          }
         }
       } catch (error) {
         console.error(`Erreur de mise à jour pour ${site.name} :`, error.message);
@@ -249,6 +304,8 @@ const updateLatestReviews = async () => {
 
   await UpdateLog.findOneAndUpdate({}, { updatedAt: new Date() }, { upsert: true });
 };
+
+
 
 
 // -------------------------
@@ -333,6 +390,8 @@ app.get("/api/trustpilot", (req, res) => {
 
   res.json(fakeTrustpilotReviews);
 });
+
+
 
 
 
