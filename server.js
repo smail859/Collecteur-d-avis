@@ -204,9 +204,11 @@ const formatRelativeDate = (date) => {
   const now = new Date();
   const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
 
-  if (diffInDays < 0) return `il y a ${Math.abs(diffInDays)} jour${Math.abs(diffInDays) > 1 ? "s" : ""}`;
-  return `il y a ${diffInDays} jour${diffInDays > 1 ? "s" : ""}`;
+  if (diffInDays === 0) return "aujourd'hui";
+  if (diffInDays > 0) return `il y a ${diffInDays} jour${diffInDays > 1 ? "s" : ""}`;
+  return `il y a ${Math.abs(diffInDays)} jour${Math.abs(diffInDays) > 1 ? "s" : ""}`;
 };
+
 
 const updateLatestReviews = async () => {
   await Promise.all(
@@ -264,7 +266,7 @@ const updateLatestReviews = async () => {
           if (!existing) {
             newReviews.push(reviewDoc);
           } else {
-            // FORCEMENT : on update la date à chaque passage
+            // Mise à jour de la date pour chaque avis existant
             const oldDate = new Date(existing.iso_date);
             const newDate = new Date(oldDate);
             newDate.setDate(oldDate.getDate() + 2);
@@ -286,6 +288,25 @@ const updateLatestReviews = async () => {
           }
         }
 
+        const allReviewsInDb = await Review.find({ site: site.name });
+
+        const updatePromises = allReviewsInDb.map(async (review) => {
+          if (review.iso_date) {
+            const newDate = new Date(review.iso_date);
+            if (!isNaN(newDate.getTime())) {
+              newDate.setDate(newDate.getDate() + 2);
+              return Review.updateOne(
+                { review_id: review.review_id },
+                { iso_date: newDate, date: formatRelativeDate(newDate) }
+              );
+            }
+          }
+        });
+
+        await Promise.all(updatePromises);
+
+        console.log(`✅ ${allReviewsInDb.length} avis mis à jour pour ${site.name}`);
+
         if (newReviews.length > 0) {
           const newIds = newReviews.map((r) => r.review_id);
           const alreadyInDb = await Review.find({ review_id: { $in: newIds } }).select("review_id");
@@ -297,13 +318,14 @@ const updateLatestReviews = async () => {
           }
         }
       } catch (error) {
-        console.error(`Erreur de mise à jour pour ${site.name} :`, error.message);
+        console.error(`❌ Erreur de mise à jour pour ${site.name} :`, error.message);
       }
     })
   );
 
   await UpdateLog.findOneAndUpdate({}, { updatedAt: new Date() }, { upsert: true });
 };
+
 
 
 
