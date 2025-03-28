@@ -11,12 +11,13 @@ import StartlocRadius from "../../image/StartlocRadius.png";
 import ListChip from "../../avisRécents/components/ListChip";
 import useFetchReviews from "../../hooks/components/useFetchReviews";
 import CommercialTable from "../components/CommercialTable";
+import ArrowUpwardOutlinedIcon from '@mui/icons-material/ArrowUpwardOutlined';
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 const Statistiques = () => {
-  const { commercialCounts, commercialCountsYears } = useFetchReviews();
+  const { commercialCounts, commercialCountsYears, filteredReviews } = useFetchReviews();
 
   // Fonction pour générer le PDF à partir de l'élément avec id "pdf-content"
   const generatePDF = () => {
@@ -40,7 +41,9 @@ const Statistiques = () => {
   const { totalAvisParCommercialParService } = commercialCountsYears || {};
 
   // État : Commercial sélectionné
-  const [selectedCommercial, setSelectedCommercial] = useState("Smaïl");
+  const [selectedCommercial, setSelectedCommercial] = useState("");
+
+
 
   // Fonction de changement de commercial
   const handleCommercialChange = (serviceLabel, commercial) => {
@@ -69,9 +72,6 @@ const Statistiques = () => {
   // Couleurs
   const colors = ["#7B61FF", "#E3E4FE"];
 
-  
-
-
   return (
     <Box>
       <Typography variant="h2" textAlign="left" ml="180px" mt="50px" gutterBottom>
@@ -86,7 +86,37 @@ const Statistiques = () => {
         handleCommercialChange={handleCommercialChange}
         variant="select"
       />
-      
+
+        {/* Bloc si aucun commercial sélectionné */}
+        {!selectedCommercial && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              height: "400px",
+              mx: "auto",
+              mt: 6,
+              maxWidth: "900px",
+              px: 4,
+              
+            }}
+          >
+            <Typography
+              variant="h5"
+              textAlign="center"
+              fontWeight={600}
+              color= "#8B61FF"
+
+            >
+              Veuillez sélectionner un commercial pour afficher les statistiques
+            </Typography>
+            <ArrowUpwardOutlinedIcon sx={{ fontSize: 40, color: "#8B61FF", mr: 2 }} />
+          </Box>
+        )}
+
+
 
       {selectedCommercial && (
         <>
@@ -116,6 +146,7 @@ const Statistiques = () => {
             selectedCommercial={selectedCommercial}
             tableauCommerciaux={tableauCommerciaux}
             totalAvisParCommercialParService={totalAvisParCommercialParService}
+            filteredReviews={filteredReviews}
           />
 
           <Typography variant="h4" textAlign="left" ml="180px" mt="50px" gutterBottom>

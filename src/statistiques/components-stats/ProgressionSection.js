@@ -4,8 +4,8 @@ import { Box, Typography } from "@mui/material";
 
 // Composant pour la progression avec les flammes et la vague animée
 const ProgressionSection = ({ commercialCountMount, commercialCountYears, isYearly }) => {
-  const OBJECTIF_MENSUEL = 5;
-  const OBJECTIF_ANNUEL = 60;
+  const OBJECTIF_MENSUEL = 10;
+  const OBJECTIF_ANNUEL = 120;
   const BASE_HEIGHT = 0; // La vague commence avec une hauteur de 0%
 
   // Calcul de la progression en pourcentage
@@ -105,7 +105,7 @@ const ProgressionSection = ({ commercialCountMount, commercialCountYears, isYear
         </Typography>
 
         {/* Flammes */}
-        <Box sx={{ display: "flex", gap: 0.5 }}>
+        <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", justifyContent: "center", mt: 1 }}>
           {Array.from({ length: 5 }, (_, index) => (
             <LocalFireDepartmentIcon
               key={index}

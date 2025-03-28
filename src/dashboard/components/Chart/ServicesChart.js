@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTheme } from '@mui/material/styles'; // ✅ Importer useTheme
 import ToggleButtonGroup from '../../../avisRécents/components/ToggleButtonGroup';
 import {
   BarChart,
@@ -14,6 +15,8 @@ import { Typography, Box } from '@mui/material';
 import useFetchReviews from '../../../hooks/components/useFetchReviews';
 
 const ServicesChart = () => {
+  const theme = useTheme(); // ✅ Récupérer le thème actuel
+
   const [selectedFilters, setSelectedFilters] = useState({
     period: '30days',
     service: '',
@@ -25,8 +28,6 @@ const ServicesChart = () => {
     periode: selectedFilters.period,
     note: selectedFilters.rating,
   });
-
-  
 
   const serviceColors = {
     Startloc: "#FF66B2",
@@ -45,96 +46,21 @@ const ServicesChart = () => {
     "Sinimo",
     "Pige Online",
   ];
-  
+
   const periodData = reviewsPerPeriod[selectedFilters.period] || {};
 
-  // Construction du jeu de données pour le graphique
-  const chartData = useMemo(() => {
-    if (selectedFilters.rating) {
-      // Mode "filtre par note" : un objet unique avec, pour chaque service, le nombre d'avis
-      const data = { period: selectedFilters.period };
-      if (selectedFilters.plateforme) {
-        if (ratingsCount[selectedFilters.plateforme]) {
-          Object.keys(ratingsCount[selectedFilters.plateforme]).forEach(service => {
-            if (selectedFilters.service && selectedFilters.service !== service) return;
-            const count = ratingsCount[selectedFilters.plateforme][service][selectedFilters.rating] || 0;
-            data[service] = count;
-          });
-        }
-      } else {
-        const counts = {};
-        Object.keys(ratingsCount).forEach(source => {
-          if (source === "Google" || source === "Trustpilot") {
-            Object.keys(ratingsCount[source]).forEach(service => {
-              if (selectedFilters.service && selectedFilters.service !== service) return;
-              const count = ratingsCount[source][service][selectedFilters.rating] || 0;
-              counts[service] = (counts[service] || 0) + count;
-            });
-          }
-        });
-        Object.entries(counts).forEach(([service, count]) => {
-          data[service] = count;
-        });
-      }
-      return [data];
-    } else {
-      // Mode "graphique temporel" : agrégation des avis par date et par service
-      const dailyCounts = {};
-      let sources = [];
-      if (selectedFilters.plateforme) {
-        sources.push(selectedFilters.plateforme);
-      } else {
-        sources = Object.keys(reviewsPerPeriod[selectedFilters.period] || {});
-      }
-      sources.forEach(source => {
-        const sourceData = reviewsPerPeriod[selectedFilters.period][source];
-        if (sourceData) {
-          Object.keys(sourceData).forEach(service => {
-            if (selectedFilters.service && selectedFilters.service !== service) return;
-            const { dates } = sourceData[service];
-            dates.forEach(date => {
-              if (!dailyCounts[date]) dailyCounts[date] = { date };
-              dailyCounts[date][service] = (dailyCounts[date][service] || 0) + 1;
-            });
-          });
-        }
-      });
-  
-      // Transformer dailyCounts en tableau et trier par date
-      const dataArray = Object.values(dailyCounts).sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-      );
-  
-      // Pour chaque entrée, ajouter tous les services manquants avec 0
-      dataArray.forEach(entry => {
-        allServices.forEach(serviceName => {
-          if (!entry.hasOwnProperty(serviceName)) {
-            entry[serviceName] = 0;
-          }
-        });
-      });
-  
-      return dataArray;
-    }
-  }, [reviewsPerPeriod, selectedFilters, ratingsCount]);
-
-  
-
-  // Tooltip personnalisé
+  // Tooltip personnalisé (utilise theme.palette)
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div style={{
-          background: '#fff',
-          border: '1px solid #ccc',
+          background: theme.palette.background.paper, // Adaptation au mode sombre
+          border: `1px solid ${theme.palette.divider}`,
           padding: '10px',
-          borderRadius: '4px'
+          borderRadius: '4px',
+          color: theme.palette.text.primary // Texte adaptable
         }}>
-          {selectedFilters.rating ? (
-            <p>{`Période : ${label}`}</p>
-          ) : (
-            <p>{`Date : ${label}`}</p>
-          )}
+          <p>{selectedFilters.rating ? `Période : ${label}` : `Date : ${label}`}</p>
           {payload.map((item, index) => (
             <p key={index} style={{ color: item.fill, margin: 0 }}>
               {`${item.name} : ${item.value}`}
@@ -144,39 +70,6 @@ const ServicesChart = () => {
       );
     }
     return null;
-  };
-
-  // Légende personnalisée qui utilise serviceColors
-  const renderCustomLegend = (props) => {
-    const { payload } = props;
-    return (
-      <ul style={{
-        display: 'flex',
-        justifyContent: 'center',
-        listStyle: 'none',
-        margin: 0,
-        padding: 0
-      }}>
-        {payload.map((entry, index) => (
-          <li key={`item-${index}`} style={{
-            marginRight: 20,
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <div
-              style={{
-                width: 12,
-                height: 12,
-                backgroundColor: serviceColors[entry.value] || entry.color,
-                marginRight: 5,
-                borderRadius: '50%'
-              }}
-            />
-            <span>{entry.value}</span>
-          </li>
-        ))}
-      </ul>
-    );
   };
 
   const filters = [
@@ -232,14 +125,85 @@ const ServicesChart = () => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-
+  // Construction des données pour le graphique
+  const chartData = useMemo(() => {
+    if (selectedFilters.rating) {
+      // Mode "filtre par note"
+      const data = { period: selectedFilters.period };
+      if (selectedFilters.plateforme) {
+        if (ratingsCount[selectedFilters.plateforme]) {
+          Object.keys(ratingsCount[selectedFilters.plateforme]).forEach(service => {
+            if (selectedFilters.service && selectedFilters.service !== service) return;
+            const count = ratingsCount[selectedFilters.plateforme][service][selectedFilters.rating] || 0;
+            data[service] = count;
+          });
+        }
+      } else {
+        const counts = {};
+        Object.keys(ratingsCount).forEach(source => {
+          if (source === "Google" || source === "Trustpilot") {
+            Object.keys(ratingsCount[source]).forEach(service => {
+              if (selectedFilters.service && selectedFilters.service !== service) return;
+              const count = ratingsCount[source][service][selectedFilters.rating] || 0;
+              counts[service] = (counts[service] || 0) + count;
+            });
+          }
+        });
+        Object.entries(counts).forEach(([service, count]) => {
+          data[service] = count;
+        });
+      }
+      return [data];
+    } else {
+      // Mode "graphique temporel"
+      const dailyCounts = {};
+      let sources = [];
+      if (selectedFilters.plateforme) {
+        sources.push(selectedFilters.plateforme);
+      } else {
+        sources = Object.keys(reviewsPerPeriod[selectedFilters.period] || {});
+      }
+      sources.forEach(source => {
+        const sourceData = reviewsPerPeriod[selectedFilters.period][source];
+        if (sourceData) {
+          Object.keys(sourceData).forEach(service => {
+            if (selectedFilters.service && selectedFilters.service !== service) return;
+            const { dates } = sourceData[service];
+            dates.forEach(date => {
+              if (!dailyCounts[date]) dailyCounts[date] = { date };
+              dailyCounts[date][service] = (dailyCounts[date][service] || 0) + 1;
+            });
+          });
+        }
+      });
+  
+      const dataArray = Object.values(dailyCounts).sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+  
+      dataArray.forEach(entry => {
+        allServices.forEach(serviceName => {
+          if (!entry.hasOwnProperty(serviceName)) {
+            entry[serviceName] = 0;
+          }
+        });
+      });
+  
+      return dataArray;
+    }
+  }, [reviewsPerPeriod, selectedFilters, ratingsCount]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: "column", marginTop: "25px" }}>
-      <Typography variant="h4" fontWeight="bold" sx={{ color: '#333' }}>
-      Évolution du nombre <span style={{ color: '#6B5BFF' }}>d’avis par services</span>
+    <Box sx={{ display: 'flex', flexDirection: "column", mt: 3 }}>
+      <Typography 
+        variant="h4" 
+        fontWeight="bold" 
+        sx={{ color: theme.palette.text.primary }} // Texte adaptatif
+      >
+        Évolution du nombre <span style={{ color: theme.palette.primary.main }}>d’avis par services</span>
       </Typography>
-      <Typography variant="body1" sx={{ color: '#8B5CF6', mt: 2, mb: 2 }}>
+
+      <Typography variant="body1" sx={{ color: theme.palette.secondary.main, mt: 2, mb: 2 }}>
         Suivez les performances de vos services et leur évolution au fil du temps
       </Typography>
 
@@ -247,95 +211,53 @@ const ServicesChart = () => {
         sx={{
           p: 6,
           borderRadius: '16px',
-          backgroundColor: '#fff',
+          backgroundColor: theme.palette.background.paper, // Fond adaptatif
           mt: 4,
-          boxShadow: 3,
+          boxShadow: theme.shadows[3], // Ombre adaptable
           overflow: 'hidden'
         }}
       >
         <ToggleButtonGroup filters={filters} onFilterChange={handleFilterChange} />
 
-        {selectedFilters.rating ? (
-          // Mode "Note" : graphique par service (une barre par service)
-          <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={chartData} margin={{ top: 30, right: 40, left: 20, bottom: 80 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="period" hide />
-              <YAxis
-                label={{
-                  value: "Nombre d'avis",
-                  angle: -90,
-                  position: 'insideLeft',
-                  style: { fontSize: '12px', fill: '#555' }
-                }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                content={renderCustomLegend}
-                verticalAlign="bottom"
-                align="center"
-                wrapperStyle={{ marginTop: 20 }}
-              />
-              {chartData.length > 0 &&
-                Object.keys(chartData[0])
-                  .filter(key => key !== "period")
-                  .map(service => (
-                    <Bar
-                      key={service}
-                      dataKey={service}
-                      fill={serviceColors[service] || "#8884d8"}
-                      name={service}
-                      legendType="square"
-                      radius={[10, 10, 0, 0]}
-                      animationDuration={1500}
-                    />
-                  ))
-              }
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          // Mode "temps" : graphique temporel (une barre par service par date)
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={chartData} margin={{ top: 30, right: 40, left: 20, bottom: 80 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="date"
-                tickFormatter={date => new Date(date).toLocaleDateString()}
-                style={{ fontSize: '12px', fill: '#555' }}
-              />
-              <YAxis
-                label={{
-                  value: "Nombre d'avis",
-                  angle: -90,
-                  position: 'insideLeft',
-                  style: { fontSize: '12px', fill: '#555' }
-                }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                content={renderCustomLegend}
-                verticalAlign="bottom"
-                align="center"
-                wrapperStyle={{ marginTop: 20 }}
-              />
-              {chartData.length > 0 &&
-                Object.keys(chartData[0])
-                  .filter(key => key !== "date")
-                  .map(service => (
-                    <Bar
-                      key={service}
-                      dataKey={service}
-                      fill={serviceColors[service] || "#8884d8"}
-                      name={service}
-                      legendType="square"
-                      radius={[10, 10, 0, 0]}
-                      animationDuration={1500}
-                    />
-                  ))
-              }
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+        <ResponsiveContainer width="100%" height={500}>
+          <BarChart data={chartData} margin={{ top: 30, right: 40, left: 20, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} /> 
+            <XAxis
+              dataKey={selectedFilters.rating ? "period" : "date"}
+              tickFormatter={date => new Date(date).toLocaleDateString()}
+              style={{ fontSize: '12px', fill: theme.palette.text.secondary }}
+            />
+            <YAxis
+              label={{
+                value: "Nombre d'avis",
+                angle: -90,
+                position: 'insideLeft',
+                style: { fontSize: '12px', fill: theme.palette.text.secondary }
+              }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend
+              verticalAlign="bottom"
+              align="center"
+              wrapperStyle={{ marginTop: 20 }}
+            />
+            {chartData.length > 0 &&
+              Object.keys(chartData[0])
+                .filter(key => key !== "period" && key !== "date")
+                .map(service => (
+                  <Bar
+                    key={service}
+                    dataKey={service}
+                    fill={serviceColors[service] || theme.palette.primary.main} // Utilisation de theme.palette
+                    name={service}
+                    legendType="square"
+                    radius={[10, 10, 0, 0]}
+                    animationDuration={1500}
+                  />
+                ))
+            }
+          </BarChart>
+        </ResponsiveContainer>
       </Box>
     </Box>
   );

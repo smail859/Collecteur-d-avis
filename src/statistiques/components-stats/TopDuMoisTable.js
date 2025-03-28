@@ -1,11 +1,8 @@
 import { Box } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
-import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
-import SouthEastIcon from "@mui/icons-material/SouthEast";
-import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
 
 // Composant pour afficher le Top du mois
-const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, selectedRank, isSelectedInTop3, isSelectedCommercialValid }) => {
+const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, selectedRank, isSelectedInTop3, isSelectedCommercialValid, reviews}) => {
   
   const getRankStyle = (rank, isActive) => ({
     background: isActive ? "red" : rank === 1 ? "linear-gradient(to right, #8B5CF6, #2972FF)" : rank === 2 ? "transparent" : rank === 3 ? "#FFF" : "transparent",
@@ -13,12 +10,33 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
     borderBottom: "none"
   });
 
-  const getTrendIcon = (trend) => {
-    if (trend === "up") return <ArrowOutwardIcon sx={{ color: 'green' }} />;
-    if (trend === "down") return <SouthEastIcon sx={{ color: 'red' }} />;
-    return <HorizontalRuleIcon />;
+
+
+  // Récuperer les avis de chaque commercial dans le top 3 uniquement 
+  // Vérifier la note de chaque avis 
+  // Faire la moyenne de chaque notes pour chaque commercial 
+  const normalizeText = (text) => {
+    if (!text || typeof text !== "string") return "";
+    return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
   };
 
+  const getAverageRatingForCommercial = (name) => {
+    if (!Array.isArray(reviews)) return "0.0";
+  
+    const normalizedName = normalizeText(name);
+    const regex = new RegExp(`\\b${normalizedName}\\b`, "i");
+  
+    const filtered = reviews.filter(review => {
+      const text = normalizeText(review.text || review.snippet || "");
+      return regex.test(text);
+    });
+  
+    if (filtered.length === 0) return "0.0";
+    const sum = filtered.reduce((acc, curr) => acc + (curr.rating || 0), 0);
+    return (sum / filtered.length).toFixed(1);
+  };
+  
   return (
     <Box
       sx={{
@@ -102,8 +120,7 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
                   boxShadow: commercial.top === 3 ? "rgba(149, 157, 165, 0.2) 0px 8px 24px" : "none",
                 }}
               >
-                {getTrendIcon(commercial.trend)}
-                <strong>{(commercial.avis / 10).toFixed(1)} <StarIcon sx={{ color: "gold" }} /></strong>
+                <strong>{getAverageRatingForCommercial(commercial.name)} <StarIcon sx={{ color: "gold" }} /></strong>
               </Box>
             </Box>
           );
@@ -153,7 +170,7 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 1,
-                fontSize: "16px",
+                fontSize: "20px",
                 backgroundColor: "white",
                 padding: "8px 12px",
                 maxWidth: "131px",
@@ -162,7 +179,7 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
                 margin: "auto",
               }}
             >
-              <strong>{(selectedCommercialData.count / 10).toFixed(1)} <StarIcon sx={{ color: "gold" }} /></strong>
+              <strong>{getAverageRatingForCommercial(selectedCommercialData.name)} <StarIcon sx={{ color: "gold" }} /></strong>
             </Box>
           </Box>
         )}

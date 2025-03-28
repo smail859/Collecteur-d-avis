@@ -4,7 +4,7 @@ import ProgressionSection from "../components-stats/ProgressionSection";
 import TopDuMoisTable from "../components-stats/TopDuMoisTable";
 import StatistiquesGrid from "../components-stats/StatistiquesGrid";
 
-const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => {
+const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial, selectedRank, isSelectedInTop3, isSelectedCommercialValid, filteredReviews, reviews }) => {
   // Trier et extraire le top 3
   const top3 = [...tableauCommerciaux]
     .sort((a, b) => b.count - a.count)
@@ -15,19 +15,14 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => 
       avis: commercial.count,
       gainBruts: `${commercial.count * 10}€`,
       gainNets: `${commercial.count * 10}€`,
-      trend: index === 0 ? "up" : index === 1 ? "neutral" : "down",
     }));
 
   const normalizeText = (text) => {
     if (!text || typeof text !== "string") {
       return "";
     }
-    return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   };
-
-  
-
-    
 
   const selectedCommercialData = tableauCommerciaux.find(
     com => normalizeText(com.name) === normalizeText(selectedCommercial)
@@ -38,10 +33,6 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => 
   const progressionCommercial = selectedCommercial
     ? Math.min(100, Math.round((commercialCountMount / OBJECTIF_MENSUEL) * 100))
     : 0;
-  
-
-
-
 
   return (
     <Box
@@ -68,6 +59,10 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => 
             top3={top3}
             selectedCommercial={selectedCommercial}
             selectedCommercialData={selectedCommercialData}
+            selectedRank={selectedRank}
+            isSelectedInTop3={isSelectedInTop3}
+            isSelectedCommercialValid={isSelectedCommercialValid}
+            reviews={filteredReviews}
           />
         </Box>
       </Box>
@@ -97,15 +92,17 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial }) => 
   );
 };
 
-
-
 // Validation avec PropTypes
 ChartStatistiques.propTypes = {
   data: PropTypes.array.isRequired,
-  progression: PropTypes.number.isRequired,
-  colors: PropTypes.array.isRequired,
+  progression: PropTypes.number,
+  colors: PropTypes.array,
   tableauCommerciaux: PropTypes.array.isRequired,
   selectedCommercial: PropTypes.string.isRequired,
+  selectedRank: PropTypes.number,
+  isSelectedInTop3: PropTypes.bool,
+  isSelectedCommercialValid: PropTypes.bool,
+  filteredReviews: PropTypes.array
 };
 
 export default ChartStatistiques;

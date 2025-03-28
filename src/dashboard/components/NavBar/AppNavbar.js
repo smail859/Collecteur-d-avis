@@ -8,6 +8,7 @@ import {
   Toolbar,
   Typography,
   Box,
+  useTheme
 } from '@mui/material';
 
 // MUI Icons
@@ -15,12 +16,12 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 
-
 // Custom Components
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 import CustomDatePicker from './CustomDatePicker';
 import icon from '../../../image/icon.png';
+import ButtonDarkMode from "../../../components/ButtonDarkMode"
 
 // Styled Toolbar
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -31,7 +32,6 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   flexShrink: 0,
-  
 }));
 
 const links = [
@@ -41,8 +41,9 @@ const links = [
   { path: "/statistiques", label: "Statistiques" },
 ];
 
-export default function AppNavbar() {
+export default function AppNavbar({ darkMode, onToggleDarkMode }) {
   const [open, setOpen] = useState(false);
+  const theme = useTheme(); // ✅ Récupérer le thème actuel
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -52,12 +53,13 @@ export default function AppNavbar() {
     <AppBar
       position="static"
       sx={{
-        bgcolor: 'white',
+        bgcolor: darkMode ? theme.palette.grey[900] : theme.palette.background.paper, // Fond sombre ou clair
+        color: darkMode ? theme.palette.text.primary : theme.palette.text.secondary, // Texte adapté
         backgroundImage: 'none',
         borderBottom: '1px solid',
-        borderColor: 'divider',
+        borderColor: theme.palette.divider, // Utilisation de la palette du thème
         top: 'var(--template-frame-height, 0px)',
-        boxShadow:"none"
+        boxShadow: "none",
       }}
     >
       <StyledToolbar>
@@ -67,12 +69,10 @@ export default function AppNavbar() {
         </Box>
 
         {/* Center Section - Navigation Links */}
-        <Box sx={{ display: 'flex', gap: 4, justifyContent: 'center'}}>
-          
+        <Box sx={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
           {links.map((link) => (
-              <NavLinks label={link.label} path={link.path} />
-            ))}
-
+            <NavLinks key={link.path} label={link.label} path={link.path} />
+          ))}
         </Box>
 
         {/* Right Section */}
@@ -81,16 +81,17 @@ export default function AppNavbar() {
           <MenuButton showBadge aria-label="Open notifications">
             <NotificationsRoundedIcon />
           </MenuButton>
-          <Person2OutlinedIcon 
-            sx={{ 
-              fontSize: 30,            
+          <ButtonDarkMode darkMode={darkMode} onToggle={onToggleDarkMode} />
+          <Person2OutlinedIcon
+            sx={{
+              fontSize: 30,
               background: 'linear-gradient(90deg, #2972FF, #8B5CF6)',
-              color: 'white',          
-              borderRadius: '20px',     
-              padding: '8px'           
-            }} 
+              color: 'white',
+              borderRadius: '20px',
+              padding: '8px',
+            }}
           />
-          <Typography sx={{ color: '#121826', fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px' }}>
+          <Typography sx={{ color: theme.palette.text.primary, fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px' }}>
             Smaïl El Hajjar
           </Typography>
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>

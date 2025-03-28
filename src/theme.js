@@ -1,11 +1,17 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
+// Fonction pour créer un thème en fonction du mode clair ou sombre
+const getTheme = (darkMode) => createTheme({
   palette: {
+    mode: darkMode ? "dark" : "light",
     background: {
-      default: "#F5F7FF", // ✅ Couleur de fond globale
+      default: darkMode ? "#121212" : "#F5F7FF",
+      paper: darkMode ? "#1E1E1E" : "#FFFFFF",
+    },
+    text: {
+      primary: darkMode ? "#ffffff" : "#000000",
     },
   },
 });
 
-export default theme;
+export default getTheme;

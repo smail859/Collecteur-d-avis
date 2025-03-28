@@ -1,7 +1,7 @@
 // Description: La page AvisRecents est la page principale de l'application. Elle affiche les avis récents des utilisateurs.
 
 //Import des composants depuis Material-UI
-import { Stack, Box, Typography, Button, Fade } from "@mui/material";
+import { Stack, Box, Typography, Button, Fade,CircularProgress } from "@mui/material";
 
 //Import des composants depuis React
 import { useState, useMemo } from "react";
@@ -62,7 +62,8 @@ const AvisRecents = ({ onFilterChange }) => {
     filteredReviews,
     setDisplayLimit,
     avgRatingByService,
-    reviewsCountByService
+    reviewsCountByService,
+    loading
   } = useFetchReviews(filters);
 
 
@@ -130,7 +131,7 @@ const AvisRecents = ({ onFilterChange }) => {
   ];
   const detectCommercial = (text) => {
     if (!text) return text;
-  
+    // Liste des commerciaux ajouté les variantes 
     const commerciaux = ["Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Arnaud", "Jean-Simon", "Océane", "Johanna", "Angela", "Esteban", "Anais", "Elodie"];
   
     // Fonction pour normaliser le texte (enlever accents + minuscule)
@@ -220,7 +221,7 @@ const AvisRecents = ({ onFilterChange }) => {
 
       <Stack direction="row" spacing={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center", mt: 10, padding: "20px", borderRadius: "20px", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-          <ListChip servicesChip={servicesChip} handleServiceChange={handleServiceChange} selected={selected} />
+          <ListChip servicesChip={servicesChip} handleServiceChange={handleServiceChange} selected={selected} sx={{backgroundColor: "#F2F3FB"}}/>
         </Box>
 
         {selected === '' && <Typography>Aucun service sélectionné</Typography>}
@@ -310,14 +311,25 @@ const AvisRecents = ({ onFilterChange }) => {
 
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, justifyContent: "center", width: "1599px", mx: "auto", overflowY: "auto", paddingBottom: 4, paddingTop: 4, borderRadius: "20px", backgroundColor: "white" }}>
             {reviewsToDisplay && reviewsToDisplay.length > 0 ? (
-                  reviewsToDisplay.map((review, index) => (
-                      <FullAvis key={index} avisData={review} defaultValueAvis={review.rating} detectCommercial={detectCommercial}/>
-                  ))
+              loading ? (
+                <CircularProgress size={90} sx={{ my: 6 }} />
               ) : (
-                  <Typography sx={{ color: "#8B5CF6", fontSize: "20px", fontWeight: "bold", textAlign: "center", mt: 3 }}>
-                      Aucun avis ne correspond à votre recherche.
-                  </Typography>
-              )}
+                reviewsToDisplay.map((review, index) => (
+                  <FullAvis 
+                    key={index} 
+                    avisData={review} 
+                    defaultValueAvis={review.rating} 
+                    detectCommercial={detectCommercial} 
+                  />
+                ))
+              )
+            ) : (
+              <Typography sx={{ color: "#8B5CF6", fontSize: "20px", fontWeight: "bold", textAlign: "center", mt: 3 }}>
+                Aucun avis ne correspond à votre recherche.
+              </Typography>
+            )}
+
+
           </Box>
 
 
