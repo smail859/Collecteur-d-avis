@@ -66,7 +66,7 @@ cd collecteur-avis
 
 ### 2. Crée un fichier `.env` (non versionné)
 ```env
-MONGO_URI=mongodb://mongo:27017/reviewapp
+MONGO_URI=ta_bdd
 SERPAPI_KEY=ta_clé
 PORT=3000
 ```
