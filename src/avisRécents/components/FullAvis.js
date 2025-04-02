@@ -15,6 +15,8 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
   const isLongText = text.length > MAX_LENGTH;
   const truncatedText = isLongText ? text.slice(0, MAX_LENGTH) + "..." : text;
 
+
+
   return (
     <Card 
       sx={{ 
@@ -72,7 +74,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
           {detectCommercial(truncatedText)}
         </Typography>
 
-        {isLongText && (
+        {isLongText &&  (
           <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
             <Button 
               startIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 30 }} />} 
@@ -89,7 +91,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
         <Stack direction="row" spacing={2} alignItems="center">
           <Stack direction="row" alignItems="center" spacing={1}>
             <FolderOutlinedIcon sx={{ fontSize: 24, color: '#8B5CF6' }} />
-            {avisData.link && (
+            {(avisData.link || avisData.response?.snippet) && (
               <Link 
                 href={avisData.link} 
                 target="_blank" 
@@ -100,12 +102,13 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
                 Voir l'avis sur Google
               </Link>
             )}
+
           </Stack>
         </Stack>
       </CardActions>
 
       {/* Modal pour afficher l'avis complet */}
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleClose} >
         <Box sx={styles.modal}>
           {/* Bouton de fermeture */}
           <IconButton onClick={handleClose} sx={styles.closeButton}>
@@ -130,7 +133,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
                   {avisData.user?.name || "Utilisateur inconnu"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {avisData.date} • {avisData.reviewCount || 0} avis
+                {avisData.date} • {avisData.reviewCount || avisData.user?.reviews_count || 0} avis
                 </Typography>
               </Box>
             </Box>
@@ -139,7 +142,13 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
           )}
 
           {/* Contenu complet de l'avis */}
-          <Typography sx={styles.commentText}>
+          <Typography
+            sx={{
+              ...styles.commentText,
+              overflowY: (avisData?.text?.length || avisData?.snippet?.length || 0) > 200 ? "auto" : "hidden",
+              maxHeight: 200,
+            }}
+          >
             {detectCommercial(avisData?.text || avisData?.snippet)}
           </Typography>
 
@@ -184,6 +193,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: 2,
+    maxHeight: "80vh",
+    overflowY: "auto", 
   },
   closeButton: {
     position: "absolute",
@@ -244,8 +255,9 @@ FullAvis.propTypes = {
     link: PropTypes.string,
     reviewCount: PropTypes.number,
     likes: PropTypes.number,
+    defaultValueAvis: PropTypes.number.isRequired,
   }).isRequired,
-  detectCommercial: PropTypes.func.isRequired, // Déclarer la fonction en prop
+  detectCommercial: PropTypes.func.isRequired,
 };
 
 export default FullAvis;

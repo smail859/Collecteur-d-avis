@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useTheme } from '@mui/material/styles'; // ✅ Importer useTheme
+import { useTheme } from '@mui/material/styles'; 
 import ToggleButtonGroup from '../../../avisRécents/components/ToggleButtonGroup';
 import {
   BarChart,
@@ -15,7 +15,7 @@ import { Typography, Box } from '@mui/material';
 import useFetchReviews from '../../../hooks/components/useFetchReviews';
 
 const ServicesChart = () => {
-  const theme = useTheme(); // ✅ Récupérer le thème actuel
+  const theme = useTheme(); // Récupérer le thème actuel
 
   const [selectedFilters, setSelectedFilters] = useState({
     period: '30days',
@@ -28,6 +28,8 @@ const ServicesChart = () => {
     periode: selectedFilters.period,
     note: selectedFilters.rating,
   });
+
+  console.log(reviewsPerPeriod)
 
   const serviceColors = {
     Startloc: "#FF66B2",
@@ -117,6 +119,11 @@ const ServicesChart = () => {
         { label: "Aujourd'hui", value: "today" },
         { label: "7 derniers jours", value: "7days" },
         { label: "30 derniers jours", value: "30days" },
+        { label: "Ce mois", value: "thismonth" },
+        { label: "Le mois dernier", value: "lastmonth" },
+        { label: "Cette semaine", value: "thisweek" },
+        { label: "La semaine dernière", value: "lastweek" },
+        { label: "Cette année", value: "thisyear" },
       ],
     },
   ];

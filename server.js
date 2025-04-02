@@ -543,7 +543,7 @@ app.get("/api/trustpilot", (req, res) => {
   const fakeTrustpilotReviews = {
     "Sinimo": {
       reviews: [
-        { id: "1", rating: 5, date: "il y a 1 mois", text: "Excellent service, Arnaud a assuré !" },
+        { id: "1", rating: 5, date: "il y a 1 heure", text: "Excellent service, Arnaud a assuré !" },
         { id: "2", rating: 4, date: "30 févr. 2025", text: "Service de qualité, est très professionnel." },
         { id: "3", rating: 5, date: "15 févr. 2025", text: "Je recommande, est au top !" },
         { id: "4", rating: 4, date: "15 févr. 2025", text: "Très bon service, merci." },
@@ -558,11 +558,11 @@ app.get("/api/trustpilot", (req, res) => {
     },
     "Pige Online": {
       reviews: [
-        { id: "1", rating: 2, date: "il y a 1 semaine", text: "Expérience mitigée, n'a pas été à la hauteur." },
-        { id: "2", rating: 3, date: "15 févr. 2025", text: "Service moyen, a fait son possible." },
-        { id: "3", rating: 2, date: "15 févr. 2025", text: "Pas satisfait, aurait pu mieux faire." },
-        { id: "4", rating: 3, date: "15 févr. 2025", text: "Expérience passable, merci pour l'effort." },
-        { id: "5", rating: 2, date: "15 févr. 2025", text: "Décevant, n'a pas répondu à mes attentes." },
+        { id: "1", rating: 2, date: "3 mars 2025", text: "Expérience mitigée, n'a pas été à la hauteur." },
+        { id: "2", rating: 3, date: "23 mars 2025", text: "Service moyen, a fait son possible." },
+        { id: "3", rating: 2, date: "30 mars 2025", text: "Pas satisfait, aurait pu mieux faire." },
+        { id: "4", rating: 3, date: "31 mars 2025", text: "Expérience passable, merci pour l'effort." },
+        { id: "5", rating: 2, date: "13 mars 2025", text: "Décevant, n'a pas répondu à mes attentes." },
         { id: "6", rating: 3, date: "15 févr. 2025", text: "Service correct, est compétent." },
         { id: "7", rating: 2, date: "15 févr. 2025", text: "Bof, n'a pas été très réactif." },
         { id: "8", rating: 3, date: "15 févr. 2025", text: " a tenté de faire au mieux, service moyen." },
@@ -630,7 +630,7 @@ app.get("/api/debug-site/:site", async (req, res) => {
     return res.json({
       exists: true,
       count: reviews.length,
-      message: `✅ ${reviews.length} avis trouvés pour le site ${site}`,
+      message: `${reviews.length} avis trouvés pour le site ${site}`,
       reviews,
     });
   } catch (err) {

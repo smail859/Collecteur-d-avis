@@ -30,4 +30,5 @@ yarn-error.log*
 /coverage
 
 DEPLOYMENT_GUIDE.txt
+amelioration.txt
 README_Docker_Setup.txt
