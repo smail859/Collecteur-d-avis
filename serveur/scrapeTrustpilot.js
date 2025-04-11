@@ -5,11 +5,8 @@ const { Review } = require("./model/model");
 require("dotenv").config();
 
 const launchBrowserWithFallback = async () => {
-  const executablePath = process.env.CHROME_EXECUTABLE_PATH;
-
   return puppeteer.launch({
     headless: true,
-    executablePath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -18,6 +15,7 @@ const launchBrowserWithFallback = async () => {
     ],
   });
 };
+
 
 
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
