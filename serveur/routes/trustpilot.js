@@ -1,24 +1,27 @@
 const express = require("express");
 const router = express.Router();
+const cache = require("memory-cache");
 const { Review } = require("../model/model.js");
 
-// GET /api/reviews/:site
+// GET /api/trustpilot
 router.get("/", async (req, res) => {
+  const cached = cache.get("trustpilot_reviews");
+  if (cached) {
+    console.log("✅ Trustpilot renvoyé depuis le cache");
+    return res.status(200).json(cached);
+  }
+
   try {
     const reviews = await Review.find({ source: "trustpilot" });
 
-    if (!reviews || reviews.length === 0) {
+    if (!reviews.length) {
       return res.status(404).json({ message: "Aucun avis Trustpilot trouvé." });
     }
 
     const grouped = {};
-
     reviews.forEach((r) => {
       if (!grouped[r.site]) {
-        grouped[r.site] = {
-          reviews: [],
-          total: 0,
-        };
+        grouped[r.site] = { reviews: [], total: 0 };
       }
 
       grouped[r.site].reviews.push({
@@ -30,14 +33,13 @@ router.get("/", async (req, res) => {
         text: r.text,
         source: r.source,
         service: r.site,
-        user: r.user, 
+        user: r.user,
         link: r.link || null,
       });
 
       grouped[r.site].total += r.rating;
     });
 
-    // Calculer la moyenne par site
     const finalResult = {};
     for (const site in grouped) {
       const siteData = grouped[site];
@@ -51,12 +53,13 @@ router.get("/", async (req, res) => {
       };
     }
 
+    // ⏱️ Mise en cache pendant 5 minutes (300 000 ms)
+    cache.put("trustpilot_reviews", finalResult, 300000);
+
+    console.log("🧠 Trustpilot calculé et mis en cache");
     res.json(finalResult);
   } catch (err) {
-    console.error("Erreur API /api/trustpilot :", err.message);
+    console.error("❌ Erreur API /api/trustpilot :", err.message);
     res.status(500).json({ error: "Erreur serveur lors de la récupération des avis Trustpilot." });
   }
 });
-
-
-module.exports = router;
