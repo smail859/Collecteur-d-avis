@@ -13,6 +13,8 @@ require("dotenv").config();
 const { UpdateLog, UpdateLogTrustpilot } = require("./model/model");
 const routesReviews = require("../serveur/routes/reviews");
 const routesTrustpilot = require("../serveur/routes/trustpilot");
+const routeTrustpilotSites = require("../serveur/routes/scrapeTrustpilotSite")
+const routeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll")
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
 const {shouldUpdateReviews, shouldUpdateReviewsTrustpilot } = require("./services/shouldUpdate")
@@ -50,6 +52,8 @@ requiredEnv.forEach((env) => {
 app.use("/api/reviews", routesReviews);
 app.use("/api/trustpilot", routesTrustpilot);
 app.use("/api/force-update", routesUpdate);
+app.use("/api", routeTrustpilotAll)
+app.use("/api", routeTrustpilotSites)
 app.use("/api", routesDebug);
 app.get("/", (req, res) => {
   res.send("API Reviews opérationnelle !");
