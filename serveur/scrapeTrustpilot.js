@@ -5,26 +5,20 @@ const { Review } = require("./model/model");
 require("dotenv").config();
 
 const launchBrowserWithFallback = async () => {
-  try {
-    return await puppeteer.launch({
-      headless: true,
-      args: [
-        '--ignore-certificate-errors',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-features=IsolateOrigins,site-per-process',
-        '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/117 Safari/537.36'
-      ]
-    });
-  } catch (err) {
-    console.warn("Erreur lancement headless, tentative fallback...");
+  const executablePath = process.env.CHROME_EXECUTABLE_PATH;
 
-    return await puppeteer.launch({
-      headless: false,
-      args: ['--no-sandbox', '--ignore-certificate-errors']
-    });
-  }
+  return puppeteer.launch({
+    headless: true,
+    executablePath,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--ignore-certificate-errors',
+      '--disable-features=IsolateOrigins,site-per-process',
+    ],
+  });
 };
+
 
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
   let browser;
