@@ -98,7 +98,7 @@ const startServer = async () => {
 
     // Lancer l'application
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Serveur démarré sur http://localhost:${PORT}`);
+      console.log(`✅ Server is listening on port ${PORT}`);
     });
   } catch (err) {
     console.error("Erreur au démarrage du serveur :", err.message);
