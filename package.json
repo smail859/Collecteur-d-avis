@@ -56,7 +56,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "PUPPETEER_CACHE_DIR=.cache/puppeteer npx puppeteer browsers install chrome"
+
   },
   "eslintConfig": {
     "extends": [
