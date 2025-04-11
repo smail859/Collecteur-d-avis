@@ -99,8 +99,9 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
                 underline="none" 
                 sx={{ color: '#8B5CF6', fontSize: '14px' }}
               >
-                Voir l'avis sur Google
+                {avisData.source === "Trustpilot" ? "Voir l'avis sur Trustpilot" : "Voir l'avis sur Google"}
               </Link>
+
             )}
 
           </Stack>
@@ -159,17 +160,18 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial}) => {
 
           {/* Boutons secondaires */}
           <Box sx={styles.actions}>
-            {avisData.link && (
-              <Link 
-                href={avisData.link} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                underline="none" 
-                sx={{ color: '#8B5CF6', fontSize: '14px' }}
-              >
-                Voir l'avis sur Google
-              </Link>
-            )}
+          {avisData.link && (
+            <Link 
+              href={avisData.link} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              underline="none" 
+              sx={{ color: '#8B5CF6', fontSize: '14px' }}
+            >
+              {avisData.source === "Trustpilot" ? "Voir l'avis sur Trustpilot" : "Voir l'avis sur Google"}
+            </Link>
+          )}
+
           </Box>
         </Box>
       </Modal>

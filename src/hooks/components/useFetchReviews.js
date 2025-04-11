@@ -842,6 +842,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
               service // Ajoute la clé `service` à chaque avis
           }))
       );
+
       const responseTrustpilot = await axios.get(`${baseURL}/api/trustpilot`);
       const trustpilotReviewsData = responseTrustpilot.data;
       
@@ -893,10 +894,15 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       ? googleReviews 
       : Object.values(googleReviews).flatMap((data) => data.reviews || []);
   
-    const trustpilotReviewsArray = Object.entries(trustpilotReviews).flatMap(([service, data]) => 
-      (data.reviews || []).map(review => ({ ...review, service })) // Ajoute `service` manuellement
-    );
-  
+      const trustpilotReviewsArray = Object.entries(trustpilotReviews).flatMap(([service, data]) =>
+        (data.reviews || []).map((review) => ({
+          ...review,
+          service,
+          rating: review.rating || 0,
+        }))
+      );
+
+      
     // Traiter les avis Google
     googleReviewsArray.forEach(({ service, rating }) => {
       if (!service || rating == null) return; // Accepte rating = 0
@@ -945,6 +951,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     setAvgRatingByService(avgRatingByService);
   
   }, [reviews, googleReviews, trustpilotReviews]); // Ajout des dépendances
+
 
 
   return {

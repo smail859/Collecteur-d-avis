@@ -95,10 +95,10 @@ const Statistiques = () => {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "row",
-              height: "400px",
+              height: "415px",
               mx: "auto",
               mt: 6,
-              maxWidth: "900px",
+              maxWidth: "950px",
               px: 4,
               
             }}

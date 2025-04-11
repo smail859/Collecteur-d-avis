@@ -3,7 +3,7 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const { googleSites } = require("../config/sites");
 const { Review, UpdateLog } = require("../model/model.js");
 const { formatRelativeDate } = require("../utils/dateUtils");
-const updateCache = require("../updateCache.js");
+const {updateCache} = require("../updateCache.js");
 
 const fetchReviewsForSite = async (site) => {
   if (!site?.id) {

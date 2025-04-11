@@ -29,8 +29,6 @@ const ServicesChart = () => {
     note: selectedFilters.rating,
   });
 
-  console.log(reviewsPerPeriod)
-
   const serviceColors = {
     Startloc: "#FF66B2",
     Sinimo: "#4D9B9B",

@@ -1,7 +1,7 @@
 const cache = require("memory-cache");
 const {trustpilotSites} = require("../config/sites")
 const { UpdateLogTrustpilot } = require("../model/model.js");
-const updateCache = require("../updateCache");
+const {updateCache} = require("../updateCache");
 const scrapeTrustpilot = require("../scrapeTrustpilot")
 
 // Mise à jour des avis Trustpilot

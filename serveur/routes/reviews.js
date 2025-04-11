@@ -18,7 +18,8 @@ router.get("/", async (req, res) => {
     }
 
     // Si pas dans le cache : récupérer depuis Mongo
-    const dbReviews = await Review.find({ source: { $ne: "trustpilot" } });
+    const dbReviews = await Review.find({ source: "Google" });
+
 
     let grouped = {};
 
