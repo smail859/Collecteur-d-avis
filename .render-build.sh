@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# 📦 Installe les dépendances
+echo "📦 Installation des dépendances..."
 npm install
 
-# 🧰 Télécharge Chromium pour Puppeteer
+echo "🌐 Installation de Chrome via Puppeteer..."
 npx puppeteer browsers install chrome
 
-# 🚀 Lance le serveur comme prévu
-npm run start
+echo "🚀 Lancement du serveur Node..."
+npm run server
