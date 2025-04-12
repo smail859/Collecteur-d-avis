@@ -21,11 +21,14 @@ const ChatGpt = ({ avisData }) => {
 
   const handleSuggestReply = async () => {
     setLoadingReply(true);
-    setSuggestion("");
+    setSuggestion(""); 
     setError("");
-    const baseUrl = import.meta.env.PROD
-    ? "https://collecteur-avis.onrender.com"
-    : "http://localhost:5000";
+    const isProd = window.location.hostname !== "localhost";
+    const baseUrl = isProd
+      ? "https://collecteur-avis.onrender.com"
+      : "http://localhost:5000";
+
+     
 
     try {
       const response = await fetch(`${baseUrl}/api/suggest-reply`, {
@@ -40,6 +43,8 @@ const ChatGpt = ({ avisData }) => {
       });
 
       const data = await response.json();
+      console.log("🔍 Reçu depuis l'API :", data);
+
       if (data.reply) {
         setSuggestion(data.reply);
         setOpenModal(true);
