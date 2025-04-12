@@ -53,6 +53,13 @@ const fetchReviewsForSite = async (site) => {
           date: r.date || "",
           source: r.source,
           likes: r.likes || 0,
+          response: r.response
+            ? {
+                snippet: r.response.snippet || "",
+                date: r.response.date || "",
+                iso_date: new Date(r.response.iso_date || Date.now()),
+              }
+            : { snippet: "" },
           user: {
             name: r.user.name,
             link: r.user.link,
@@ -61,7 +68,8 @@ const fetchReviewsForSite = async (site) => {
             reviews: r.user.reviews || 0,
             photos: r.user.photos || 0,
           }
-        }));
+        }))
+        
 
       if (newReviews.length) {
         await Review.insertMany(newReviews, { ordered: false }).catch(() => {});
@@ -123,6 +131,13 @@ const updateLatestReviews = async () => {
             date: formatRelativeDate(new Date(r.iso_date)),
             source: r.source,
             likes: r.likes || 0,
+            response: r.response
+              ? {
+                  snippet: r.response.snippet || "",
+                  date: r.response.date || "",
+                  iso_date: new Date(r.response.iso_date || Date.now()),
+                }
+              : { snippet: "" },
             user: {
               name: r.user.name,
               link: r.user.link,
@@ -132,6 +147,7 @@ const updateLatestReviews = async () => {
               photos: r.user.photos || 0,
             },
           };
+          
 
           const existing = existingMap.get(r.review_id);
           if (!existing) {

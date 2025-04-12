@@ -12,6 +12,11 @@ const reviewSchema = new mongoose.Schema({
   iso_date: Date,
   iso_date_of_last_edit: Date,
   date: String,
+  response: {
+    snippet: { type: String, default: "" },
+    iso_date: { type: Date },
+    date: { type: String },
+  },
   source: {
     type: String,
     enum: ["Google", "Trustpilot"],

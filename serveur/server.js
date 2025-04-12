@@ -17,10 +17,12 @@ const routeTrustpilotSites = require("../serveur/routes/scrapeTrustpilotSite")
 const routeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll")
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
+const suggestReplyRoute = require("../serveur/routes/routesChatGpt");
 const {shouldUpdateReviews, shouldUpdateReviewsTrustpilot } = require("./services/shouldUpdate")
 const { updateLatestReviews } = require("./services/fetchReviewsGoogle");
 const { updateLatestReviewsTrustpilot } = require("./services/fetchReviewsTrustpilot");
 const { updateDates } = require("./utils/dateUtils");
+
 // -------------------------
 // Initialisation serveur
 // -------------------------
@@ -55,6 +57,11 @@ app.use("/api/force-update", routesUpdate);
 app.use("/api", routeTrustpilotAll)
 app.use("/api", routeTrustpilotSites)
 app.use("/api", routesDebug);
+
+app.use("/api/suggest-reply", suggestReplyRoute);
+
+
+
 app.get("/", (req, res) => {
   res.send("API Reviews opérationnelle !");
 });
