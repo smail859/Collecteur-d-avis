@@ -23,9 +23,12 @@ const ChatGpt = ({ avisData }) => {
     setLoadingReply(true);
     setSuggestion("");
     setError("");
+    const baseUrl = import.meta.env.PROD
+    ? "https://collecteur-avis.onrender.com"
+    : "http://localhost:5000";
 
     try {
-      const response = await fetch("http://localhost:5000/api/suggest-reply", {
+      const response = await fetch(`${baseUrl}/api/suggest-reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
