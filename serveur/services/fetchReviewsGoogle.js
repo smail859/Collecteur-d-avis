@@ -168,10 +168,11 @@ const updateLatestReviews = async () => {
             );
           }
         }
-
-        if (newReviews.length > 0) {
-          await Review.insertMany(newReviews, { ordered: false });
-        }
+        await Review.insertMany(newReviews, { ordered: false })
+        .catch(err => {
+          if (err.code !== 11000) console.error("Erreur insertMany:", err.message);
+        });
+      
 
         console.log(`✔ ${newReviews.length} nouveaux avis ajoutés pour ${site.name}`);
       } catch (err) {
