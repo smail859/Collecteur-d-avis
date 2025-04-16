@@ -1,5 +1,5 @@
 import { Container, Box, useMediaQuery, useTheme } from '@mui/material';
-import NavLinks from "../components/NavBar/NavLinks";
+import NavLinks from "./NavBar/NavLinks";
 import icon from '../../image/icon.png';
 import AddIcon from '@mui/icons-material/Add';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';

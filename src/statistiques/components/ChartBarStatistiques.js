@@ -76,7 +76,7 @@ const ChartBarStatistiques = ({
         justifyContent: "space-between",
         alignItems: "flex-start",
         flexWrap: "wrap",
-        maxWidth: "1600px",
+        maxWidth: isMobile ? "90%" : "1600px",
         margin: "50px auto",
         padding: "20px",
         borderRadius: "20px",

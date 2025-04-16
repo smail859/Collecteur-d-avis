@@ -9,7 +9,8 @@ import {
   Typography,
   Box,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Badge,
 } from '@mui/material';
 
 // MUI Icons
@@ -22,7 +23,8 @@ import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 import CustomDatePicker from './CustomDatePicker';
 import icon from '../../../image/icon.png';
-import ButtonDarkMode from "../../../components/ButtonDarkMode";
+import NotificationDrawer from "./NotificationDrawer"
+import useFetchReviews from '../../../hooks/components/useFetchReviews';
 
 // Styled Toolbar
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -44,12 +46,21 @@ const links = [
 
 export default function AppNavbar({ darkMode, onToggleDarkMode }) {
   const [open, setOpen] = useState(false);
+  const [openNotif, setOpenNotif] = useState(false);
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const { newReviewsCount, updateLastCheckDate, newReviews } = useFetchReviews();
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
+  const handleNotifOpen = () => {
+    updateLastCheckDate();
+    setOpenNotif(true);
+  };
+
+  const handleNotifClose = () => setOpenNotif(false);
+
 
   return (
     <AppBar
@@ -66,7 +77,6 @@ export default function AppNavbar({ darkMode, onToggleDarkMode }) {
       }}
     >
       <StyledToolbar>
-
         {/* Left Section */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <img src={icon} alt="Logo" style={{ height: '50px', marginLeft: '100px' }} />
@@ -86,10 +96,17 @@ export default function AppNavbar({ darkMode, onToggleDarkMode }) {
           {isDesktop ? (
             <>
               <CustomDatePicker />
-              <MenuButton showBadge aria-label="Open notifications">
-                <NotificationsRoundedIcon />
+              <MenuButton onClick={handleNotifOpen}>
+                <Badge
+                  color="error"
+                  variant="dot"
+                  invisible={newReviewsCount === 0}
+                >
+                  <NotificationsRoundedIcon />
+                </Badge>
               </MenuButton>
-              <ButtonDarkMode darkMode={darkMode} onToggle={onToggleDarkMode} />
+              
+
               <Person2OutlinedIcon
                 sx={{
                   fontSize: 30,
@@ -110,13 +127,18 @@ export default function AppNavbar({ darkMode, onToggleDarkMode }) {
             </>
           ) : (
             <>
-              <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
+              <MenuButton aria-label="menu" onClick={() => setOpen(true)}>
                 <MenuRoundedIcon />
               </MenuButton>
             </>
           )}
         </Box>
       </StyledToolbar>
+      {/* Drawer uniquement pour desktop */}
+      {isDesktop && (
+        <NotificationDrawer open={openNotif} onClose={handleNotifClose} newReviews={newReviews} />
+      )}
+    
 
       {/* Drawer uniquement pour mobile */}
       <SideMenuMobile

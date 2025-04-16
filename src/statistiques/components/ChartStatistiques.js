@@ -41,10 +41,11 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial, selec
     <Box
       sx={{
         display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
+        flexDirection: isMobile ? "column" : "row",
+        justifyContent: "center",
+        alignItems: isMobile ? "center" : "flex-start",
         flexWrap: "wrap",
-        maxWidth: "1600px",
+        maxWidth: isMobile ? "90%" : "1600px",
         margin: "50px auto",
         padding: "30px",
         borderRadius: "20px",
@@ -52,8 +53,9 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial, selec
         gap: 3,
       }}
     >
+
       {/* Bloc des statistiques et tableau */}
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, width: isMobile ? "100%" : "auto" }}>
         <StatistiquesGrid data={data} selectedCommercial={selectedCommercial} />
 
         {/* Tableau Top du Mois */}

@@ -43,17 +43,24 @@ const StatistiquesGrid = ({
   }));
 
   return (
-    <Box sx={{ width: "100%", px: isMobile ? 2 : 6, mt: 4 }}>
+    <Box 
+      sx={{ 
+          width: "100%", 
+          px: isMobile ? 2 : 6, 
+          mt: 4,
+        }}>
       <Grid
         container
-        spacing={isMobile ? 2 : 4}
+        spacing={isMobile ? 3 : 4}
         justifyContent={isMobile ? "center" : "start"}
+        alignItems="center"
       >
         {/* Carte total d'avis */}
         <Grid item xs={12} sm={6} md={4}>
           <Box
             sx={{
-              width: "100%",
+              width: isMobile ? "100%" : "100%",
+              maxWidth: isMobile ? "300px" : "none",
               height: isMobile ? "180px" : "240px",
               borderRadius: 2,
               bgcolor: "#F2F3FB",
@@ -61,6 +68,7 @@ const StatistiquesGrid = ({
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              mx: isMobile ? "auto" : 0, 
             }}
           >
             <Rating value={5} precision={0.5} readOnly />
@@ -84,7 +92,8 @@ const StatistiquesGrid = ({
         <Grid item xs={12} sm={6} md={4}>
           <Box
             sx={{
-              width: "100%",
+              width: isMobile ? "100%" : "100%",
+              maxWidth: isMobile ? "300px" : "none",
               height: isMobile ? "180px" : "240px",
               borderRadius: 2,
               bgcolor: "#F2F3FB",
@@ -92,6 +101,7 @@ const StatistiquesGrid = ({
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              mx: isMobile ? "auto" : 0, 
             }}
           >
             <CustomLinearProgress
@@ -124,7 +134,8 @@ const StatistiquesGrid = ({
         <Grid item xs={12} sm={6} md={4}>
           <Box
             sx={{
-              width: "100%",
+              width: isMobile ? "100%" : "100%",
+              maxWidth: isMobile ? "300px" : "none",
               height: isMobile ? "180px" : "240px",
               borderRadius: 2,
               bgcolor: "#F2F3FB",
@@ -132,6 +143,7 @@ const StatistiquesGrid = ({
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              mx: isMobile ? "auto" : 0, 
             }}
           >
             <CustomLinearProgress

@@ -867,13 +867,92 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
         setRefresh(false);
     }
   }, []);
-  
 
+
+  const LAST_REVIEW_KEY = "lastReviewCheck";
+
+  const updateLastCheckDate = () => {
+    localStorage.setItem(LAST_REVIEW_KEY, new Date().toISOString());
+  };
+
+  const getLastCheckDate = () => {
+    return localStorage.getItem(LAST_REVIEW_KEY);
+  };
+  const lastCheckDate = new Date(getLastCheckDate());
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  // On garde la date la plus ancienne des deux
+  const pivotDate = lastCheckDate < twoDaysAgo ? lastCheckDate : twoDaysAgo;
+
+
+  const newReviews = reviews.filter((review) => {
+    return new Date(review.iso_date) > pivotDate;
+  });
+ 
   useEffect(() => {
     if (!loading && googleReviews.length === 0 && trustpilotReviews.length === 0) {
       fetchReviews();
     }
   }, [googleReviews, trustpilotReviews]);
+
+  const detectCommercialName = (reviewText, service) => {
+    const commerciauxParService = {
+      "Monbien": {
+        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+        "Joanna": ["Joanna", "Joana"],
+        "Johanna": ["Johanna"],
+        "Théo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
+      },
+      "Startloc": {
+        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+        "Mélanie": ["Mélanie", "Melanie", "Mel"],
+        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+        "Déborah": ["Déborah", "Deborah", "Debby"],
+        "Manon": ["Manon", "Mano", "Mannon"],
+      },
+      "Marketing automobile": {
+        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+        "Arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
+        "Élodie": ["Élodie", "Elodie", "Elo"],
+      },
+      "Marketing immobilier": {
+        "Jean-Simon": ["Jean-Simon", "Jean Simon", "J-Simon"],
+        "Océane": ["Océane", "Oceane"],
+        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+        "Johanna": ["Johanna"],
+      },
+      "Pige Online": {
+        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+        "Angela": ["Angela", "Angéla", "Angie"],
+        "Esteban": ["Esteban", "estebane"],
+      },
+      "Sinimo": {
+        "Anaïs": ["Anaïs", "Anais"],
+        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      }
+    };
+  
+    const text = reviewText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+    const serviceCommerciaux = commerciauxParService[service] || {};
+    for (const [nom, variants] of Object.entries(serviceCommerciaux)) {
+      for (const variant of variants) {
+        const variantNorm = variant.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (text.includes(variantNorm)) {
+          return nom;
+        }
+      }
+    }
+  
+    return null;
+  };
+
+  
   
 
   const refreshReviews = () => {
@@ -881,7 +960,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     fetchReviews();
   };
   useEffect(() => {
-    if (reviews.length === 0) return; // Éviter d'exécuter si aucun avis n'est chargé
+    if (reviews.length === 0) return; 
   
   
     // Initialisation des compteurs
@@ -983,7 +1062,11 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     trustpilotReviews,
     setDisplayLimit,
     ratingsCountAllTime,
-    commercialCountsYears
+    commercialCountsYears,
+    newReviewsCount : newReviews.length,
+    updateLastCheckDate,
+    newReviews,
+    detectCommercialName
   };
 };
 

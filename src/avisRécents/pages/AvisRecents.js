@@ -268,7 +268,7 @@ const AvisRecents = ({ onFilterChange }) => {
               borderColor: "#FF4D4D",
               color: "#FF4D4D",
               fontWeight: "bold",
-              width: isMobile ? "50%" : "300px",
+              width: isMobile ? "80%" : "300px",
               height: "30px",
               "&:hover": { backgroundColor: "#FFE5E5" },
             }}

@@ -2,11 +2,10 @@ import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
+import {Typography,Stack, Box} from '@mui/material';
 import NavLinks from './NavLinks';
-import MenuButton from './MenuButton';
+import useFetchReviews from '../../../hooks/components/useFetchReviews';
+
 
 const links = [
   { path: "/", label: "Tableau de bord" },
@@ -15,8 +14,9 @@ const links = [
   { path: "/statistiques", label: "Statistiques" },
 ];
 
+function SideMenuMobile({ open, toggleDrawer, newReviews}) {
+  const { detectCommercialName } = useFetchReviews();
 
-function SideMenuMobile({ open, toggleDrawer }) {
   return (
     <Drawer
       anchor="right"
@@ -51,9 +51,6 @@ function SideMenuMobile({ open, toggleDrawer }) {
               Smaïl El Hajjar
             </Typography>
           </Stack>
-          <MenuButton showBadge>
-            <NotificationsRoundedIcon />
-          </MenuButton>
         </Stack>
         <Divider />
           {/* Liens de navigation */}
@@ -62,6 +59,33 @@ function SideMenuMobile({ open, toggleDrawer }) {
               <NavLinks key={link.path} label={link.label} path={link.path} />
             ))}
         </Stack>
+        <Stack sx={{display: "flex", justifyContent: "center", alignItems: "center", mt: 2}}>
+          <Divider />
+          {Array.isArray(newReviews) && newReviews.length > 0 ? (
+            newReviews.slice(0, 5).map((review, index) => {
+              const commercial = detectCommercialName(review.text || "", review.service);
+              return (
+                <Box key={index} sx={{ p: 1, bgcolor: "#F2F3FB", borderRadius: 2 }}>
+                  <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
+                    {review.service} {commercial && `– ${commercial}`}
+                  </Typography>
+                  <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
+                    {review.text.length > 1000
+                      ? `${review.text.substring(0, 50)}...`
+                      : review.text
+                    }
+                   
+                  </Typography>
+                </Box>
+              );
+            })
+          ) : (
+            <Typography sx={{ fontSize: "14px", color: "text.secondary" }}>
+              Aucun nouvel avis
+            </Typography>
+          )}
+        </Stack>
+
       </Stack>
     </Drawer>
   );

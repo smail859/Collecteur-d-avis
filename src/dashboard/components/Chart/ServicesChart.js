@@ -17,7 +17,6 @@ const ServicesChart = () => {
   const theme = useTheme(); // Récupérer le thème actuel
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
-  const [selectedServiceMobile, setSelectedServiceMobile] = useState("Monbien");
 
   const [selectedFilters, setSelectedFilters] = useState({
     period: '30days',
@@ -257,11 +256,19 @@ const ServicesChart = () => {
               }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend
-              verticalAlign="bottom"
-              align="center"
-              wrapperStyle={{ marginTop: 20 }}
-            />
+            {isMobile ? (
+              <Typography
+                variant="caption"
+                sx={{ color: theme.palette.text.secondary, marginTop: 2 }}
+              >
+              </Typography>
+            ) : (
+              <Legend
+                verticalAlign="bottom"
+                align="center"
+                wrapperStyle={{ marginTop: 20 }}
+              />
+            )}
             {chartData.length > 0 &&
               Object.keys(chartData[0])
                 .filter(key => key !== "period" && key !== "date")
@@ -280,9 +287,6 @@ const ServicesChart = () => {
           </BarChart>
         </ResponsiveContainer>
 
-
-     
-          
       </Box>
     </Box>
   );
