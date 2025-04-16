@@ -1,5 +1,4 @@
-import React from 'react';
-import { Container, Box } from '@mui/material';
+import { Container, Box, useMediaQuery, useTheme } from '@mui/material';
 import NavLinks from "../components/NavBar/NavLinks";
 import icon from '../../image/icon.png';
 import AddIcon from '@mui/icons-material/Add';
@@ -14,6 +13,10 @@ const links = [
 ];
 
 const Footer = () => {
+  const theme = useTheme(); // Récupérer le thème actuel
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  if (isMobile) return null; // Affichage désactivé sur mobile
+
   return (
     <footer 
       style={{

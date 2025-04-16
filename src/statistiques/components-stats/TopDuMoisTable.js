@@ -1,8 +1,13 @@
-import { Box } from "@mui/material";
+import { Box,useTheme, useMediaQuery } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 
 // Composant pour afficher le Top du mois
 const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, selectedRank, isSelectedInTop3, isSelectedCommercialValid, reviews}) => {
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
+    if (isMobile) return null;
   
   const getRankStyle = (rank, isActive) => ({
     background: isActive ? "red" : rank === 1 ? "linear-gradient(to right, #8B5CF6, #2972FF)" : rank === 2 ? "transparent" : rank === 3 ? "#FFF" : "transparent",
@@ -10,11 +15,6 @@ const TopDuMoisTable = ({ top3, selectedCommercial, selectedCommercialData, sele
     borderBottom: "none"
   });
 
-
-
-  // Récuperer les avis de chaque commercial dans le top 3 uniquement 
-  // Vérifier la note de chaque avis 
-  // Faire la moyenne de chaque notes pour chaque commercial 
   const normalizeText = (text) => {
     if (!text || typeof text !== "string") return "";
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

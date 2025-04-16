@@ -1,17 +1,20 @@
-import { Card, CardContent, Typography, Stack, CircularProgress } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  CircularProgress,
+  useMediaQuery,
+  useTheme
+} from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import PropTypes from 'prop-types';
-import useFetchReviews from "../../hooks/components/useFetchReviews"
-
-
-/**
- * Recuperer l'ensemble des avis de tous les services
- * Calculer combien d'avis nous avons eu 
- * Afficher le nombre d'avis recoltés
-*/
+import useFetchReviews from "../../hooks/components/useFetchReviews";
 
 function StatCard() {
   const { totalReviews, loading } = useFetchReviews();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <Card
@@ -21,12 +24,12 @@ function StatCard() {
         textAlign: 'center',
         backgroundColor: 'white',
         borderRadius: '16px',
-        p: 2,
-        boxShadow: 'none'
+        p: isMobile ? 2 : 4,
+        boxShadow: 'none',
       }}
     >
       <CardContent>
-        {/* Icône étoiles */}
+        {/* Bloc étoiles */}
         <Stack
           direction="row"
           spacing={0.5}
@@ -35,28 +38,28 @@ function StatCard() {
             display: 'flex',
             justifyContent: "center",
             alignItems: 'center',
-            mb: 2,
+            mb: isMobile ? 1 : 2,
             backgroundColor: "#F2F3FB",
-            width: "200px",
-            maxHeight: "72px",
-            padding: "20px",
+            width: isMobile ? "150px" : "200px",
+            height: isMobile ? "48px" : "72px",
+            padding: isMobile ? "12px" : "20px",
             borderRadius: "20px"
           }}
         >
           {[...Array(5)].map((_, index) => (
-            <StarIcon key={index} sx={{ color: '#FFA726', fontSize: '20px' }} />
+            <StarIcon key={index} sx={{ color: '#FFA726', fontSize: isMobile ? '16px' : '20px' }} />
           ))}
         </Stack>
 
-        {/* Nombre d'avis collectés OU loader */}
+        {/* Nombre d’avis ou loader */}
         {loading ? (
-          <CircularProgress size={90} sx={{ my: 2 }} />
+          <CircularProgress size={isMobile ? 60 : 90} sx={{ my: 2 }} />
         ) : (
           <Typography
             variant="h4"
             fontWeight="bold"
             sx={{
-              fontSize: '120px',
+              fontSize: isMobile ? '60px' : '120px',
               background: 'linear-gradient(180deg, #2972FF -123%, #8B5CF6 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
@@ -66,13 +69,13 @@ function StatCard() {
           </Typography>
         )}
 
-        {/* Texte "Avis collectés" */}
+        {/* Titre */}
         <Typography
           variant="subtitle1"
           sx={{
             color: '#6366F1',
             fontWeight: '500',
-            fontSize: "54px"
+            fontSize: isMobile ? '28px' : "54px"
           }}
         >
           Avis collectés
@@ -82,14 +85,12 @@ function StatCard() {
   );
 }
 
-
 StatCard.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.number).isRequired,
-  interval: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  trend: PropTypes.oneOf(['down', 'neutral', 'up']).isRequired,
-  value: PropTypes.string.isRequired,
+  data: PropTypes.arrayOf(PropTypes.number),
+  interval: PropTypes.string,
+  title: PropTypes.string,
+  trend: PropTypes.oneOf(['down', 'neutral', 'up']),
+  value: PropTypes.string,
 };
-
 
 export default StatCard;

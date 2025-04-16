@@ -1,10 +1,13 @@
-import { Box } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import PropTypes from "prop-types";
 import ProgressionSection from "../components-stats/ProgressionSection";
 import TopDuMoisTable from "../components-stats/TopDuMoisTable";
 import StatistiquesGrid from "../components-stats/StatistiquesGrid";
 
 const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial, selectedRank, isSelectedInTop3, isSelectedCommercialValid, filteredReviews, reviews }) => {
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   // Trier et extraire le top 3
   const top3 = [...tableauCommerciaux]
     .sort((a, b) => b.count - a.count)
@@ -54,7 +57,7 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial, selec
         <StatistiquesGrid data={data} selectedCommercial={selectedCommercial} />
 
         {/* Tableau Top du Mois */}
-        <Box sx={{ marginTop: "30px", bgcolor: "#F2F3FB", borderRadius: "20px", padding: "20px" }}>
+        <Box sx={{ marginTop: "30px", bgcolor: "#F2F3FB", borderRadius: "20px", padding: "20px", display: isMobile ? "none" : "block" }}>
           <TopDuMoisTable
             top3={top3}
             selectedCommercial={selectedCommercial}
@@ -74,7 +77,7 @@ const ChartStatistiques = ({ data, tableauCommerciaux, selectedCommercial, selec
           height: "700px",
           borderRadius: "20px",
           bgcolor: "#F2F3FB",
-          display: "flex",
+          display: isMobile ? "none" : "flex",
           flexDirection: "column",
           alignItems: "center",
           position: "relative",

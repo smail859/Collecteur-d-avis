@@ -1,10 +1,12 @@
 import  {useState} from "react";
-import { Chip, Stack, Box} from "@mui/material";
+import { Chip, Stack, Box,useMediaQuery, useTheme} from "@mui/material";
 import PropTypes from "prop-types";
 import CustomDropdown from "./CustomDropdown";
 
 
 const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, handleCommercialChange, selectedService }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedValues, setSelectedValues] = useState(
     servicesChip.reduce((acc, service) => {
@@ -39,10 +41,11 @@ const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, ha
       >
         <Box
           sx={{
-            maxWidth: "1600px",
+            maxWidth: isMobile ? "100%" : "1600px",
             padding: "7px",
             borderRadius: "15px",
             display: "flex",
+            flexDirection : isMobile ? "column" : "row",
             flexWrap: "wrap",
             gap: 1,
             ...sx,

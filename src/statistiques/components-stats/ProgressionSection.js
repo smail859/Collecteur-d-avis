@@ -1,9 +1,15 @@
 import Wave from "react-wavify";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography,useTheme, useMediaQuery } from "@mui/material";
 
 // Composant pour la progression avec les flammes et la vague animée
 const ProgressionSection = ({ commercialCountMount, commercialCountYears, isYearly }) => {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  if (isMobile) return null;
+  
   const OBJECTIF_MENSUEL = 10;
   const OBJECTIF_ANNUEL = 120;
   const BASE_HEIGHT = 0; // La vague commence avec une hauteur de 0%

@@ -4,14 +4,17 @@ import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Box, Button, Modal, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Modal, Grid, Stack, Typography,useMediaQuery, useTheme } from "@mui/material";
 import ListChipFiltre from "../avisRécents/components/ListChipFiltre";
 
 const CalendarDate = ({ onPeriodChange }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [open, setOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("Toutes les périodes");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
 
   // Filtres disponibles pour la période
   const dataFilters = [
@@ -43,7 +46,7 @@ const CalendarDate = ({ onPeriodChange }) => {
 
       if (start) {
         onPeriodChange({ start: start.format("YYYY-MM-DD"), end: now.format("YYYY-MM-DD") });
-        setOpen(false); // ✅ Ferme la modal immédiatement après sélection
+        setOpen(false); // Ferme la modal immédiatement après sélection
       }
     }
   };
@@ -75,7 +78,7 @@ const CalendarDate = ({ onPeriodChange }) => {
           color: "#8B5CF6", 
           fontWeight: "bold",
           borderRadius: "20px", 
-          width: "20%",
+          width: isMobile ? "50%" : "20%",
           padding: "10px 20px",
           boxShadow: "none", 
         }}
@@ -91,12 +94,11 @@ const CalendarDate = ({ onPeriodChange }) => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 600,
+            width: isMobile ? 400 : 600,
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
             borderRadius: "12px",
-
           }}
         >
           <Typography variant="h6" fontWeight="bold" textAlign="center" mb={2}>

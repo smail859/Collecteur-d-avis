@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import CustomDropdown from "./CustomDropdown";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 const ListChipFiltre = ({ filters, onChangeFilters, dataFilters }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+    
+    <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "center", gap: "10px" }}>
       {dataFilters.map(({ name, label, options }) => (
         <CustomDropdown
           key={name}

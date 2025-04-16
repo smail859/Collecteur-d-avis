@@ -949,6 +949,9 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     // Mettre à jour les états
     setReviewsCountByService(countByService);
     setAvgRatingByService(avgRatingByService);
+
+
+    console.log(avgRatingByService)
   
   }, [reviews, googleReviews, trustpilotReviews]); // Ajout des dépendances
 

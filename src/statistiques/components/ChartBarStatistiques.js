@@ -1,4 +1,4 @@
-import { Typography, Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Typography, Box, ToggleButton, ToggleButtonGroup, useMediaQuery, useTheme} from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import PropTypes from "prop-types";
 import Wave from "react-wavify";
@@ -14,6 +14,9 @@ const ChartBarStatistiques = ({
   totalAvisParCommercialParService,
   commercialCountsYears,
 }) => {
+    
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [selectedFilter, setSelectedFilter] = useState("gains");
 
   const totalAvisGraph = commercialCountsYears?.resultYears || [];
@@ -163,7 +166,7 @@ const ChartBarStatistiques = ({
           height: "760px",
           borderRadius: "20px",
           bgcolor: "#F2F3FB",
-          display: "flex",
+          display: isMobile ? "none" : "flex",
           flexDirection: "column",
           alignItems: "center",
           position: "relative",

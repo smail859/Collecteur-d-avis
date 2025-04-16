@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
-import { Typography, Grid, Box } from '@mui/material';
+import { useMemo, useState, useEffect } from 'react';
+import { Typography, Grid, Box,  useMediaQuery, useTheme } from '@mui/material';
 import ServicesTable from './Chart/ServicesTable';
 import ServicesChart from './Chart/ServicesChart';
 import StatCard from './StatCard';
@@ -22,6 +22,8 @@ import PIGEONLINE from "../../image/PIGEONLINE.png";
  * Affiche le tableau de bord avec les statistiques, le tableau des services et les graphiques.
  */
 export default function MainGrid() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
   const { totalReviews, selectedFilter, reviewsCountByService,avgRatingByService, averageRatingLastTwoMonths} = useFetchReviews();
   // État pour gérer le filtre actif du graphique
@@ -161,11 +163,11 @@ export default function MainGrid() {
 
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '1900px', margin: 'auto', p: 2, marginTop: "100px" }}>
+    <Box sx={{ width: '100%', maxWidth: '1900px', margin: 'auto', p: 2, marginTop: isMobile ? "0px" : "100px" }}>
       {/* En-tête */}
       <Typography variant="h2" textAlign="center" gutterBottom>
-        <span style={{ fontWeight: 'bold', color: "#121826" }}>Tableau de bord </span>
-        <span style={{ color: '#8B5CF6', fontWeight: "200" }}>des performances et retours clients du groupe Realty</span>
+        <span style={{ fontWeight: 'bold', color: "#121826", fontSize: isMobile ? "30px" :  "52px" }}>Tableau de bord </span>
+        <span style={{ color: '#8B5CF6', fontWeight: "200", fontSize: isMobile ? "30px" :  "52px" }}>des performances et retours clients du groupe Realty</span>
       </Typography>
       <Typography variant="h6" sx={{ color: "#121826", textAlign: 'center', mb: "64px", mt: "80px" }}>
         Tous les retours clients pour l'ensemble des services en un seul coup d'œil

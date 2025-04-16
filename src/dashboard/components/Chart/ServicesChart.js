@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { useTheme } from '@mui/material/styles'; 
 import ToggleButtonGroup from '../../../avisRécents/components/ToggleButtonGroup';
 import {
   BarChart,
@@ -11,11 +10,14 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, useMediaQuery,useTheme, Select, MenuItem  } from '@mui/material';
 import useFetchReviews from '../../../hooks/components/useFetchReviews';
 
 const ServicesChart = () => {
   const theme = useTheme(); // Récupérer le thème actuel
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  const [selectedServiceMobile, setSelectedServiceMobile] = useState("Monbien");
 
   const [selectedFilters, setSelectedFilters] = useState({
     period: '30days',
@@ -58,7 +60,10 @@ const ServicesChart = () => {
           border: `1px solid ${theme.palette.divider}`,
           padding: '10px',
           borderRadius: '4px',
-          color: theme.palette.text.primary // Texte adaptable
+          color: theme.palette.text.primary, // Texte adaptable
+          display: isMobile ? "flex" : "block",
+          flexDirection:isMobile ? "row" : "column",
+          justifyContent:isMobile ? "center" : "flex-start",
         }}>
           <p>{selectedFilters.rating ? `Période : ${label}` : `Date : ${label}`}</p>
           {payload.map((item, index) => (
@@ -77,6 +82,7 @@ const ServicesChart = () => {
       key: "service",
       label: "Service",
       value: selectedFilters.service,
+      
       options: [{ label: "Tous les services", value: "" }].concat(
         Object.keys(periodData).reduce((services, platform) => {
           Object.keys(periodData[platform]).forEach(service => {
@@ -198,6 +204,7 @@ const ServicesChart = () => {
     }
   }, [reviewsPerPeriod, selectedFilters, ratingsCount]);
 
+
   return (
     <Box sx={{ display: 'flex', flexDirection: "column", mt: 3 }}>
       <Typography 
@@ -217,27 +224,36 @@ const ServicesChart = () => {
           p: 6,
           borderRadius: '16px',
           backgroundColor: theme.palette.background.paper, // Fond adaptatif
-          mt: 4,
+          mt:5,
           boxShadow: theme.shadows[3], // Ombre adaptable
           overflow: 'hidden'
         }}
       >
+
         <ToggleButtonGroup filters={filters} onFilterChange={handleFilterChange} />
 
-        <ResponsiveContainer width="100%" height={500}>
-          <BarChart data={chartData} margin={{ top: 30, right: 40, left: 20, bottom: 80 }}>
+        <ResponsiveContainer width="100%" height={isMobile ? 300 : 500}>
+          <BarChart       
+            data={chartData}
+            margin={{
+              top: 30,
+              right: isMobile ? 10 : 40,
+              left: isMobile ? 10 : 20,
+              bottom: isMobile ? 40 : 80,
+            }}
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} /> 
             <XAxis
               dataKey={selectedFilters.rating ? "period" : "date"}
               tickFormatter={date => new Date(date).toLocaleDateString()}
-              style={{ fontSize: '12px', fill: theme.palette.text.secondary }}
+              style={{ fontSize: isMobile ? '10px' : '12px', fill: theme.palette.text.secondary }}
             />
             <YAxis
               label={{
                 value: "Nombre d'avis",
                 angle: -90,
                 position: 'insideLeft',
-                style: { fontSize: '12px', fill: theme.palette.text.secondary }
+                style: { fontSize: isMobile ? '10px' : '12px', fill: theme.palette.text.secondary }
               }}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -263,6 +279,10 @@ const ServicesChart = () => {
             }
           </BarChart>
         </ResponsiveContainer>
+
+
+     
+          
       </Box>
     </Box>
   );

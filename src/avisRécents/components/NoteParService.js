@@ -1,4 +1,4 @@
-import { Card, Box, Typography, Rating, LinearProgress } from '@mui/material';
+import { Card, Box, Typography, Rating, LinearProgress, useMediaQuery, useTheme} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import StarIcon from '@mui/icons-material/Star';
 import PropTypes from "prop-types";
@@ -21,24 +21,27 @@ const NoteParService = ({
   nombreAvis,
   progress 
 }) => {
+  const theme = useTheme(); // Récupérer le thème actuel
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   return (
     <Box 
       sx={{ 
         display: "flex",
-        flexDirection: "row",
+        flexDirection: isMobile ? "column" : "row",
         justifyContent: "center",
-        alignItems: "center",
-        minWidth: "1599px",  
-        height: "auto",
-        padding: "34px",
+        alignItems: isMobile ? "flex-start" : "center",
+        width: isMobile ? "100%" : "1600px",
+        px: isMobile ? 2 : 5,
+        py: isMobile ? 3 : 5,
         backgroundColor: '#F2F3FB',
         borderRadius: '20px',
         border: '1px solid #F2F3FB',
         margin: 'auto',
         marginBottom: '34px',
-        boxShadow:" rgba(0, 0, 0, 0.10) 0px 1px 4px"
+        boxShadow: "rgba(0, 0, 0, 0.10) 0px 1px 4px"
       }}
     >
+    {/* Titre */}
       {/* Première Card */}
       <Box sx={{
         display: 'flex',
@@ -48,7 +51,9 @@ const NoteParService = ({
       }}>
         <Card sx={{ 
             height: "auto",
-            width: 'auto',
+            width: isMobile ? '100%' : 'auto',
+            mb: isMobile ? 3 : 0,
+            p: isMobile ? 2 : 4,
             borderRadius: '15px', 
             boxShadow: 2, 
             display: 'flex',
@@ -76,19 +81,18 @@ const NoteParService = ({
                   <Typography color="black" fontSize={"16px"}>{nombreAvis} avis</Typography>
               </Box>
             </Box>
-
             {/* Note + Étoiles */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Typography sx={{ display: 'flex', alignItems: 'center', fontSize: '54px', fontWeight: '800'}}>
+              <Typography sx={{ display: 'flex', alignItems: 'center', fontSize: isMobile ? "26px" : "54px", fontWeight: '800'}}>
                 {noteService}
-                <SouthEastOutlinedIcon sx={{ color: 'red', fontSize: "40px", marginLeft: '4px' }}/>
+                <SouthEastOutlinedIcon sx={{ color: 'red', fontSize: isMobile ? "30px" : "40px", marginLeft: '4px' }}/>
               </Typography>
               <Rating 
                 name="half-rating-read" 
                 value={parseFloat(noteService) || 0}
                 precision={0.1} 
                 readOnly 
-                sx={{fontSize: "40px"}}
+                sx={{fontSize: isMobile ? "30px" : "40px"}}
               />
 
             </Box>
@@ -96,12 +100,15 @@ const NoteParService = ({
       </Box>
 
       {/* Barre de progression des avis */}
-      <Box sx={{
-        width: '225%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-      }}>
+      <Box
+        sx={{
+          width: isMobile ? '100%' : '225%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: isMobile ? 1.5 : '12px',
+        }}
+      >
+
         {[5, 4, 3, 2, 1].map((note) => (
           <Box 
             key={note}

@@ -1,6 +1,6 @@
 import ChartStatistiques from "../components/ChartStatistiques";
 import ChartBarStatistiques from "../components/ChartBarStatistiques";
-import { Typography, Button, Box } from "@mui/material";
+import { Typography, Button, Box,useMediaQuery, useTheme } from "@mui/material";
 import { useState } from "react";
 import MonbienRadius from "../../image/MonbienRadius.png";
 import MARadius from "../../image/MARadius.png";
@@ -72,12 +72,26 @@ const Statistiques = () => {
   // Couleurs
   const colors = ["#7B61FF", "#E3E4FE"];
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box>
-      <Typography variant="h2" textAlign="left" ml="180px" mt="50px" gutterBottom>
-        <span style={{ fontWeight: "bold", color: "#121826" }}>Statistiques détaillées</span>
-        <span style={{ color: "#8B61FF", fontWeight: "200" }}> par collaborateur</span>
+      <Typography
+        variant="h2"
+        sx={{
+          textAlign: isMobile ? "center" : "left",
+          mx: isMobile ? "auto" : "180px",
+          mt: isMobile ? "30px" : "50px",
+          fontSize: isMobile ? "26px" : "54px",
+          fontWeight: 900,
+        }}
+        gutterBottom
+      >
+        <span style={{ color: "#121826" }}>Statistiques détaillées</span>{" "}
+        <span style={{ color: "#8B61FF", fontWeight: 200 }}>par collaborateur</span>
       </Typography>
+
 
       {/* Sélection des commerciaux */}
       <ListChip
@@ -87,44 +101,51 @@ const Statistiques = () => {
         variant="select"
       />
 
-        {/* Bloc si aucun commercial sélectionné */}
-        {!selectedCommercial && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              height: "415px",
-              mx: "auto",
-              mt: 6,
-              maxWidth: "950px",
-              px: 4,
-              
-            }}
-          >
-            <Typography
-              variant="h5"
-              textAlign="center"
-              fontWeight={600}
-              color= "#8B61FF"
+        
 
-            >
-              Veuillez sélectionner un commercial pour afficher les statistiques
-            </Typography>
-            <ArrowUpwardOutlinedIcon sx={{ fontSize: 40, color: "#8B61FF", mr: 2 }} />
-          </Box>
-        )}
+      {/* Bloc si aucun commercial sélectionné */}
+      {!selectedCommercial && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "row",
+            height: "415px",
+            mx: "auto",
+            mt: 6,
+            maxWidth: "950px",
+            px: 4,
+            
+          }}
+        >
+          <Typography
+            variant="h5"
+            textAlign="center"
+            fontWeight={600}
+            color= "#8B61FF"
+
+          >
+            Veuillez sélectionner un commercial pour afficher les statistiques
+          </Typography>
+          <ArrowUpwardOutlinedIcon sx={{ fontSize: 40, color: "#8B61FF", mr: 2 }} />
+        </Box>
+      )}
 
 
 
       {selectedCommercial && (
         <>
-          <Typography variant="h4" textAlign="start" mt={5} ml="180px">
+          <Typography   
+            textAlign={isMobile ? "center" : "left"}
+            mt={isMobile ? 4 : 5}
+            ml={isMobile ? 0 : "180px"}
+            sx={{ fontSize: isMobile ? "20px" : "32px" }}
+            >
             <span style={{ color: "#8B61FF", fontWeight: "500" }}>Bilan de {selectedCommercial}</span>
             <span style={{ fontWeight: "bold", color: "#121826" }}> pour le mois en cours</span>
           </Typography>
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 3, alignItems: 'center' }}>
+          <Box sx={{ display: isMobile ? "none" : "flex", justifyContent: "center", mt: 3, alignItems: 'center' }}>
             <Button
               onClick={generatePDF}
               variant="contained"
@@ -149,7 +170,11 @@ const Statistiques = () => {
             filteredReviews={filteredReviews}
           />
 
-          <Typography variant="h4" textAlign="left" ml="180px" mt="50px" gutterBottom>
+          <Typography variant="h4"             
+            textAlign={isMobile ? "center" : "left"}
+            mt={isMobile ? 4 : 5}
+            ml={isMobile ? 0 : "180px"}
+            sx={{ fontSize: isMobile ? "20px" : "32px" }}gutterBottom>
             <span style={{ fontWeight: "bold", color: "#121826" }}>Bilan annuel </span>
             <span style={{ color: "#8B61FF", fontWeight: "500" }}>de {selectedCommercial}</span>
           </Typography>

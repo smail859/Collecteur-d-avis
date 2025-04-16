@@ -1,14 +1,20 @@
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-
+import NavLinks from './NavLinks';
 import MenuButton from './MenuButton';
+
+const links = [
+  { path: "/", label: "Tableau de bord" },
+  { path: "/avisRecents", label: "Avis récents" },
+  { path: "/collecterAvis", label: "Collecter des avis" },
+  { path: "/statistiques", label: "Statistiques" },
+];
+
 
 function SideMenuMobile({ open, toggleDrawer }) {
   return (
@@ -27,7 +33,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
       <Stack
         sx={{
           maxWidth: '70dvw',
-          height: '100%',
+          height: '50%',
         }}
       >
         <Stack direction="row" sx={{ p: 5, pb: 0, gap: 1 }}>
@@ -37,7 +43,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
           >
             <Avatar
               sizes="small"
-              alt="Riley Carter"
+              alt="Smaïl El Hajjar"
               src="/static/images/avatar/7.jpg"
               sx={{ width: 24, height: 24 }}
             />
@@ -50,13 +56,11 @@ function SideMenuMobile({ open, toggleDrawer }) {
           </MenuButton>
         </Stack>
         <Divider />
-        <Stack sx={{ flexGrow: 1 }}>
-          <Divider />
-        </Stack>
-        <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
-            Logout
-          </Button>
+          {/* Liens de navigation */}
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            {links.map((link) => (
+              <NavLinks key={link.path} label={link.label} path={link.path} />
+            ))}
         </Stack>
       </Stack>
     </Drawer>
