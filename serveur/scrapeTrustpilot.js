@@ -1,10 +1,22 @@
-const chromium = require("chrome-aws-lambda");
-const puppeteer = require("puppeteer-core");
 const crypto = require("crypto");
 const { Review } = require("./model/model");
 require("dotenv").config();
 
+
+const isLocal = process.env.NODE_ENV !== "production";
+
+const puppeteer = isLocal
+  ? require("puppeteer")
+  : require("puppeteer-core");
+const chromium = isLocal ? null : require("chrome-aws-lambda");
+
 const launchBrowserWithFallback = async () => {
+  if (isLocal) {
+    console.log("🖥️ Lancement local avec Puppeteer standard");
+    return puppeteer.launch({ headless: true });
+  }
+
+  console.log("☁️ Lancement cloud avec chrome-aws-lambda");
   return puppeteer.launch({
     args: chromium.args,
     executablePath: await chromium.executablePath,
@@ -12,6 +24,7 @@ const launchBrowserWithFallback = async () => {
     defaultViewport: chromium.defaultViewport,
   });
 };
+
 
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
   let browser;
