@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+/* App.css (corrigé) */
 
 .App {
   text-align: center;
@@ -23,6 +23,7 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
+  font-family: 'Montserrat', sans-serif;
   color: white;
 }
 

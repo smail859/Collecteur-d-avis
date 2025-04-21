@@ -125,7 +125,7 @@ const CalendarDate = ({ onPeriodChange }) => {
                 label="Date de début"
                 value={startDate}
                 onChange={(newValue) => handleCustomDateChange(newValue, "start")}
-                sx={{ width: "100%" }}
+                sx={{ width: "100%", color: "balck" }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -133,7 +133,7 @@ const CalendarDate = ({ onPeriodChange }) => {
                 label="Date de fin"
                 value={endDate}
                 onChange={(newValue) => handleCustomDateChange(newValue, "end")}
-                sx={{ width: "100%" }}
+                sx={{ width: "100%", color: "balck" }}
               />
             </Grid>
           </Grid>
@@ -154,7 +154,7 @@ const CalendarDate = ({ onPeriodChange }) => {
               Annuler
             </Button>
 
-            {/* ✅ Bouton activé seulement si l'utilisateur choisit une période personnalisée */}
+            {/* Bouton activé seulement si l'utilisateur choisit une période personnalisée */}
             {startDate && endDate && (
               <Button
                 variant="contained"
@@ -171,7 +171,7 @@ const CalendarDate = ({ onPeriodChange }) => {
                   "&:hover": { backgroundColor: "#5A4DE7" },
                 }}
               >
-                ✅ Valider la sélection
+                Valider la sélection
               </Button>
             )}
           </Stack>

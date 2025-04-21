@@ -4,7 +4,6 @@ import Divider from '@mui/material/Divider';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 import {Typography,Stack, Box} from '@mui/material';
 import NavLinks from './NavLinks';
-import useFetchReviews from '../../../hooks/components/useFetchReviews';
 
 
 const links = [
@@ -14,9 +13,7 @@ const links = [
   { path: "/statistiques", label: "Statistiques" },
 ];
 
-function SideMenuMobile({ open, toggleDrawer, newReviews}) {
-  const { detectCommercialName } = useFetchReviews();
-
+function SideMenuMobile({ open, toggleDrawer }) {
   return (
     <Drawer
       anchor="right"
@@ -30,17 +27,10 @@ function SideMenuMobile({ open, toggleDrawer, newReviews}) {
         },
       }}
     >
-      <Stack
-        sx={{
-          maxWidth: '70dvw',
-          height: '50%',
-        }}
-      >
+      <Stack sx={{ maxWidth: '70dvw', height: '100%' }}>
+        {/* En-tête utilisateur */}
         <Stack direction="row" sx={{ p: 5, pb: 0, gap: 1 }}>
-          <Stack
-            direction="row"
-            sx={{ gap: 1, alignItems: 'center', flexGrow: 1, p: 1 }}
-          >
+          <Stack direction="row" sx={{ gap: 1, alignItems: 'center', flexGrow: 1, p: 1 }}>
             <Avatar
               sizes="small"
               alt="Smaïl El Hajjar"
@@ -52,44 +42,23 @@ function SideMenuMobile({ open, toggleDrawer, newReviews}) {
             </Typography>
           </Stack>
         </Stack>
+
         <Divider />
-          {/* Liens de navigation */}
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            {links.map((link) => (
-              <NavLinks key={link.path} label={link.label} path={link.path} />
-            ))}
-        </Stack>
-        <Stack sx={{display: "flex", justifyContent: "center", alignItems: "center", mt: 2}}>
-          <Divider />
-          {Array.isArray(newReviews) && newReviews.length > 0 ? (
-            newReviews.slice(0, 5).map((review, index) => {
-              const commercial = detectCommercialName(review.text || "", review.service);
-              return (
-                <Box key={index} sx={{ p: 1, bgcolor: "#F2F3FB", borderRadius: 2 }}>
-                  <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
-                    {review.service} {commercial && `– ${commercial}`}
-                  </Typography>
-                  <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
-                    {review.text.length > 1000
-                      ? `${review.text.substring(0, 50)}...`
-                      : review.text
-                    }
-                   
-                  </Typography>
-                </Box>
-              );
-            })
-          ) : (
-            <Typography sx={{ fontSize: "14px", color: "text.secondary" }}>
-              Aucun nouvel avis
-            </Typography>
-          )}
+
+        {/* Liens de navigation */}
+        <Stack spacing={2} sx={{ mt: 2 }}>
+          {links.map((link) => (
+            <Box key={link.path} onClick={toggleDrawer(false)}>
+              <NavLinks label={link.label} path={link.path} />
+            </Box>
+          ))}
         </Stack>
 
       </Stack>
     </Drawer>
   );
 }
+
 
 SideMenuMobile.propTypes = {
   open: PropTypes.bool,

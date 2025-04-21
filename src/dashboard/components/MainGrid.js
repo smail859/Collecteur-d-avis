@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Typography, Grid, Box,  useMediaQuery, useTheme } from '@mui/material';
+import { Typography, Grid2, Box,  useMediaQuery, useTheme } from '@mui/material';
 import ServicesTable from './Chart/ServicesTable';
 import ServicesChart from './Chart/ServicesChart';
 import StatCard from './StatCard';
@@ -23,9 +23,8 @@ import PIGEONLINE from "../../image/PIGEONLINE.png";
  */
 export default function MainGrid() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
-  const { totalReviews, selectedFilter, reviewsCountByService,avgRatingByService, averageRatingLastTwoMonths} = useFetchReviews();
+  const {selectedFilter, reviewsCountByService,avgRatingByService, averageRatingLastTwoMonths} = useFetchReviews();
   // État pour gérer le filtre actif du graphique
   const [activeFilter, setActiveFilter] = useState(selectedFilter);
 
@@ -163,37 +162,70 @@ export default function MainGrid() {
 
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '1900px', margin: 'auto', p: 2, marginTop: isMobile ? "0px" : "100px" }}>
-      {/* En-tête */}
-      <Typography variant="h2" textAlign="center" gutterBottom>
-        <span style={{ fontWeight: 'bold', color: "#121826", fontSize: isMobile ? "30px" :  "52px" }}>Tableau de bord </span>
-        <span style={{ color: '#8B5CF6', fontWeight: "200", fontSize: isMobile ? "30px" :  "52px" }}>des performances et retours clients du groupe Realty</span>
-      </Typography>
-      <Typography variant="h6" sx={{ color: "#121826", textAlign: 'center', mb: "64px", mt: "80px" }}>
-        Tous les retours clients pour l'ensemble des services en un seul coup d'œil
-      </Typography>
-
-      {/* Statistiques et actions */}
-      <Grid container sx={{ mb: 4, mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCard title="Avis collectés" value={totalReviews} />
-        </Grid>
-        <Grid item sx={{ marginLeft: '50px' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, mt: 2 }}>
-            <ActionButtons buttons={myButtons} />
+    <>
+    {/* SECTION 1 : Dégradé haut */}
+    <Box
+      sx={{
+        background: "linear-gradient(165deg, #EDEFFF 0%, #D0D9FF 50%, #FFFFFF 100%)",
+        py: 8,
+        overflow: 'hidden', // Pour éviter des débordements
+      }}
+    >
+      <Box sx={{ maxWidth: 1600, mx: "auto", px: 2, textAlign: "center" }}>
+        {/* TITRE */}
+        <Typography variant="h1">
+          <Box component="span" sx={{ color: theme.palette.text.primary }}>
+            Tableau de bord{" "}
           </Box>
-        </Grid>
-      </Grid>
-
-      {/* Tableau des services et graphique */}
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={6}>
-          <ServicesTable services={servicesData} />
-        </Grid>
-        <Grid item xs={12} md={6} mt={2}>
-        <ServicesChart/>
-        </Grid>
-      </Grid>
+          <Box component="span" sx={{ color: theme.palette.custom.violetRealty, fontWeight: 400 }}>
+            des performances et retours clients du groupe Realty
+          </Box>
+        </Typography>
+  
+        {/* SOUS-TITRE */}
+        <Typography variant="subtitle1" sx={{ mt: 2 }}>
+          Tous les retours clients pour l'ensemble des services en un seul coup d'œil
+        </Typography>
+  
+        {/* GRILLE : Stat + boutons */}
+        <Grid2
+          container
+          spacing={4}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ mt: 6 }}
+        >
+          <Grid2 xs={12} sm={6} md={4}>
+            <StatCard />
+          </Grid2>
+          <Grid2>
+            <ActionButtons buttons={myButtons} />
+          </Grid2>
+        </Grid2>
+      </Box>
     </Box>
+  
+    {/* SECTION 2 : blanche */}
+    <Box sx={{ width: '100%', overflowX: 'hidden', backgroundColor: '#fff' }}>
+      <Box sx={{ maxWidth: 1600, mx: "auto", px: 2 }}>
+        <ServicesTable services={servicesData} />
+      </Box>
+    </Box>
+  
+    {/* SECTION 3 : bas dégradé */}
+    <Box
+      sx={{
+        background: "linear-gradient(165deg, #EDEFFF 0%, #D0D9FF 50%, #FFFFFF 100%)",
+        py: 10,
+      }}
+    >
+      <Box sx={{ maxWidth: 1600, mx: 'auto', px: 2 }}>
+        <ServicesChart />
+      </Box>
+
+    </Box>
+
+  </>
   );
+  
 }

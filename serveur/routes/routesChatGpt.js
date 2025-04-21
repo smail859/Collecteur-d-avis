@@ -10,23 +10,35 @@ const { Groq } = require("groq-sdk");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 router.post("/", async (req, res) => {
-  const { text, source, site, contexte } = req.body;
+  const { text, source, site, contexte, name } = req.body;
   if (!text || !site) return res.status(400).json({ error: "Texte ou site manquant" });
 
   const sitePrompt = prompts[site];
   if (!sitePrompt) return res.status(400).json({ error: "Aucun prompt défini pour ce site" });
 
   const prompt = `
-  ${sitePrompt}
-
-  Voici un avis client publié sur ${source} :
-  "${text}"
-
-  ${contexte ? `Contexte supplémentaire fourni par l’équipe : ${contexte}` : ""}
-
-  Rédige une réponse professionnelle, humaine, bienveillante et sympathique à cet avis, au nom de l’équipe ${site}.
+    ${sitePrompt}
+    
+    Tu es responsable du service client de l’équipe ${site}.  
+    Un client nommé **${name}** a laissé cet avis sur ${source} :  
+    "${text}"
+    
+    **Objectif** : rédiger une réponse professionnelle, chaleureuse, humaine et reconnaissante.  
+    Ta réponse doit être authentique, refléter l’écoute et montrer que chaque retour est précieux.
+    
+    Commence toujours par : "Bonjour ${name},"
+    
+    ${contexte ? `Contexte supplémentaire transmis par l'équipe : ${contexte}` : ""}
+    
+    Adapte ton ton en fonction de l’avis : 
+    - S’il est positif : renforce la satisfaction, remercie avec le cœur ❤️ et termine sur une note enthousiaste.  
+    - S’il est négatif : reste compréhensif, propose une solution, et montre notre engagement à s’améliorer 💪
+    
+    Ajoute des **émojis pertinents** pour donner du relief à ta réponse, **sans en abuser**.
+    
+    Ne copie pas le texte de l’avis, reformule toujours avec tes propres mots.
   `;
-
+  
   try {
     const completion = await groq.chat.completions.create({
       model: "llama3-8b-8192",

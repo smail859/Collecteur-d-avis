@@ -50,16 +50,14 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
             target="_blank"
             rel="noopener noreferrer"
             underline="none"
-            sx={{ color: "black" }}
+            sx={{ color: "black", fontWeight: "bold", marginLeft: "3px", fontSize: "16px"}}
           >
             {avisData.user?.name || "Utilisateur inconnu"}
           </Link>
         }
         subheader={
           <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2" color="text.secondary">
-              {avisData.date}
-            </Typography>
+
             <Rating
               name="half-rating-read"
               value={defaultValueAvis}
@@ -67,13 +65,16 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
               precision={0.5}
               sx={{ fontSize: "20px" }}
             />
+            <Typography variant="body2" sx={{color: "black"}}>
+              {avisData.date}
+            </Typography>
           </Stack>
         }
         sx={{ paddingBottom: 0 }}
       />
 
       <CardContent sx={{ paddingTop: 1, flexGrow: 1 }}>
-        <Typography variant="body2" color="text.secondary" mt={1}>
+        <Typography variant="body2" color="black" mt={1}>
           {detectCommercial(truncatedText)}
         </Typography>
 
@@ -193,7 +194,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
               <Typography fontWeight="bold">
                 {avisData.user?.name || "Utilisateur inconnu"}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="black">
                 {avisData.date} • {avisData.reviewCount || avisData.user?.reviews_count || 0} avis
               </Typography>
             </Box>

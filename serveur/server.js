@@ -18,6 +18,7 @@ const routeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll")
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
 const suggestReplyRoute = require("../serveur/routes/routesChatGpt");
+const routeSend = require("./routes/sendLinks"); 
 const {shouldUpdateReviews, shouldUpdateReviewsTrustpilot } = require("./services/shouldUpdate")
 const { updateLatestReviews } = require("./services/fetchReviewsGoogle");
 const { updateLatestReviewsTrustpilot } = require("./services/fetchReviewsTrustpilot");
@@ -40,7 +41,7 @@ app.use(morgan("dev"));
 // -------------------------
 // Vérification des variables d'environnement
 // -------------------------
-const requiredEnv = ["MONGO_URI", "SERPAPI_KEY", "PORT"];
+const requiredEnv = ["MONGO_URI", "SERPAPI_KEY", "PORT", "SENDGRID_API_KEY", "GROQ_API_KEY"];
 requiredEnv.forEach((env) => {
   if (!process.env[env]) {
     console.error(`Erreur : La variable d'environnement ${env} est manquante.`);
@@ -57,7 +58,7 @@ app.use("/api/force-update", routesUpdate);
 app.use("/api", routeTrustpilotAll)
 app.use("/api", routeTrustpilotSites)
 app.use("/api", routesDebug);
-
+app.use("/api/sendEmail", routeSend);
 app.use("/api/suggest-reply", suggestReplyRoute);
 
 

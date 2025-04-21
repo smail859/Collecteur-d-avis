@@ -1,5 +1,13 @@
-import { Typography, Box, Grid, LinearProgress, styled, Rating, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Grid,
+  Rating,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import PropTypes from "prop-types";
+import StatCard from "./StatCard"
 
 const StatistiquesGrid = ({
   data = [],
@@ -11,13 +19,20 @@ const StatistiquesGrid = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const normalizeText = (text) =>
-    text ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+    text
+      ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      : "";
 
   const selectedData =
-    data.find((item) => normalizeText(item.label.trim()) === normalizeText(selectedCommercial.trim())) || {};
+    data.find(
+      (item) =>
+        normalizeText(item.label.trim()) ===
+        normalizeText(selectedCommercial.trim())
+    ) || {};
 
   const normalizedCommercial = normalizeText(selectedCommercial);
-  const nombreAvisYears = totalAvisParCommercialParService[normalizedCommercial] || 0;
+  const nombreAvisYears =
+    totalAvisParCommercialParService[normalizedCommercial] || 0;
   const nombreAvis = selectedData.count || 0;
 
   const objectifMensuelle = 5;
@@ -30,25 +45,20 @@ const StatistiquesGrid = ({
   const gainsNetsYears = (gainsBrutsYears * 7.96) / 10;
 
   const progression = Math.min((nombreAvis / objectifMensuelle) * 100, 100);
-  const progressionYears = Math.min((nombreAvisYears / objectifAnnuel) * 100, 100);
+  const progressionYears = Math.min(
+    (nombreAvisYears / objectifAnnuel) * 100,
+    100
+  );
 
-  const CustomLinearProgress = styled(LinearProgress)(() => ({
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#E0E0E0",
-    "& .MuiLinearProgress-bar": {
-      borderRadius: 5,
-      backgroundImage: "linear-gradient(to right, #B4EC51, #429321)",
-    },
-  }));
 
   return (
-    <Box 
-      sx={{ 
-          width: "100%", 
-          px: isMobile ? 2 : 6, 
-          mt: 4,
-        }}>
+    <Box
+      sx={{
+        width: "100%",
+        px: isMobile ? 2 : 6,
+        mt: 1,
+      }}
+    >
       <Grid
         container
         spacing={isMobile ? 3 : 4}
@@ -59,28 +69,31 @@ const StatistiquesGrid = ({
         <Grid item xs={12} sm={6} md={4}>
           <Box
             sx={{
-              width: isMobile ? "100%" : "100%",
-              maxWidth: isMobile ? "300px" : "none",
+              width: "100%",
+              maxWidth: "300px",
               height: isMobile ? "180px" : "240px",
-              borderRadius: 2,
-              bgcolor: "#F2F3FB",
+              borderRadius: 3,
+              bgcolor: "#F6F7FE",
               padding: isMobile ? 2 : 4,
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              mx: isMobile ? "auto" : 0, 
+              mx: "auto",
+              boxShadow: "0px 4px 10px rgba(139, 92, 246, 0.1)",
             }}
           >
             <Rating value={5} precision={0.5} readOnly />
-            <Typography variant="h6" sx={{ fontWeight: 400, color: "#8B5CF6" }}>
-              <span style={{ fontWeight: "bold" }}>Total</span> d'avis {isYearly ? "annuels" : "ce mois"}
+            <Typography sx={{ fontWeight: 400, fontSize: "16px", mt: "10px" }}>
+              <span style={{ fontWeight: "bold", color: "#8B5CF6" }}>
+                Total
+              </span>{" "}
+              <span style={{ color: "#8B5CF6" }}>d'avis collectés</span>{" "}
             </Typography>
             <Typography
-              variant="h1"
               sx={{
                 fontWeight: "bold",
                 color: "#8B5CF6",
-                fontSize: isMobile ? "54px" : "120px",
+                fontSize: isMobile ? "54px" : "100px",
               }}
             >
               {isYearly ? nombreAvisYears : nombreAvis}
@@ -90,81 +103,20 @@ const StatistiquesGrid = ({
 
         {/* Carte gains bruts */}
         <Grid item xs={12} sm={6} md={4}>
-          <Box
-            sx={{
-              width: isMobile ? "100%" : "100%",
-              maxWidth: isMobile ? "300px" : "none",
-              height: isMobile ? "180px" : "240px",
-              borderRadius: 2,
-              bgcolor: "#F2F3FB",
-              padding: isMobile ? 2 : 4,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              mx: isMobile ? "auto" : 0, 
-            }}
-          >
-            <CustomLinearProgress
-              variant="determinate"
-              value={isYearly ? progressionYears : progression}
-              sx={{
-                width: "100%",
-                height: "18px",
-                marginBottom: "10px",
-                maxWidth: "120px",
-              }}
-            />
-            <Typography variant="h6">
-              <span style={{ fontWeight: "bold" }}>Gains</span> bruts (€)
-            </Typography>
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: "bold",
-                color: "#8B5CF6",
-                fontSize: isMobile ? "42px" : "90px",
-              }}
-            >
-              {isYearly ? gainsBrutsYears : gainsBruts}€
-            </Typography>
-          </Box>
+          <StatCard
+            label="bruts"
+            value={isYearly ? gainsBrutsYears : gainsBruts}
+            progress={isYearly ? progressionYears : progression}
+          />
         </Grid>
 
         {/* Carte gains nets */}
         <Grid item xs={12} sm={6} md={4}>
-          <Box
-            sx={{
-              width: isMobile ? "100%" : "100%",
-              maxWidth: isMobile ? "300px" : "none",
-              height: isMobile ? "180px" : "240px",
-              borderRadius: 2,
-              bgcolor: "#F2F3FB",
-              padding: isMobile ? 2 : 4,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              mx: isMobile ? "auto" : 0, 
-            }}
-          >
-            <CustomLinearProgress
-              variant="determinate"
-              value={isYearly ? progressionYears : progression}
-              sx={{ width: "120px", height: "18px", marginBottom: "10px" }}
-            />
-            <Typography variant="h6">
-              <span style={{ fontWeight: "bold" }}>Gains</span> nets (€)
-            </Typography>
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: "bold",
-                color: "#8B5CF6",
-                fontSize: isMobile ? "36px" : "70px",
-              }}
-            >
-              {(isYearly ? gainsNetsYears : gainsNets).toFixed(2)}€
-            </Typography>
-          </Box>
+          <StatCard
+            label="nets"
+            value={(isYearly ? gainsNetsYears : gainsNets).toFixed(0)}
+            progress={isYearly ? progressionYears : progression}
+          />
         </Grid>
       </Grid>
     </Box>

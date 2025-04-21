@@ -56,7 +56,7 @@ function StatCard() {
           <CircularProgress size={isMobile ? 60 : 90} sx={{ my: 2 }} />
         ) : (
           <Typography
-            variant="h4"
+
             fontWeight="bold"
             sx={{
               fontSize: isMobile ? '60px' : '120px',
