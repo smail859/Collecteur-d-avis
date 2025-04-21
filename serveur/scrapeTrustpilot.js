@@ -1,22 +1,17 @@
-const puppeteer = require("puppeteer");
+const chromium = require("chrome-aws-lambda");
+const puppeteer = require("puppeteer-core");
 const crypto = require("crypto");
 const { Review } = require("./model/model");
-
 require("dotenv").config();
 
 const launchBrowserWithFallback = async () => {
   return puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--ignore-certificate-errors',
-      '--disable-features=IsolateOrigins,site-per-process',
-    ],
+    args: chromium.args,
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless,
+    defaultViewport: chromium.defaultViewport,
   });
 };
-
-
 
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
   let browser;
@@ -41,7 +36,6 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
         if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) break;
 
         if (currentPage === 1) {
-          // Cookies
           try {
             const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
             await page.waitForSelector(acceptBtn, { timeout: 5000 });
@@ -51,7 +45,6 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
             console.log("Aucun bouton cookies trouvé");
           }
 
-          // Note moyenne & nombre d'avis
           try {
             const ratingSelector = '[data-rating-typography]';
             await page.waitForSelector(ratingSelector, { timeout: 5000 });
@@ -76,18 +69,14 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
 
         const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards, currentPage) =>
           cards.map((card) => {
-            // Note de l'avis
             const ratingEl = card.querySelector('[data-service-review-rating] img');
             const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
 
-            // Date
             const date = card.querySelector("time")?.innerText.trim() || "";
             const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
 
-            // Texte de l'avis
             const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
 
-            // Infos utilisateur
             const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
             const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
             const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
@@ -95,7 +84,6 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
             const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
             const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
 
-            // Lien vers l'avis
             const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
             const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
 
@@ -119,15 +107,6 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
           }),
           currentPage
         );
-
-        
-        // Log côté Node pour les cas où le nom est manquant
-        rawReviews
-          .filter(r => r.debugMissingName)
-          .forEach((r, i) => {
-            console.warn(`⚠️ Avis #${i + 1} sans nom utilisateur`);
-          });
-        
 
         const reviews = rawReviews.map((r) => {
           const hash = crypto
