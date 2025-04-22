@@ -17,7 +17,6 @@ export default function Dashboard() {
             mt: { xs: 8, md: 0 },
           }}
         >
-          <Typography> Prod ff</Typography>
           <Stack>
             <MainGrid />
           </Stack>
