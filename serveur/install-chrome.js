@@ -1,14 +1,10 @@
-const puppeteer = require('puppeteer');
+const { exec } = require("child_process");
 
-(async () => {
-  console.log('🔧 Téléchargement de Chromium pour Puppeteer...');
-  try {
-    await puppeteer.install({
-      browser: 'chrome',
-    });
-    console.log('✅ Chrome installé avec succès !');
-  } catch (err) {
-    console.error('❌ Erreur pendant l’installation de Chrome :', err.message);
+exec("npx puppeteer browsers install chrome", (err, stdout, stderr) => {
+  if (err) {
+    console.error("❌ Erreur lors de l’installation de Chromium :", stderr);
     process.exit(1);
   }
-})();
+  console.log("✅ Chromium installé avec succès !");
+  console.log(stdout);
+});
