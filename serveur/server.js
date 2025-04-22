@@ -82,9 +82,7 @@ updateDates();
 const startServer = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ VERSION FED6FEF EN LIGNE ✅");
-
-
+ 
     // Création des collections si elles n’existent pas
     await UpdateLog.createCollection();
     await UpdateLogTrustpilot.createCollection();

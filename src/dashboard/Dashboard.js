@@ -1,4 +1,4 @@
-import { Box, Stack, useTheme } from '@mui/material';
+import { Box, Stack, useTheme,Typography } from '@mui/material';
 import MainGrid from './components/MainGrid';
 
 export default function Dashboard() {
@@ -17,6 +17,7 @@ export default function Dashboard() {
             mt: { xs: 8, md: 0 },
           }}
         >
+          <Typography> Prod ff</Typography>
           <Stack>
             <MainGrid />
           </Stack>
