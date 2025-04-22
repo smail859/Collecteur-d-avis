@@ -16,7 +16,6 @@ router.get("/scrape-all-trustpilot", async (req, res) => {
       }
     }));
 
-    // 🔁 Mettre à jour le cache après les scrapes
     await updateCache();
 
     res.json({
