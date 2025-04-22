@@ -8,13 +8,16 @@ const launchBrowserWithFallback = async () => {
   return puppeteer.launch({
     headless: "new",
     args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--ignore-certificate-errors',
-      '--disable-features=IsolateOrigins,site-per-process',
-    ],
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--single-process",
+      "--no-zygote"
+    ]
   });
 };
+
 
 
 
