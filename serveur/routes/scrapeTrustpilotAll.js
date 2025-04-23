@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer");
 const crypto = require("crypto");
-const { Review } = require("./model/model");
+const { Review } = require("../model/model");
 require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
