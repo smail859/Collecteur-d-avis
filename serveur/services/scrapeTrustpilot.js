@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer");
 const crypto = require("crypto");
-const { Review } = require("./model/model");
+const { Review } = require("../model/model");
 require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
@@ -58,12 +58,13 @@ const launchBrowserWithFallback = async () => {
 };
 
 // === FONCTION DE SCRAPING ===
-const scrapeTrustpilot = async (url, name = "Trustpilot") => {
+const scrapeTrustpilot = async (url, name = "Trustpilot", options = {}) => {
+  const pagesToScrape = options.pages || 10; // par défaut 10 pages
   let browser;
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
-
+  
   try {
     browser = await launchBrowserWithFallback();
     const page = await browser.newPage();
@@ -76,7 +77,7 @@ const scrapeTrustpilot = async (url, name = "Trustpilot") => {
     page.on("console", msg => console.log("📄 Console:", msg.text()));
     page.on("pageerror", error => console.error("❌ Page error:", error.message));
 
-    for (let currentPage = 1; currentPage <= 10; currentPage++) {
+    for (let currentPage = 1; currentPage <= pagesToScrape; currentPage++) {
       const pageUrl = `${url}?page=${currentPage}`;
       console.log(`🔍 Scraping ${pageUrl}...`);
 

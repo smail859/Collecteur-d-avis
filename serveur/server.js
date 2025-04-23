@@ -12,9 +12,9 @@ require("dotenv").config();
 // -------------------------
 const { UpdateLog, UpdateLogTrustpilot } = require("./model/model");
 const routesReviews = require("../serveur/routes/reviews");
-const routesTrustpilot = require("../serveur/routes/trustpilot");
-const routeTrustpilotSites = require("../serveur/routes/scrapeTrustpilotSite")
-const routeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll")
+const routesScrapeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll");
+const routesScrapeTrustpilotSite = require("../serveur/routes/scrapeTrustpilotSite");
+const routesScrapeTrustpilotLatest = require("../serveur/routes/scrapeTrustpilotLatest"); 
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
 const suggestReplyRoute = require("../serveur/routes/routesChatGpt");
@@ -52,12 +52,11 @@ requiredEnv.forEach((env) => {
 // Routes API
 // -------------------------
 app.use("/api/reviews", routesReviews);
-app.use("/api/trustpilot", routesTrustpilot);
 app.use("/api/force-update", routesUpdate);
-app.use("/api", routeTrustpilotAll)
-app.use("/api", routeTrustpilotSites)
+app.use("/api", routesScrapeTrustpilotAll);
+app.use("/api", routesScrapeTrustpilotSite)
+app.use("/api", routesScrapeTrustpilotLatest)
 app.use("/api", routesDebug);
-
 app.use("/api/suggest-reply", suggestReplyRoute);
 
 
