@@ -2,11 +2,29 @@ const puppeteer = require("puppeteer");
 const crypto = require("crypto");
 const { Review } = require("./model/model");
 require("dotenv").config();
+const path = require("path");
+
+const fs = require("fs");
+
 
 
 const launchBrowserWithFallback = async () => {
+
+  const chromePath = path.join(
+    "/opt/render/.cache/puppeteer/chrome",
+    "linux-135.0.7049.95",
+    "chrome-linux64",
+    "chrome"
+  );
+  
+  if (!fs.existsSync(chromePath)) {
+    throw new Error("❌ Le binaire Chromium est introuvable au chemin : " + chromePath);
+  }
+  console.log("🔧 Utilisation de Chromium depuis :", chromePath);
+
   return puppeteer.launch({
     headless: "new",
+    executablePath: chromePath,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -17,6 +35,7 @@ const launchBrowserWithFallback = async () => {
     ]
   });
 };
+
 
 
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
