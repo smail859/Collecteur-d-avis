@@ -10,7 +10,7 @@ router.get("/scrape/:site", async (req, res) => {
   if (!match) return res.status(404).json({ success: false, error: "Site introuvable" });
 
   try {
-    const result = await scrapeTrustpilot(match.url, match.name, { pages: 10 });
+    const result = await scrapeTrustpilot(match.url, match.name, { pages: 1 });
     res.json({ success: true, inserted: result.inserted });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

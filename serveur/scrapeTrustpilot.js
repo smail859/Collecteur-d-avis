@@ -63,7 +63,8 @@ const scrapeTrustpilot = async (url, name = "Trustpilot", options = {}) => {
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
-  const pagesToScrape = options.pages || 10; // par défaut 10 pages
+  const pagesToScrape = Number.isInteger(options.pages) && options.pages > 0 ? options.pages : 10;
+
 
   try {
     browser = await launchBrowserWithFallback();
