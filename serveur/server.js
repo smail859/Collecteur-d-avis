@@ -15,6 +15,7 @@ const routesReviews = require("../serveur/routes/reviews");
 const routesScrapeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll");
 const routesScrapeTrustpilotSite = require("../serveur/routes/scrapeTrustpilotSite");
 const routesScrapeTrustpilotLatest = require("../serveur/routes/scrapeTrustpilotLatest"); 
+const routeTrustpilotGet = require("../serveur/routes/trustpilot");
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
 const suggestReplyRoute = require("../serveur/routes/routesChatGpt");
@@ -58,6 +59,7 @@ app.use("/api", routesScrapeTrustpilotSite)
 app.use("/api", routesScrapeTrustpilotLatest)
 app.use("/api", routesDebug);
 app.use("/api/suggest-reply", suggestReplyRoute);
+app.use("/api/trustpilot", routeTrustpilotGet);
 
 
 
