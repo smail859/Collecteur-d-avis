@@ -19,7 +19,6 @@ const launchBrowserWithFallback = async () => {
 };
 
 
-
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
   let browser;
   let avgRating = null;
