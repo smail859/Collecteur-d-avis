@@ -4,14 +4,9 @@ const { Review } = require("./model/model");
 require("dotenv").config();
 
 
-
 const launchBrowserWithFallback = async () => {
-  const path = puppeteer.executablePath();
-  console.log("🧪 Using Chromium from:", path);
-
   return puppeteer.launch({
     headless: "new",
-    executablePath: path,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",

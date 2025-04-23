@@ -55,7 +55,6 @@
     "web-vitals": "^4.2.4"
   },
   "scripts": {
-    "postinstall": "node serveur/install-chrome.js",
     "start": "react-scripts start",
     "server": "node serveur/server.js",
     "build": "react-scripts build",
