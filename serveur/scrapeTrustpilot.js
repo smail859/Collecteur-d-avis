@@ -58,17 +58,18 @@ const launchBrowserWithFallback = async () => {
 };
 
 // === SCRAPE FUNCTION ===
-const scrapeTrustpilot = async (url, name = "Trustpilot") => {
+const scrapeTrustpilot = async (url, name = "Trustpilot", options = {}) => {
   let browser;
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
+  const pagesToScrape = options.pages || 10; // par défaut 10 pages
 
   try {
     browser = await launchBrowserWithFallback();
     const page = await browser.newPage();
 
-    for (let currentPage = 1; currentPage <= 10; currentPage++) {
+    for (let currentPage = 1; currentPage <= pagesToScrape; currentPage++) {
       const pageUrl = `${url}?page=${currentPage}`;
       console.log(`🔍 Scraping ${pageUrl}...`);
 
