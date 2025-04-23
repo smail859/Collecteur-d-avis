@@ -1,22 +1,17 @@
 const puppeteer = require("puppeteer");
 const crypto = require("crypto");
 const { Review } = require("./model/model");
-const path = require("path");
 require("dotenv").config();
 
 
+
 const launchBrowserWithFallback = async () => {
-  const executablePath = path.join(
-    "/opt/render/.cache/puppeteer/chrome",
-    "linux-135.0.7049.95", // <- c'est cette ligne que tu dois copier du log
-    "chrome-linux64",
-    "chrome"
-  );
-  
+  const path = puppeteer.executablePath();
+  console.log("🧪 Using Chromium from:", path);
 
   return puppeteer.launch({
-    headless: "new", // option moderne
-    executablePath,
+    headless: "new",
+    executablePath: path,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -27,6 +22,7 @@ const launchBrowserWithFallback = async () => {
     ]
   });
 };
+
 
 
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
