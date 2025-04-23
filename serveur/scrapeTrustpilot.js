@@ -50,15 +50,13 @@ const launchBrowserWithFallback = async () => {
 };
 
 // === SCRAPE FUNCTION ===
-const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
-  let browser;
+const scrapeTrustpilot = async (browser, baseUrl, name = "Trustpilot") => {
   let page;
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
 
   try {
-    browser = await launchBrowserWithFallback();
     page = await browser.newPage();
 
     for (let currentPage = 1; currentPage <= 10; currentPage++) {
@@ -115,7 +113,6 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
 
       const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
         cards.map((card) => {
-          // === BLOC DE SCRAPING NON MODIFIÉ ===
           const ratingEl = card.querySelector('[data-service-review-rating] img');
           const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
           const date = card.querySelector("time")?.innerText.trim() || "";
@@ -167,8 +164,7 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
 
       allReviews.push(...reviews);
 
-      // Petite pause pour éviter la surcharge CPU
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1000)); // pause entre pages
     }
 
     const valid = allReviews.filter((r) => typeof r.rating === "number");
@@ -206,8 +202,11 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
     console.error("❌ Erreur critique Trustpilot :", error.message);
     throw error;
   } finally {
-    if (browser) await browser.close();
+    if (page) await page.close();
   }
 };
 
-module.exports = scrapeTrustpilot;
+module.exports = {
+  launchBrowserWithFallback,
+  scrapeTrustpilot
+};

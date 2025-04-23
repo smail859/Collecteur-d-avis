@@ -4,8 +4,8 @@ const { trustpilotSites } = require("../config/sites");
 const scrapeTrustpilot = require("../scrapeTrustpilot");
 const { updateCache } = require("../updateCache"); // ← adapte le chemin si besoin
 
-// GET /api/scrape-all-trustpilot
-router.get("/scrape-all-trustpilot", async (req, res) => {
+// GET /api/scrape-one-trustpilot
+router.get("/scrape-one-trustpilot", async (req, res) => {
   try {
     const results = await Promise.all(trustpilotSites.map(async (site) => {
       try {
