@@ -23,14 +23,37 @@ const launchBrowserWithFallback = async () => {
   return puppeteer.launch({
     headless: "new",
     executablePath: chromePath,
+    timeout: 60000,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
       "--disable-gpu",
-      "--single-process",
-      "--no-zygote"
+      "--no-zygote",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-breakpad",
+      "--disable-client-side-phishing-detection",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-features=site-per-process",
+      "--disable-hang-monitor",
+      "--disable-infobars",
+      "--disable-popup-blocking",
+      "--disable-prompt-on-repost",
+      "--disable-renderer-backgrounding",
+      "--disable-sync",
+      "--disable-translate",
+      "--metrics-recording-only",
+      "--mute-audio",
+      "--no-first-run",
+      "--safebrowsing-disable-auto-update",
+      "--ignore-certificate-errors",
+      "--ignore-certificate-errors-spki-list",
+      "--disable-extensions",
     ]
+    
   });
 };
 
@@ -53,7 +76,7 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
       console.log(`Scraping ${url}...`);
 
       try {
-        const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+        const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
         if (response.status() === 404) break;
 
         const title = await page.title();
