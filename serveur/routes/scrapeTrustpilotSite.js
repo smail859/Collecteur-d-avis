@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { trustpilotSites } = require("../config/sites");
-const { scrapeTrustpilot } = require("../services/scrapeTrustpilot");
+const { scrapeTrustpilot } = require("../scrapeTrustpilot");
 
 router.get("/scrape/:site", async (req, res) => {
   const { site } = req.params;

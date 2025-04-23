@@ -2,7 +2,7 @@ const cache = require("memory-cache");
 const {trustpilotSites} = require("../config/sites")
 const { UpdateLogTrustpilot } = require("../model/model.js");
 const {updateCache} = require("../updateCache");
-const {scrapeTrustpilot} = require("./scrapeTrustpilot.js")
+const {scrapeTrustpilot} = require("../scrapeTrustpilot.js")
 
 // Mise à jour des avis Trustpilot
 // -------------------------
@@ -36,5 +36,5 @@ const updateLatestReviewsTrustpilot = async () => {
 };
 
 module.exports = {
-  updateLatestReviewsTrustpilot
-}
+  updateLatestReviewsTrustpilot,
+};
