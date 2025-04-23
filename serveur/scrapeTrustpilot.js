@@ -5,6 +5,7 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 
+// === CONFIG CHROMIUM ===
 const chromePath = path.join(
   __dirname,
   "../chromium/chrome/linux-135.0.7049.95/chrome-linux64/chrome"
@@ -48,168 +49,158 @@ const launchBrowserWithFallback = async () => {
   });
 };
 
+// === SCRAPE FUNCTION ===
 const scrapeTrustpilot = async (browser, baseUrl, name = "Trustpilot") => {
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
 
-  for (let currentPage = 1; currentPage <= 10; currentPage++) {
-    const page = await browser.newPage();
-    const url = `${baseUrl}?page=${currentPage}`;
-    console.log(`🔍 Scraping ${url}...`);
+  try {
+    for (let currentPage = 1; currentPage <= 10; currentPage++) {
+      const page = await browser.newPage();
+      const url = `${baseUrl}?page=${currentPage}`;
+      console.log(`🔍 Scraping ${url}...`);
 
-    try {
-      const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+      try {
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-      if (!response || response.status() >= 400) {
-        console.warn(`⚠️ Page ${url} renvoie un statut ${response?.status()}`);
-        await page.close();
-        break;
-      }
-
-      // Captcha detection
-      const bodyText = await page.evaluate(() => document.body.innerText);
-      if (bodyText.includes("vérifier que vous n'êtes pas un robot")) {
-        console.warn("⚠️ Captcha détecté !");
-        await page.close();
-        break;
-      }
-
-      const title = await page.title();
-      const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
-      if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) {
-        await page.close();
-        break;
-      }
-
-      // Cookies
-      if (currentPage === 1) {
-        try {
-          const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
-          await page.waitForSelector(acceptBtn, { timeout: 5000 });
-          await page.click(acceptBtn);
-          console.log("✅ Cookies acceptés");
-        } catch {
-          console.log("ℹ️ Aucun bouton cookies trouvé");
+        const title = await page.title();
+        const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
+        if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) {
+          await page.close();
+          break;
         }
 
-        try {
-          const ratingSelector = '[data-rating-typography]';
-          await page.waitForSelector(ratingSelector, { timeout: 5000 });
-          avgRating = await page.$eval(ratingSelector, el => parseFloat(el.innerText.trim()));
-        } catch {
-          console.warn("⚠️ Impossible de récupérer la note moyenne");
+        // Accept cookies
+        if (currentPage === 1) {
+          try {
+            const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
+            await page.waitForSelector(acceptBtn, { timeout: 5000 });
+            await page.click(acceptBtn);
+            console.log("✅ Cookies acceptés");
+          } catch {
+            console.log("ℹ️ Aucun bouton cookies trouvé");
+          }
+
+          try {
+            const ratingSelector = '[data-rating-typography]';
+            await page.waitForSelector(ratingSelector, { timeout: 5000 });
+            avgRating = await page.$eval(ratingSelector, el => parseFloat(el.innerText.trim()));
+          } catch {
+            console.warn("⚠️ Impossible de récupérer la note moyenne");
+          }
+
+          try {
+            const totalSelector = 'h1 span.styles_reviewsAndRating__Syz6V';
+            await page.waitForSelector(totalSelector, { timeout: 5000 });
+            totalReviews = await page.$eval(totalSelector, el => {
+              const match = el.innerText.match(/Avis\s+(\d+)/);
+              return match ? parseInt(match[1]) : null;
+            });
+          } catch {
+            console.warn("⚠️ Impossible de récupérer le nombre total d’avis");
+          }
         }
 
-        try {
-          const totalSelector = 'h1 span.styles_reviewsAndRating__Syz6V';
-          await page.waitForSelector(totalSelector, { timeout: 5000 });
-          totalReviews = await page.$eval(totalSelector, el => {
-            const match = el.innerText.match(/Avis\s+(\d+)/);
-            return match ? parseInt(match[1]) : null;
-          });
-        } catch {
-          console.warn("⚠️ Impossible de récupérer le nombre total d’avis");
-        }
-      }
+        await page.waitForSelector('[data-service-review-card-paper]', { timeout: 10000 });
 
-      // Wait for reviews
-      await page.waitForSelector('[data-service-review-card-paper]', { timeout: 20000 });
+        const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
+          cards.map((card) => {
+            const ratingEl = card.querySelector('[data-service-review-rating] img');
+            const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
+            const date = card.querySelector("time")?.innerText.trim() || "";
+            const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
+            const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
 
-      const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
-        cards.map((card) => {
-          const ratingEl = card.querySelector('[data-service-review-rating] img');
-          const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
-          const date = card.querySelector("time")?.innerText.trim() || "";
-          const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
-          const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
+            const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
+            const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
+            const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
+            const country = profileLinkEl?.querySelector('[data-consumer-country-typography]')?.innerText.trim() || "";
+            const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
+            const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
 
-          const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
-          const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
-          const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
-          const country = profileLinkEl?.querySelector('[data-consumer-country-typography]')?.innerText.trim() || "";
-          const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
-          const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
+            const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
+            const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
 
-          const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
-          const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
+            return {
+              rating,
+              date,
+              iso_date,
+              text,
+              link: reviewLink,
+              source: "Trustpilot",
+              user: {
+                name,
+                link,
+                reviews: reviewsCount,
+                country,
+                contributor_id: null,
+                thumbnail: null,
+                photos: 0,
+              },
+            };
+          })
+        );
+
+        const reviews = rawReviews.map((r) => {
+          const hash = crypto
+            .createHash("sha256")
+            .update(`${r.text}-${r.iso_date}-${r.user.name}`)
+            .digest("hex");
 
           return {
-            rating,
-            date,
-            iso_date,
-            text,
-            link: reviewLink,
-            source: "Trustpilot",
-            user: {
-              name,
-              link,
-              reviews: reviewsCount,
-              country,
-              contributor_id: null,
-              thumbnail: null,
-              photos: 0,
-            },
+            ...r,
+            review_id: hash,
+            site: name,
           };
-        })
-      );
+        });
 
-      const reviews = rawReviews.map((r) => {
-        const hash = crypto
-          .createHash("sha256")
-          .update(`${r.text}-${r.iso_date}-${r.user.name}`)
-          .digest("hex");
-
-        return {
-          ...r,
-          review_id: hash,
-          site: name,
-        };
-      });
-
-      allReviews.push(...reviews);
-      await page.close();
-      await new Promise((r) => setTimeout(r, 1000)); // pause
-    } catch (err) {
-      console.error(`❌ Erreur scraping ${url} : ${err.message}`);
-      try {
+        allReviews.push(...reviews);
+      } catch (err) {
+        console.error(`❌ Erreur scraping ${url} : ${err.message}`);
         await page.close();
-      } catch {}
-      break;
+        break;
+      }
+
+      await page.close(); // fermeture propre à chaque page
+      await new Promise((r) => setTimeout(r, 1000)); // délai entre pages
     }
-  }
 
-  const valid = allReviews.filter((r) => typeof r.rating === "number");
-  console.log(`✅ ${valid.length} avis valides récupérés pour ${name}`);
+    const valid = allReviews.filter((r) => typeof r.rating === "number");
+    console.log(`✅ ${valid.length} avis valides récupérés pour ${name}`);
 
-  if (valid.length > 0) {
-    const reviewIds = valid.map((r) => r.review_id);
-    const existing = await Review.find({ review_id: { $in: reviewIds } }).select("review_id");
-    const existingIds = new Set(existing.map((e) => e.review_id));
-    const newReviews = valid.filter((r) => !existingIds.has(r.review_id));
+    if (valid.length > 0) {
+      const reviewIds = valid.map((r) => r.review_id);
+      const existing = await Review.find({ review_id: { $in: reviewIds } }).select("review_id");
+      const existingIds = new Set(existing.map((e) => e.review_id));
+      const newReviews = valid.filter((r) => !existingIds.has(r.review_id));
 
-    if (newReviews.length > 0) {
-      const ops = newReviews.map((r) => ({
-        updateOne: {
-          filter: { review_id: r.review_id },
-          update: { $setOnInsert: r },
-          upsert: true,
-        },
-      }));
+      if (newReviews.length > 0) {
+        const ops = newReviews.map((r) => ({
+          updateOne: {
+            filter: { review_id: r.review_id },
+            update: { $setOnInsert: r },
+            upsert: true,
+          },
+        }));
 
-      const result = await Review.bulkWrite(ops, { ordered: false });
-      console.log(`✔️ ${result.upsertedCount} nouveaux avis ajoutés pour ${name}`);
-      return {
-        inserted: result.upsertedCount,
-        avgRating,
-        totalReviews,
-      };
-    } else {
-      console.log("ℹ️ Aucun nouvel avis à insérer");
+        const result = await Review.bulkWrite(ops, { ordered: false });
+        console.log(`✔️ ${result.upsertedCount} nouveaux avis ajoutés pour ${name}`);
+        return {
+          inserted: result.upsertedCount,
+          avgRating,
+          totalReviews,
+        };
+      } else {
+        console.log("ℹ️ Aucun nouvel avis à insérer");
+      }
     }
-  }
 
-  return { inserted: 0, avgRating, totalReviews };
+    return { inserted: 0, avgRating, totalReviews };
+  } catch (error) {
+    console.error("❌ Erreur critique Trustpilot :", error.message);
+    throw error;
+  }
 };
 
 module.exports = {
