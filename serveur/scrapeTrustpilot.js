@@ -3,24 +3,22 @@ const crypto = require("crypto");
 const { Review } = require("./model/model");
 require("dotenv").config();
 const path = require("path");
-
 const fs = require("fs");
 
 
-
 const launchBrowserWithFallback = async () => {
-
   const chromePath = path.join(
-    "/opt/render/.cache/puppeteer/chrome",
-    "linux-135.0.7049.95",
-    "chrome-linux64",
-    "chrome"
+    __dirname, // <- chemin absolu basé sur ton script
+    "../chromium/chrome/linux-135.0.7049.95/chrome-linux64/chrome"
   );
-  
+
   if (!fs.existsSync(chromePath)) {
     throw new Error("❌ Le binaire Chromium est introuvable au chemin : " + chromePath);
   }
+
   console.log("🔧 Utilisation de Chromium depuis :", chromePath);
+
+  puppeteer._preferredRevision = "135.0.7049.95";
 
   return puppeteer.launch({
     headless: "new",
@@ -35,6 +33,8 @@ const launchBrowserWithFallback = async () => {
     ]
   });
 };
+
+
 
 
 
