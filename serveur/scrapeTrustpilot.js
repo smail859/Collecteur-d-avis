@@ -1,15 +1,21 @@
 const puppeteer = require("puppeteer");
 const crypto = require("crypto");
 const { Review } = require("./model/model");
+const path = require("path");
 require("dotenv").config();
 
 
 const launchBrowserWithFallback = async () => {
-  const executablePath = puppeteer.executablePath(); // <- dynamique
-  console.log("Chromium path utilisé :", executablePath);
+  const executablePath = path.join(
+    "/opt/render/.cache/puppeteer/chrome",
+    "linux-135.0.7049.95", // <- c'est cette ligne que tu dois copier du log
+    "chrome-linux64",
+    "chrome"
+  );
+  
 
   return puppeteer.launch({
-    headless: "new",
+    headless: "new", // option moderne
     executablePath,
     args: [
       "--no-sandbox",
@@ -17,8 +23,8 @@ const launchBrowserWithFallback = async () => {
       "--disable-dev-shm-usage",
       "--disable-gpu",
       "--single-process",
-      "--no-zygote",
-    ],
+      "--no-zygote"
+    ]
   });
 };
 
