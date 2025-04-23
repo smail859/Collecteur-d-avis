@@ -51,120 +51,119 @@ const launchBrowserWithFallback = async () => {
 
 // === SCRAPE FUNCTION ===
 const scrapeTrustpilot = async (browser, baseUrl, name = "Trustpilot") => {
-  let page;
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
 
   try {
-    page = await browser.newPage();
-
     for (let currentPage = 1; currentPage <= 10; currentPage++) {
+      const page = await browser.newPage();
       const url = `${baseUrl}?page=${currentPage}`;
       console.log(`🔍 Scraping ${url}...`);
 
       try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+
+        const title = await page.title();
+        const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
+        if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) {
+          await page.close();
+          break;
+        }
+
+        // Accept cookies
+        if (currentPage === 1) {
+          try {
+            const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
+            await page.waitForSelector(acceptBtn, { timeout: 5000 });
+            await page.click(acceptBtn);
+            console.log("✅ Cookies acceptés");
+          } catch {
+            console.log("ℹ️ Aucun bouton cookies trouvé");
+          }
+
+          try {
+            const ratingSelector = '[data-rating-typography]';
+            await page.waitForSelector(ratingSelector, { timeout: 5000 });
+            avgRating = await page.$eval(ratingSelector, el => parseFloat(el.innerText.trim()));
+          } catch {
+            console.warn("⚠️ Impossible de récupérer la note moyenne");
+          }
+
+          try {
+            const totalSelector = 'h1 span.styles_reviewsAndRating__Syz6V';
+            await page.waitForSelector(totalSelector, { timeout: 5000 });
+            totalReviews = await page.$eval(totalSelector, el => {
+              const match = el.innerText.match(/Avis\s+(\d+)/);
+              return match ? parseInt(match[1]) : null;
+            });
+          } catch {
+            console.warn("⚠️ Impossible de récupérer le nombre total d’avis");
+          }
+        }
+
+        await page.waitForSelector('[data-service-review-card-paper]', { timeout: 10000 });
+
+        const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
+          cards.map((card) => {
+            const ratingEl = card.querySelector('[data-service-review-rating] img');
+            const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
+            const date = card.querySelector("time")?.innerText.trim() || "";
+            const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
+            const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
+
+            const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
+            const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
+            const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
+            const country = profileLinkEl?.querySelector('[data-consumer-country-typography]')?.innerText.trim() || "";
+            const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
+            const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
+
+            const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
+            const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
+
+            return {
+              rating,
+              date,
+              iso_date,
+              text,
+              link: reviewLink,
+              source: "Trustpilot",
+              user: {
+                name,
+                link,
+                reviews: reviewsCount,
+                country,
+                contributor_id: null,
+                thumbnail: null,
+                photos: 0,
+              },
+            };
+          })
+        );
+
+        const reviews = rawReviews.map((r) => {
+          const hash = crypto
+            .createHash("sha256")
+            .update(`${r.text}-${r.iso_date}-${r.user.name}`)
+            .digest("hex");
+
+          return {
+            ...r,
+            review_id: hash,
+            site: name,
+          };
+        });
+
+        allReviews.push(...reviews);
       } catch (err) {
-        console.error(`❌ Erreur navigation ${url} : ${err.message}`);
+        console.error(`❌ Erreur scraping ${url} : ${err.message}`);
+        await page.close();
         break;
       }
 
-      const title = await page.title();
-      const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
-      if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) break;
-
-      if (currentPage === 1) {
-        try {
-          const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
-          await page.waitForSelector(acceptBtn, { timeout: 5000 });
-          await page.click(acceptBtn);
-          console.log("✅ Cookies acceptés");
-        } catch {
-          console.log("ℹ️ Aucun bouton cookies trouvé");
-        }
-
-        try {
-          const ratingSelector = '[data-rating-typography]';
-          await page.waitForSelector(ratingSelector, { timeout: 5000 });
-          avgRating = await page.$eval(ratingSelector, el => parseFloat(el.innerText.trim()));
-        } catch {
-          console.warn("⚠️ Impossible de récupérer la note moyenne");
-        }
-
-        try {
-          const totalSelector = 'h1 span.styles_reviewsAndRating__Syz6V';
-          await page.waitForSelector(totalSelector, { timeout: 5000 });
-          totalReviews = await page.$eval(totalSelector, el => {
-            const match = el.innerText.match(/Avis\s+(\d+)/);
-            return match ? parseInt(match[1]) : null;
-          });
-        } catch {
-          console.warn("⚠️ Impossible de récupérer le nombre total d’avis");
-        }
-      }
-
-      try {
-        await page.waitForSelector('[data-service-review-card-paper]', { timeout: 10000 });
-      } catch (err) {
-        console.warn(`⚠️ Aucune review trouvée sur ${url} : ${err.message}`);
-        continue;
-      }
-
-      const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
-        cards.map((card) => {
-          const ratingEl = card.querySelector('[data-service-review-rating] img');
-          const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
-          const date = card.querySelector("time")?.innerText.trim() || "";
-          const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
-          const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
-
-          const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
-          const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
-          const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
-          const country = profileLinkEl?.querySelector('[data-consumer-country-typography]')?.innerText.trim() || "";
-          const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
-          const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
-
-          const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
-          const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
-
-          return {
-            rating,
-            date,
-            iso_date,
-            text,
-            link: reviewLink,
-            source: "Trustpilot",
-            user: {
-              name,
-              link,
-              reviews: reviewsCount,
-              country,
-              contributor_id: null,
-              thumbnail: null,
-              photos: 0,
-            },
-          };
-        })
-      );
-
-      const reviews = rawReviews.map((r) => {
-        const hash = crypto
-          .createHash("sha256")
-          .update(`${r.text}-${r.iso_date}-${r.user.name}`)
-          .digest("hex");
-
-        return {
-          ...r,
-          review_id: hash,
-          site: name,
-        };
-      });
-
-      allReviews.push(...reviews);
-
-      await new Promise((r) => setTimeout(r, 1000)); // pause entre pages
+      await page.close(); // fermeture propre à chaque page
+      await new Promise((r) => setTimeout(r, 1000)); // délai entre pages
     }
 
     const valid = allReviews.filter((r) => typeof r.rating === "number");
@@ -201,8 +200,6 @@ const scrapeTrustpilot = async (browser, baseUrl, name = "Trustpilot") => {
   } catch (error) {
     console.error("❌ Erreur critique Trustpilot :", error.message);
     throw error;
-  } finally {
-    if (page) await page.close();
   }
 };
 
