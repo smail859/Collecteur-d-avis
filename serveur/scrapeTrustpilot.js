@@ -5,7 +5,7 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 
-// === CONFIG CHROMIUM ===
+// === CONFIGURATION ===
 const chromePath = path.join(
   __dirname,
   "../chromium/chrome/linux-135.0.7049.95/chrome-linux64/chrome"
@@ -13,6 +13,7 @@ const chromePath = path.join(
 
 const isProd = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
 
+// === LANCEMENT DU NAVIGATEUR ===
 const launchBrowserWithFallback = async () => {
   const args = [
     "--no-sandbox",
@@ -40,24 +41,23 @@ const launchBrowserWithFallback = async () => {
     if (!fs.existsSync(chromePath)) {
       throw new Error("❌ Chromium introuvable à ce chemin : " + chromePath);
     }
-
     console.log("🔧 PROD: utilisation de Chromium depuis :", chromePath);
 
     return puppeteer.launch({
       headless: "new",
       executablePath: chromePath,
-      args
+      args,
     });
   } else {
     console.log("🧪 DEV: utilisation de Chromium par défaut de Puppeteer");
     return puppeteer.launch({
       headless: "new",
-      args
+      args,
     });
   }
 };
 
-// === SCRAPE FUNCTION ===
+// === FONCTION DE SCRAPING ===
 const scrapeTrustpilot = async (url, name = "Trustpilot") => {
   let browser;
   let avgRating = null;
@@ -68,20 +68,32 @@ const scrapeTrustpilot = async (url, name = "Trustpilot") => {
     browser = await launchBrowserWithFallback();
     const page = await browser.newPage();
 
+    // 🧠 Simuler une navigation utilisateur
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+    await page.setViewport({ width: 1280, height: 800 });
+
+    // 🎯 Log utile pour debug
+    page.on("console", msg => console.log("📄 Console:", msg.text()));
+    page.on("pageerror", error => console.error("❌ Page error:", error.message));
+
     for (let currentPage = 1; currentPage <= 10; currentPage++) {
       const pageUrl = `${url}?page=${currentPage}`;
       console.log(`🔍 Scraping ${pageUrl}...`);
 
       try {
-        const response = await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-        if (response.status() === 404) break;
+        const response = await page.goto(pageUrl, {
+          waitUntil: "networkidle2",
+          timeout: 90000
+        });
+
+        if (!response || response.status() === 404) break;
 
         const title = await page.title();
         const h1 = await page.$eval("h1", el => el.innerText).catch(() => "");
         if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) break;
 
+        // 🍪 Cookies
         if (currentPage === 1) {
-          // Accept cookies
           try {
             const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
             await page.waitForSelector(acceptBtn, { timeout: 5000 });
@@ -91,17 +103,19 @@ const scrapeTrustpilot = async (url, name = "Trustpilot") => {
             console.log("ℹ️ Aucun bouton cookies trouvé");
           }
 
+          // 🌟 Note moyenne
           try {
             const ratingSelector = '[data-rating-typography]';
-            await page.waitForSelector(ratingSelector, { timeout: 5000 });
+            await page.waitForSelector(ratingSelector, { timeout: 15000 });
             avgRating = await page.$eval(ratingSelector, el => parseFloat(el.innerText.trim()));
           } catch {
             console.warn("⚠️ Impossible de récupérer la note moyenne");
           }
 
+          // 🧮 Nombre total d’avis
           try {
             const totalSelector = 'h1 span.styles_reviewsAndRating__Syz6V';
-            await page.waitForSelector(totalSelector, { timeout: 5000 });
+            await page.waitForSelector(totalSelector, { timeout: 15000 });
             totalReviews = await page.$eval(totalSelector, el => {
               const match = el.innerText.match(/Avis\s+(\d+)/);
               return match ? parseInt(match[1]) : null;
@@ -111,7 +125,8 @@ const scrapeTrustpilot = async (url, name = "Trustpilot") => {
           }
         }
 
-        await page.waitForSelector('[data-service-review-card-paper]', { timeout: 10000 });
+        // 💬 Scraper les avis
+        await page.waitForSelector('[data-service-review-card-paper]', { timeout: 20000 });
 
         const rawReviews = await page.$$eval('[data-service-review-card-paper]', cards =>
           cards.map(card => {
@@ -170,7 +185,7 @@ const scrapeTrustpilot = async (url, name = "Trustpilot") => {
         break;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // pause entre pages
+      await new Promise(r => setTimeout(r, 1500)); // petite pause pour éviter la surcharge
     }
 
     const valid = allReviews.filter(r => typeof r.rating === "number");
@@ -199,7 +214,7 @@ const scrapeTrustpilot = async (url, name = "Trustpilot") => {
           totalReviews
         };
       } else {
-        console.log("ℹ️ Aucun avis à insérer (déjà existants)");
+        console.log("ℹ️ Aucun nouvel avis à insérer (déjà en base)");
       }
     }
 
