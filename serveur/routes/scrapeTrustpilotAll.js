@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { trustpilotSites } = require("../config/sites");
-const scrapeTrustpilot = require("../scrapeTrustpilot");
+const { scrapeTrustpilot } = require("../scrapeTrustpilot"); // destructuré !
 const { updateCache } = require("../updateCache");
 
 // GET /api/scrape-all-trustpilot
@@ -11,7 +11,7 @@ router.get("/scrape-all-trustpilot", async (req, res) => {
 
     for (const site of trustpilotSites) {
       try {
-        const result = await scrapeTrustpilot(site.url, site.name); // plus besoin du browser ici
+        const result = await scrapeTrustpilot(site.url, site.name);
         results.push({ name: site.name, success: true, inserted: result.inserted });
       } catch (err) {
         results.push({ name: site.name, success: false, error: err.message });
@@ -20,10 +20,7 @@ router.get("/scrape-all-trustpilot", async (req, res) => {
 
     await updateCache();
 
-    res.json({
-      success: true,
-      results,
-    });
+    res.json({ success: true, results });
   } catch (err) {
     console.error("Erreur scraping multiple Trustpilot :", err.message);
     res.status(500).json({ success: false, error: err.message });
