@@ -5,6 +5,7 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 
+// === CONFIG CHROMIUM ===
 const chromePath = path.join(
   __dirname,
   "../chromium/chrome/linux-135.0.7049.95/chrome-linux64/chrome"
@@ -16,7 +17,6 @@ const launchBrowserWithFallback = async () => {
   }
 
   console.log("🔧 Utilisation de Chromium depuis :", chromePath);
-
   puppeteer._preferredRevision = "135.0.7049.95";
 
   return puppeteer.launch({
@@ -37,12 +37,8 @@ const launchBrowserWithFallback = async () => {
       "--disable-default-apps",
       "--disable-features=site-per-process",
       "--disable-hang-monitor",
-      "--disable-infobars",
       "--disable-popup-blocking",
-      "--disable-prompt-on-repost",
-      "--disable-renderer-backgrounding",
-      "--disable-sync",
-      "--disable-translate",
+      "--disable-infobars",
       "--metrics-recording-only",
       "--mute-audio",
       "--no-first-run",
@@ -53,6 +49,7 @@ const launchBrowserWithFallback = async () => {
   });
 };
 
+// === SCRAPE FUNCTION ===
 const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
   let browser;
   let page;
@@ -66,22 +63,18 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
 
     for (let currentPage = 1; currentPage <= 10; currentPage++) {
       const url = `${baseUrl}?page=${currentPage}`;
-      console.log(`Scraping ${url}...`);
+      console.log(`🔍 Scraping ${url}...`);
 
       try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
       } catch (err) {
-        console.error(`⛔ Erreur navigation ${url} : ${err.message}`);
+        console.error(`❌ Erreur navigation ${url} : ${err.message}`);
         break;
       }
 
-      try {
-        const title = await page.title();
-        const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
-        if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) break;
-      } catch {
-        break;
-      }
+      const title = await page.title();
+      const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
+      if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) break;
 
       if (currentPage === 1) {
         try {
@@ -90,7 +83,7 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
           await page.click(acceptBtn);
           console.log("✅ Cookies acceptés");
         } catch {
-          console.log("🟡 Aucun bouton cookies trouvé");
+          console.log("ℹ️ Aucun bouton cookies trouvé");
         }
 
         try {
@@ -116,53 +109,48 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
       try {
         await page.waitForSelector('[data-service-review-card-paper]', { timeout: 10000 });
       } catch (err) {
-        console.warn(`⚠️ Selecteur reviews introuvable sur ${url} : ${err.message}`);
+        console.warn(`⚠️ Aucune review trouvée sur ${url} : ${err.message}`);
         continue;
       }
 
-      let rawReviews = [];
+      const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
+        cards.map((card) => {
+          // === BLOC DE SCRAPING NON MODIFIÉ ===
+          const ratingEl = card.querySelector('[data-service-review-rating] img');
+          const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
+          const date = card.querySelector("time")?.innerText.trim() || "";
+          const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
+          const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
 
-      try {
-        rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards) =>
-          cards.map((card) => {
-            const ratingEl = card.querySelector('[data-service-review-rating] img');
-            const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
-            const date = card.querySelector("time")?.innerText.trim() || "";
-            const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
-            const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
+          const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
+          const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
+          const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
+          const country = profileLinkEl?.querySelector('[data-consumer-country-typography]')?.innerText.trim() || "";
+          const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
+          const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
 
-            const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
-            const name = profileLinkEl?.querySelector('[data-consumer-name-typography]')?.innerText.trim() || "Utilisateur";
-            const link = profileLinkEl?.getAttribute("href") ? `https://fr.trustpilot.com${profileLinkEl.getAttribute("href")}` : null;
-            const country = profileLinkEl?.querySelector('[data-consumer-country-typography]')?.innerText.trim() || "";
-            const reviewsCountText = profileLinkEl?.querySelector('[data-consumer-reviews-count-typography]')?.innerText.trim() || "";
-            const reviewsCount = parseInt(reviewsCountText.match(/\d+/)?.[0]) || 0;
+          const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
+          const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
 
-            const reviewLinkPath = card.querySelector('[data-review-title-typography]')?.closest("a")?.getAttribute("href") || "";
-            const reviewLink = reviewLinkPath ? `https://fr.trustpilot.com${reviewLinkPath}` : null;
-
-            return {
-              rating,
-              date,
-              iso_date,
-              text,
-              link: reviewLink,
-              source: "Trustpilot",
-              user: {
-                name,
-                link,
-                reviews: reviewsCount,
-                country,
-                contributor_id: null,
-                thumbnail: null,
-                photos: 0,
-              },
-            };
-          })
-        );
-      } catch (err) {
-        console.warn(`⚠️ Impossible d’extraire les avis sur ${url} : ${err.message}`);
-      }
+          return {
+            rating,
+            date,
+            iso_date,
+            text,
+            link: reviewLink,
+            source: "Trustpilot",
+            user: {
+              name,
+              link,
+              reviews: reviewsCount,
+              country,
+              contributor_id: null,
+              thumbnail: null,
+              photos: 0,
+            },
+          };
+        })
+      );
 
       const reviews = rawReviews.map((r) => {
         const hash = crypto
@@ -179,7 +167,7 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
 
       allReviews.push(...reviews);
 
-      // Petite pause entre les pages pour éviter l'overload CPU
+      // Petite pause pour éviter la surcharge CPU
       await new Promise((r) => setTimeout(r, 1000));
     }
 
@@ -209,7 +197,7 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
           totalReviews,
         };
       } else {
-        console.log("🟢 Aucun nouvel avis à insérer");
+        console.log("ℹ️ Aucun nouvel avis à insérer");
       }
     }
 
