@@ -1,29 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const { trustpilotSites } = require("../config/sites");
-const scrapeTrustpilot = require("../scrapeTrustpilot");
-const { updateCache } = require("../updateCache"); // ← adapte le chemin si besoin
+const { scrapeTrustpilot } = require("../scrapeTrustpilot");
 
-// GET /api/scrape-all-trustpilot
-router.get("/scrape-all-trustpilot", async (req, res) => {
+router.get("/scrape/:site", async (req, res) => {
+  const { site } = req.params;
+  const match = trustpilotSites.find(s => s.name.toLowerCase() === site.toLowerCase());
+
+  if (!match) return res.status(404).json({ success: false, error: "Site introuvable" });
+
   try {
-    const results = await Promise.all(trustpilotSites.map(async (site) => {
-      try {
-        const result = await scrapeTrustpilot(site.url, site.name);
-        return { name: site.name, success: true, inserted: result.inserted };
-      } catch (err) {
-        return { name: site.name, success: false, error: err.message };
-      }
-    }));
-
-    await updateCache();
-
-    res.json({
-      success: true,
-      results,
-    });
+    const result = await scrapeTrustpilot(match.url, match.name, { pages: 1 });
+    res.json({ success: true, inserted: result.inserted });
   } catch (err) {
-    console.error("Erreur lors du scraping multiple Trustpilot :", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });

@@ -12,12 +12,13 @@ require("dotenv").config();
 // -------------------------
 const { UpdateLog, UpdateLogTrustpilot } = require("./model/model");
 const routesReviews = require("../serveur/routes/reviews");
-const routesTrustpilot = require("../serveur/routes/trustpilot");
-const routeTrustpilotSites = require("../serveur/routes/scrapeTrustpilotSite")
+const routesScrapeTrustpilotAll = require("../serveur/routes/scrapeTrustpilotAll");
+const routesScrapeTrustpilotSite = require("../serveur/routes/scrapeTrustpilotSite");
+const routesScrapeTrustpilotLatest = require("../serveur/routes/scrapeTrustpilotLatest"); 
+const routeTrustpilotGet = require("../serveur/routes/trustpilot");
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
 const suggestReplyRoute = require("../serveur/routes/routesChatGpt");
-const routeSend = require("./routes/sendLinks"); 
 const {shouldUpdateReviews, shouldUpdateReviewsTrustpilot } = require("./services/shouldUpdate")
 const { updateLatestReviews } = require("./services/fetchReviewsGoogle");
 const { updateLatestReviewsTrustpilot } = require("./services/fetchReviewsTrustpilot");
@@ -40,7 +41,7 @@ app.use(morgan("dev"));
 // -------------------------
 // Vérification des variables d'environnement
 // -------------------------
-const requiredEnv = ["MONGO_URI", "SERPAPI_KEY", "PORT", "SENDGRID_API_KEY", "GROQ_API_KEY"];
+const requiredEnv = ["MONGO_URI", "SERPAPI_KEY", "PORT"];
 requiredEnv.forEach((env) => {
   if (!process.env[env]) {
     console.error(`Erreur : La variable d'environnement ${env} est manquante.`);
@@ -52,12 +53,13 @@ requiredEnv.forEach((env) => {
 // Routes API
 // -------------------------
 app.use("/api/reviews", routesReviews);
-app.use("/api/trustpilot", routesTrustpilot);
 app.use("/api/force-update", routesUpdate);
-app.use("/api", routeTrustpilotSites)
+app.use("/api", routesScrapeTrustpilotAll);
+app.use("/api", routesScrapeTrustpilotSite)
+app.use("/api", routesScrapeTrustpilotLatest)
 app.use("/api", routesDebug);
-app.use("/api/sendEmail", routeSend);
 app.use("/api/suggest-reply", suggestReplyRoute);
+app.use("/api/trustpilot", routeTrustpilotGet);
 
 
 
@@ -81,7 +83,7 @@ updateDates();
 const startServer = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-
+ 
     // Création des collections si elles n’existent pas
     await UpdateLog.createCollection();
     await UpdateLogTrustpilot.createCollection();
