@@ -10,8 +10,10 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { Typography, Box, useMediaQuery,useTheme, Select, MenuItem  } from '@mui/material';
+import { Typography, Box, useMediaQuery,useTheme  } from '@mui/material';
 import useFetchReviews from '../../../hooks/components/useFetchReviews';
+import PeriodToggleButtons from '../../../components/PeriodToggleButtons';
+
 
 const ServicesChart = () => {
   const theme = useTheme(); // Récupérer le thème actuel
@@ -19,7 +21,7 @@ const ServicesChart = () => {
   
 
   const [selectedFilters, setSelectedFilters] = useState({
-    period: '30days',
+    period: '7days',
     service: '',
     plateforme: '',
     rating: '',
@@ -205,41 +207,71 @@ const ServicesChart = () => {
 
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: "column", mt: 3 }}>
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: '1600px',
+        margin: '0 auto',
+        px: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        mt: 8,
+      }}
+    >
+
       <Typography 
-        variant="h4" 
-        fontWeight="bold" 
-        sx={{ color: theme.palette.text.primary }} // Texte adaptatif
+        variant="h2" 
+        fontWeight="bold"
+        sx={{ fontSize: isMobile ? '28px' : '54px' }}
       >
-        Évolution du nombre <span style={{ color: theme.palette.primary.main }}>d’avis par services</span>
+        Évolution du nombre{" "}
+        <Box component="span" sx={{ color: theme.palette.custom.violetRealty }}>
+          d’avis par services
+        </Box>
       </Typography>
 
-      <Typography variant="body1" sx={{ color: theme.palette.secondary.main, mt: 2, mb: 2 }}>
+      <Typography variant="body1" sx={{ color: theme.palette.custom.violetRealty, mt: 2, mb: 2 }}>
         Suivez les performances de vos services et leur évolution au fil du temps
       </Typography>
 
       <Box
         sx={{
-          p: 6,
+          p: isMobile ? 3 : 6,
           borderRadius: '16px',
-          backgroundColor: theme.palette.background.paper, // Fond adaptatif
-          mt:5,
-          boxShadow: theme.shadows[3], // Ombre adaptable
+          backgroundColor: 'white',
+          mt: 5,
+          boxShadow: theme.shadows[3],
           overflow: 'hidden'
         }}
       >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'stretch' : 'center',
+            justifyContent: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
+          }}
+        >
+          <ToggleButtonGroup filters={filters} onFilterChange={handleFilterChange} />
 
-        <ToggleButtonGroup filters={filters} onFilterChange={handleFilterChange} />
+          <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-end', width: isMobile ? '100%' : 'auto' }}>
+            <PeriodToggleButtons
+              selected={selectedFilters.period}
+              onChange={(newValue) => handleFilterChange('period', newValue)}
+            />
+          </Box>
+        </Box>
+
+  
+
 
         <ResponsiveContainer width="100%" height={isMobile ? 300 : 500}>
           <BarChart       
             data={chartData}
-            margin={{
-              top: 30,
-              right: isMobile ? 10 : 40,
-              left: isMobile ? 10 : 20,
-              bottom: isMobile ? 40 : 80,
-            }}
+            margin={{ top: 30, right: 0, left: 0, bottom: 40 }}
+
           >
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} /> 
             <XAxis
@@ -247,19 +279,12 @@ const ServicesChart = () => {
               tickFormatter={date => new Date(date).toLocaleDateString()}
               style={{ fontSize: isMobile ? '10px' : '12px', fill: theme.palette.text.secondary }}
             />
-            <YAxis
-              label={{
-                value: "Nombre d'avis",
-                angle: -90,
-                position: 'insideLeft',
-                style: { fontSize: isMobile ? '10px' : '12px', fill: theme.palette.text.secondary }
-              }}
-            />
+            <YAxis/>
             <Tooltip content={<CustomTooltip />} />
             {isMobile ? (
               <Typography
                 variant="caption"
-                sx={{ color: theme.palette.text.secondary, marginTop: 2 }}
+                sx={{ color: theme.palette.text.secondary, marginTop: 2, }}
               >
               </Typography>
             ) : (

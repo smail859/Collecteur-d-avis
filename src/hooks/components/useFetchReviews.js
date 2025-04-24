@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import useFilterService from "../components/utils/useFilterService";
 
-const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", service: "" }) => {
+const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", service: "",} ) => {
   
   // États principaux
   const [reviews, setReviews] = useState([]); // Liste des avis récupérés
@@ -16,7 +16,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   const [trustpilotReviews, setTruspilotReviews] = useState([])
   const [reviewsCountByService, setReviewsCountByService] = useState({});
   const [avgRatingByService ,setAvgRatingByService] = useState({})
-
+  const { notifCleared = false, ...filters } = externalFilters;
 
 
   // Mémoïsation du nombre total d'avis
@@ -31,6 +31,45 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     "Marketing Automobile": useFilterService(validReviews, "Marketing Automobile"),
     "Marketing Immobilier": useFilterService(validReviews, "Marketing Immobilier"),
     "Pige Online": useFilterService(validReviews, "Pige Online"),
+  };
+  const commerciauxParService = {
+    "Monbien": {
+      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      "joanna": ["Joanna", "Joana"],
+      "johanna": ["Johanna"],
+      "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
+    },
+    "Startloc": {
+      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      "melanie": ["Mélanie", "Melanie", "Mel"],
+      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      "manon": ["Manon", "Mano", "Mannon"],
+    },
+    "Marketing automobile": {
+      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
+      "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
+    },
+    "Marketing immobilier": {
+      "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
+      "oceane": ["Océane", "Oceane"],
+      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      "johanna": ["Johanna"],
+    },
+    "Pige Online": {
+      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
+      "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
+    },
+    "Sinimo": {
+      "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
+      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+    }
   };
   
   /**
@@ -122,9 +161,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       return result; // Garder l'heure intacte pour ne pas fausser la journée
     }
     
-
-    // Cas non reconnu
-    console.warn("⚠️ Format de date non reconnu :", relativeDate);
     return now;
   }, []);
 
@@ -379,47 +415,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
 
     // Filtrage par commercial (via la fonction `searchCommercialName`)
     if (externalFilters.commercial && externalFilters.commercial !== "Tous les commerciaux") {
-      const commerciauxParService = {
-        "Monbien": {
-          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-          "joanna": ["Joanna", "Joana"],
-          "johanna": ["Johanna"],
-          "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
-        },
-        "Startloc": {
-          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-          "melanie": ["Mélanie", "Melanie", "Mel"],
-          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-          "deborah": ["Déborah", "Deborah", "Débora", "Debora", "Déborrah", "Deborrah", "Débby", "Debby", "Debbi", "Debi", "Débborah", "Déborha"],
-          "manon": ["Manon", "Mano", "Mannon"],
-        },
-        "Marketing automobile": {
-          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-          "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
-          "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
-        },
-        "Marketing immobilier": {
-          "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-          "oceane": ["Océane", "Oceane"],
-          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-          "johanna": ["Johanna"],
-          "joanna": ["Joanna", "Joana"]
-        },
-        "Pige Online": {
-          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-          "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
-          "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
-        },
-        "Sinimo": {
-          "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
-          "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-          "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        }
-      };
+
 
       const normalizeText = (text) => text?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const normalizedFilter = normalizeText(externalFilters.commercial);
@@ -611,46 +607,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   const commercialCounts = useMemo(() => {
     const counts = {};
   
-    const commerciauxParService = {
-      "Monbien": {
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "joanna": ["Joanna", "Joana"],
-        "johanna": ["Johanna"],
-        "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
-      },
-      "Startloc": {
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "melanie": ["Mélanie", "Melanie", "Mel"],
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "deborah": ["Déborah", "Deborah", "Débora", "Debora", "Déborrah", "Deborrah", "Débby", "Debby", "Debbi", "Debi", "Débborah", "Déborha"],
-        "manon": ["Manon", "Mano", "Mannon"],
-      },
-      "Marketing automobile": {
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
-        "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
-      },
-      "Marketing immobilier": {
-        "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-        "oceane": ["Océane", "Oceane"],
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "johanna": ["Johanna"],
-      },
-      "Pige Online": {
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
-        "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
-      },
-      "Sinimo": {
-        "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      }
-    };
   
     const now = new Date();
     const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -703,45 +659,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   const commercialCountsYears = useMemo(() => {
     const counts = {};
   
-    const commerciauxParService = {
-      "Monbien": {
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "joanna": ["Joanna", "Joana"],
-        "johanna": ["Johanna"],
-        "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
-      },
-      "Startloc": {
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "melanie": ["Mélanie", "Melanie", "Mel"],
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "manon": ["Manon", "Mano", "Mannon"],
-      },
-      "Marketing automobile": {
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
-        "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
-      },
-      "Marketing immobilier": {
-        "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-        "oceane": ["Océane", "Oceane"],
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "johanna": ["Johanna"],
-      },
-      "Pige Online": {
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
-        "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
-      },
-      "Sinimo": {
-        "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
-        "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      }
-    };
+    
   
     const moisLabels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
   
@@ -819,9 +737,54 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   
     return { resultYears, totalAvisParCommercialParService };
   }, [filteredReviews, parseRelativeDate]);
+
+  const detectCommercialName = (text, service) => {
+    const normalize = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const normalizedText = normalize(text);
   
+    if (!commerciauxParService[service]) return null;
+  
+    for (const [commercialKey, variants] of Object.entries(commerciauxParService[service])) {
+      for (const variant of variants) {
+        const regex = new RegExp(`\\b${normalize(variant)}\\b`, "i");
+        if (regex.test(normalizedText)) return commercialKey; // <- retourne la clé maintenant
+      }
+    }
+  
+    return null;
+  };
 
+  const LAST_REVIEW_KEY = "lastReviewCheck";
 
+  const updateLastCheckDate = () => {
+    localStorage.setItem(LAST_REVIEW_KEY, new Date().toISOString());
+  };
+  
+  const pivotDate = useMemo(() => {
+    const rawLastCheck = localStorage.getItem("lastReviewCheck");
+    const lastCheckDate = rawLastCheck ? new Date(rawLastCheck) : null;
+  
+    if (lastCheckDate && !isNaN(lastCheckDate.getTime())) {
+      // forcer à minuit
+      lastCheckDate.setHours(0, 0, 0, 0);
+      return lastCheckDate;
+    }
+  
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    twoDaysAgo.setHours(0, 0, 0, 0); // également à minuit
+    return twoDaysAgo;
+  }, [notifCleared]);
+  
+  const newReviews = useMemo(() => {
+    const filtered = reviews.filter((review) => {
+      const reviewDate = new Date(review.iso_date);
+      reviewDate.setHours(0, 0, 0, 0);
+      return reviewDate > pivotDate;
+    });
+    return filtered;
+  }, [reviews, pivotDate, notifCleared]);
+  
   /**
    * Fonction pour récupérer les avis
    */
@@ -869,89 +832,19 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   }, []);
 
 
-  const LAST_REVIEW_KEY = "lastReviewCheck";
-
-  const updateLastCheckDate = () => {
-    localStorage.setItem(LAST_REVIEW_KEY, new Date().toISOString());
-  };
-
-  const getLastCheckDate = () => {
-    return localStorage.getItem(LAST_REVIEW_KEY);
-  };
-  const lastCheckDate = new Date(getLastCheckDate());
-  const twoDaysAgo = new Date();
-  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-  // On garde la date la plus ancienne des deux
-  const pivotDate = lastCheckDate < twoDaysAgo ? lastCheckDate : twoDaysAgo;
 
 
-  const newReviews = reviews.filter((review) => {
-    return new Date(review.iso_date) > pivotDate;
-  });
+
  
   useEffect(() => {
     if (!loading && googleReviews.length === 0 && trustpilotReviews.length === 0) {
+      
       fetchReviews();
     }
   }, [googleReviews, trustpilotReviews]);
 
-  const detectCommercialName = (reviewText, service) => {
-    const commerciauxParService = {
-      "Monbien": {
-        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "Joanna": ["Joanna", "Joana"],
-        "Johanna": ["Johanna"],
-        "Théo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
-      },
-      "Startloc": {
-        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "Mélanie": ["Mélanie", "Melanie", "Mel"],
-        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "Déborah": ["Déborah", "Deborah", "Debby"],
-        "Manon": ["Manon", "Mano", "Mannon"],
-      },
-      "Marketing automobile": {
-        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "Arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
-        "Élodie": ["Élodie", "Elodie", "Elo"],
-      },
-      "Marketing immobilier": {
-        "Jean-Simon": ["Jean-Simon", "Jean Simon", "J-Simon"],
-        "Océane": ["Océane", "Oceane"],
-        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "Johanna": ["Johanna"],
-      },
-      "Pige Online": {
-        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-        "Angela": ["Angela", "Angéla", "Angie"],
-        "Esteban": ["Esteban", "estebane"],
-      },
-      "Sinimo": {
-        "Anaïs": ["Anaïs", "Anais"],
-        "Lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-        "Smaïl": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      }
-    };
-  
-    const text = reviewText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  
-    const serviceCommerciaux = commerciauxParService[service] || {};
-    for (const [nom, variants] of Object.entries(serviceCommerciaux)) {
-      for (const variant of variants) {
-        const variantNorm = variant.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        if (text.includes(variantNorm)) {
-          return nom;
-        }
-      }
-    }
-  
-    return null;
-  };
 
+  
   
   
 
@@ -1028,9 +921,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     // Mettre à jour les états
     setReviewsCountByService(countByService);
     setAvgRatingByService(avgRatingByService);
-
-
-    console.log(avgRatingByService)
   
   }, [reviews, googleReviews, trustpilotReviews]); // Ajout des dépendances
 

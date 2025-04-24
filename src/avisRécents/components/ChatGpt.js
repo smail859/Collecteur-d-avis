@@ -28,7 +28,7 @@ const ChatGpt = ({ avisData }) => {
       ? "https://collecteur-avis.onrender.com"
       : "http://localhost:5000";
 
-     
+    console.log(baseUrl)
 
     try {
       const response = await fetch(`${baseUrl}/api/suggest-reply`, {
@@ -38,6 +38,7 @@ const ChatGpt = ({ avisData }) => {
           text: avisData.text || avisData.snippet || "",
           source: avisData.source,
           site: avisData.site,
+          name : avisData.user?.name,
           contexte: contexte
         }),
       });

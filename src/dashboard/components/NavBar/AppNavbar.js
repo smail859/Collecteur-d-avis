@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import NavLinks from './NavLinks';
 
 // MUI Components
@@ -47,21 +47,37 @@ const links = [
 export default function AppNavbar({ darkMode, onToggleDarkMode }) {
   const [open, setOpen] = useState(false);
   const [openNotif, setOpenNotif] = useState(false);
+  const [notifCleared, setNotifCleared] = useState(false);
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
-  const { newReviewsCount, updateLastCheckDate, newReviews } = useFetchReviews();
+  const { newReviewsCount, updateLastCheckDate, newReviews, detectCommercialName } = useFetchReviews({ notifCleared });
+
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
   const handleNotifOpen = () => {
-    updateLastCheckDate();
     setOpenNotif(true);
   };
+  
 
-  const handleNotifClose = () => setOpenNotif(false);
+  const handleNotifClose = () => {
+    updateLastCheckDate();
+    setNotifCleared(true);
+    setOpenNotif(false);
+  };
+  
 
-
+  useEffect(() => {
+    if (!openNotif) {
+      const timeout = setTimeout(() => {
+        setNotifCleared(false);
+      }, 1000); // petite latence pour laisser le temps au hook de se recalculer
+  
+      return () => clearTimeout(timeout);
+    }
+  }, [openNotif]);
+  
   return (
     <AppBar
       position="static"
@@ -97,13 +113,12 @@ export default function AppNavbar({ darkMode, onToggleDarkMode }) {
             <>
               <CustomDatePicker />
               <MenuButton onClick={handleNotifOpen}>
-                <Badge
-                  color="error"
-                  variant="dot"
-                  invisible={newReviewsCount === 0}
-                >
-                  <NotificationsRoundedIcon />
-                </Badge>
+              <Badge
+                color="error"
+                badgeContent={newReviewsCount > 0 ? newReviewsCount : null}
+              >
+                <NotificationsRoundedIcon />
+              </Badge>
               </MenuButton>
               
 
@@ -136,7 +151,7 @@ export default function AppNavbar({ darkMode, onToggleDarkMode }) {
       </StyledToolbar>
       {/* Drawer uniquement pour desktop */}
       {isDesktop && (
-        <NotificationDrawer open={openNotif} onClose={handleNotifClose} newReviews={newReviews} />
+        <NotificationDrawer open={openNotif} onClose={handleNotifClose} newReviews={newReviews} detectCommercialName={detectCommercialName} />
       )}
     
 

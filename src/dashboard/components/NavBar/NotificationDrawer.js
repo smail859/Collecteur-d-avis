@@ -1,4 +1,3 @@
-// components/layout/NotificationDrawer.js
 import PropTypes from 'prop-types';
 import {
   Drawer,
@@ -6,9 +5,13 @@ import {
   Typography,
   Stack,
   Divider,
+  Chip,
 } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
-const NotificationDrawer = ({ open, onClose, newReviews }) => {
+const NotificationDrawer = ({ open, onClose, newReviews, detectCommercialName }) => {
+
   return (
     <Drawer
       anchor="right"
@@ -17,34 +20,74 @@ const NotificationDrawer = ({ open, onClose, newReviews }) => {
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
         '& .MuiDrawer-paper': {
-          width: '300px',
+          width: '320px',
           padding: 2,
-          backgroundColor: '#fff',
+          backgroundColor: '#FAFAFA',
         },
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        🛎️ Nouveaux avis
-      </Typography>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">🛎️ Nouveaux avis</Typography>
+        <IconButton onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+
       <Divider />
-      {newReviews?.length > 0 ? (
-        <Stack spacing={2} mt={2}>
-          {newReviews.slice(0, 5).map((review, index) => (
-            <Box key={index} sx={{ p: 2, bgcolor: "#F2F3FB", borderRadius: 2 }}>
-              <Typography variant="body2" fontWeight={600}>
-                {review.service}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {review.text.slice(0, 60)}...
+
+      <Stack spacing={2} mt={2}>
+        {newReviews.slice(0, 5).map((review, index) => {
+          const text = review.text || review.snippet || "";
+          const commercial = detectCommercialName(text, review.service);
+
+          return (
+            <Box
+              key={index}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: "#FFFFFF",
+                boxShadow: 1,
+                transition: "all 0.2s ease",
+                '&:hover': {
+                  boxShadow: 3,
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body1" fontWeight={600}>
+                  {review.service}
+                </Typography>
+                {commercial && (
+                  <Chip
+                    label={commercial}
+                    size="small"
+                    color="primary"
+                    sx={{ fontSize: '12px' }}
+                  />
+                )}
+              </Stack>
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  mt: 1,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {text}
               </Typography>
             </Box>
-          ))}
-        </Stack>
-      ) : (
-        <Typography sx={{ mt: 2 }} color="text.secondary">
-          Aucun nouvel avis.
-        </Typography>
-      )}
+          );
+        })}
+      </Stack>
     </Drawer>
   );
 };

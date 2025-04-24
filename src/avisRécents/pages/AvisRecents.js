@@ -181,13 +181,18 @@ const AvisRecents = ({ onFilterChange }) => {
   }, [filters]);
 
   return (
-    <Box width="100%" mx="auto" px={isMobile ? 2 : 4}>
+    <Box   sx={{
+      width: "100%",
+      margin: "0 auto",
+      px: isMobile ? 2 : 4,
+    }}>
       <Typography
         fontSize={isMobile ? "32px" : "54px"}
-        textAlign={isMobile ? "center" : "start"}
+        textAlign="start"
         fontWeight="900"
         mt={isMobile ? "10px" : "20px"}
         gutterBottom
+        marginLeft={15}
       >
         Avis Récents
       </Typography>
@@ -195,10 +200,11 @@ const AvisRecents = ({ onFilterChange }) => {
       <Typography
         fontSize={isMobile ? "14px" : "16px"}
         fontWeight="bold"
-        textAlign={isMobile ? "center" : "start"}
+        textAlign="start"
         mt="20px"
         color="#8B5CF6"
         gutterBottom
+        marginLeft={15}
       >
         Suivez les derniers retours de nos utilisateurs
       </Typography>

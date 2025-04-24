@@ -8,7 +8,18 @@ const ToggleButtonGroup = ({ filters, onFilterChange }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   
   return (
-    <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "center", gap: "15px", marginBottom: "20px",  }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        gap: "20px",
+        flexWrap: "wrap",
+        marginLeft: "22px"
+      }}
+    >
+  
       {filters.map(({ key, label, options, value }) => (
         <CustomDropdown
           key={key}

@@ -33,8 +33,13 @@ export default function ServicesTable({ services }) {
               <img src={service.icon} alt={service.name} width={32} height={32} />
               <Typography fontWeight="bold">{service.name}</Typography>
             </Box>
-            <Typography variant="body2">Trustpilot : {service.trustpilot}</Typography>
-            <Typography variant="body2">Google : {service.google} </Typography>
+            <Typography variant="body2" sx={{ color: "#00B67A" }}>
+              Trustpilot : {service.trustpilot}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#4285F4" }}>
+              Google : {service.google}
+            </Typography>
+
             <Typography variant="body2">Total : {service.totalReviews} avis </Typography>
             <Typography variant="body2">
               Note Moyenne : {service.avgRating}
@@ -48,13 +53,13 @@ export default function ServicesTable({ services }) {
   //  VERSION DESKTOP - AFFICHAGE EN TABLEAU
   return (
     <Box sx={{ padding: '40px', borderRadius: '12px' }}>
-      <Typography variant="h4" fontWeight="bold" sx={{ color: theme.palette.text.primary }}>
-        Nombre d’avis et notes <span style={{ color: theme.palette.secondary.main }}>par services</span>
+      <Typography fontWeight="bold" sx={{ color: theme.palette.text.primary, fontSize: "54px", mt: "100px" }}>
+        Nombre d'avis et notes <span style={{ color: theme.palette.custom.violetRealty }}>par services</span>
       </Typography>
 
       
       {/* Sous-titre */}
-      <Typography variant="body1" sx={{ color: theme.palette.secondary.main, marginTop: '20px', marginBottom: "20px" }}>
+      <Typography sx={{ color: theme.palette.custom.violetRealty, marginTop: '20px', marginBottom: "20px", fontWeight: "600" }}>
         Analysez les performances de vos services grâce aux notes et avis clients collectés sur chaque plateforme.
       </Typography>
 
@@ -65,19 +70,31 @@ export default function ServicesTable({ services }) {
           borderRadius: '12px',
           boxShadow: theme.shadows[3],
           overflow: 'hidden',
-          padding: '10px',
-          mt: 4
+          padding: '34px',
+          mt: 4,
+          mb: "100px"
         }}
       >
-        <Table>
+        <Table
+          sx={{
+            borderCollapse: 'collapse',
+            '& td, & th': {
+              borderBottom: `1px solid ${theme.palette.custom.violetRealty}`,
+            },
+          }}
+        >
+
+
           <TableHead>
             <TableRow>
               {['Services', 'Trustpilot avis/notes', 'Google avis/notes', 'App Store avis/notes', 'Google Play avis/notes', 'Total d’avis', 'Note moyenne'].map((header) => (
                 <TableCell
                   key={header}
                   sx={{
-                    fontWeight: ['Services', 'Note moyenne'].includes(header) ? 'bold' : 'normal',
-                    color: theme.palette.text.primary,
+                    fontWeight: ['Services', 'Note moyenne', "Total d’avis"].includes(header) ? 600 : 400,
+                    
+                    color: theme.palette.custom.violetRealty,
+                    fontSize: "20px"
                   }}
                 >
                   {header}
@@ -91,27 +108,41 @@ export default function ServicesTable({ services }) {
               <TableRow
                 key={service.id}
                 sx={{
-                  backgroundColor: index % 2 === 0 ? theme.palette.background.default : theme.palette.background.alt,
+                  backgroundColor: index % 2 === 1 ? theme.palette.background.default : theme.palette.background.alt
+
                 }}
               >
                 <TableCell>
                   <Box display="flex" alignItems="center" gap={2}>
-                    {service.icon && <img src={service.icon} alt={service.name} width={32} height={32} />}
-                    <Typography fontWeight="600">{service.name}</Typography>
+                    {service.icon && <img src={service.icon} alt={service.name} width="70px" height="70px"  />}
+                    <Typography fontWeight="600" fontSize="16px">{service.name}</Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{service.trustpilot}</TableCell>
-                <TableCell>{service.google}</TableCell>
-                <TableCell>{service.appStore}</TableCell>
-                <TableCell>{service.googlePlay}</TableCell>
-                <TableCell>{service.totalReviews}</TableCell>
+                <TableCell sx={{fontWeight: "400", fontSize: "16px"}}>{service.trustpilot}</TableCell>
+                <TableCell sx={{fontWeight: "400", fontSize: "16px"}} >{service.google}</TableCell>
+                <TableCell sx={{fontWeight: "400", fontSize: "16px"}} >{service.appStore}</TableCell>
+                <TableCell sx={{fontWeight: "400", fontSize: "16px"}} >{service.googlePlay}</TableCell>
+                <TableCell sx={{fontWeight: "400", fontSize: "16px"}} >{service.totalReviews}</TableCell>
                 <TableCell>
-                  <Box display="flex" alignItems="center" gap={1}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      backgroundColor: 'white',
+                      padding: "24px",
+                      borderRadius: '20px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+                      width: 'fit-content',
+                      mx: 'auto'
+                    }}
+                  >
                     {getTrendIcon[service.trend]}
-                    <Typography>{service.avgRating}</Typography>
+                    <Typography fontWeight="bold">{service.avgRating}</Typography>
                     <Star style={{ color: theme.palette.warning.main }} />
                   </Box>
                 </TableCell>
+
               </TableRow>
             ))}
           </TableBody>
@@ -134,7 +165,7 @@ ServicesTable.propTypes = {
       appStore: PropTypes.string,
       googlePlay: PropTypes.string,
       totalReviews: PropTypes.string.isRequired,
-      avgRating: PropTypes.func.isRequired,
+      avgRating: PropTypes.number.isRequired,
       trend: PropTypes.oneOf(['up', 'down', 'neutral']).isRequired,
     })
   ).isRequired,
