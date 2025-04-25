@@ -6,10 +6,19 @@ const path = require("path");
 const fs = require("fs");
 
 // === CONFIG CHROMIUM ===
-const chromePath = path.join(
-  __dirname,
-  "../chromium/chrome/linux-135.0.7049.95/chrome-linux64/headless-shell"
-);
+const chromiumBasePath = path.join(__dirname, "../chromium/chrome");
+const chromeExecutablePath = fs.readdirSync(chromiumBasePath)
+  .map(version => path.join(chromiumBasePath, version, "chrome-linux64", "chrome"))
+  .find(p => fs.existsSync(p));
+
+if (!chromeExecutablePath) {
+  throw new Error("❌ Impossible de localiser le binaire Chrome automatiquement");
+}
+
+const chromePath = chromeExecutablePath;
+
+
+
 const isProd = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
 
 const launchBrowserWithFallback = async () => {
