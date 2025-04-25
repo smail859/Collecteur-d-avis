@@ -27,6 +27,7 @@ export default function MainGrid() {
   const {selectedFilter, reviewsCountByService,avgRatingByService, averageRatingLastTwoMonths} = useFetchReviews();
   // État pour gérer le filtre actif du graphique
   const [activeFilter, setActiveFilter] = useState(selectedFilter);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Synchroniser l'état interne `activeFilter` avec `selectedFilter`
   useEffect(() => {
@@ -173,7 +174,7 @@ export default function MainGrid() {
     >
       <Box sx={{ maxWidth: 1600, mx: "auto", px: 2, textAlign: "center" }}>
         {/* TITRE */}
-        <Typography variant="h1">
+        <Typography variant={isMobile ? "h2" : "h1"}>
           <Box component="span" sx={{ color: theme.palette.text.primary }}>
             Tableau de bord{" "}
           </Box>
@@ -183,7 +184,7 @@ export default function MainGrid() {
         </Typography>
   
         {/* SOUS-TITRE */}
-        <Typography variant="subtitle1" sx={{ mt: 2 }}>
+        <Typography variant={isMobile ? "body2" : "subtitle1"} sx={{ mt: 2 }}>
           Tous les retours clients pour l'ensemble des services en un seul coup d'œil
         </Typography>
   

@@ -1,25 +1,30 @@
+// Hooks React
 import { useState, useMemo } from 'react';
+
+// Composant de filtres personnalisés
 import ToggleButtonGroup from '../../../avisRécents/components/ToggleButtonGroup';
+
+// Composants Recharts pour créer le graphique en barres
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { Typography, Box, useMediaQuery,useTheme  } from '@mui/material';
+
+// Composants MUI pour la structure et le style
+import { Typography, Box, useMediaQuery, useTheme } from '@mui/material';
+
+// Hook de récupération des avis filtrés
 import useFetchReviews from '../../../hooks/components/useFetchReviews';
+
+// Boutons prédéfinis pour la sélection rapide de périodes
 import PeriodToggleButtons from '../../../components/PeriodToggleButtons';
 
 
+// Composant d'affichage du graphique des avis par service
 const ServicesChart = () => {
-  const theme = useTheme(); // Récupérer le thème actuel
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+  const theme = useTheme(); // Utilisation du thème Material UI
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Détection du format mobile
 
+  // États des filtres sélectionnés
   const [selectedFilters, setSelectedFilters] = useState({
     period: '7days',
     service: '',
@@ -27,11 +32,13 @@ const ServicesChart = () => {
     rating: '',
   });
 
+  // Récupération des données d’avis en fonction des filtres
   const { reviewsPerPeriod, ratingsCount } = useFetchReviews({
     periode: selectedFilters.period,
     note: selectedFilters.rating,
   });
 
+  // Définition des couleurs par service
   const serviceColors = {
     Startloc: "#FF66B2",
     Sinimo: "#4D9B9B",
@@ -41,49 +48,53 @@ const ServicesChart = () => {
     Monbien: "#FF7F32",
   };
 
+  // Liste des services disponibles
   const allServices = [
-    "Monbien",
-    "Startloc",
-    "Marketing immobilier",
-    "Marketing automobile",
-    "Sinimo",
-    "Pige Online",
+    "Monbien", "Startloc", "Marketing immobilier", "Marketing automobile", "Sinimo", "Pige Online"
   ];
 
   const periodData = reviewsPerPeriod[selectedFilters.period] || {};
 
-  // Tooltip personnalisé (utilise theme.palette)
+  // Composant de tooltip personnalisé (info-bulle au survol)
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div style={{
-          background: theme.palette.background.paper, // Adaptation au mode sombre
-          border: `1px solid ${theme.palette.divider}`,
-          padding: '10px',
-          borderRadius: '4px',
-          color: theme.palette.text.primary, // Texte adaptable
-          display: isMobile ? "flex" : "block",
-          flexDirection:isMobile ? "row" : "column",
-          justifyContent:isMobile ? "center" : "flex-start",
-        }}>
-          <p>{selectedFilters.rating ? `Période : ${label}` : `Date : ${label}`}</p>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.background.paper,
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: "8px",
+            padding: isMobile ? "" : "12px",
+            color: theme.palette.text.primary,
+            boxShadow: theme.shadows[2],
+            fontSize: isMobile ? "12px" : "14px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
+            minWidth: isMobile ? "50px" : "200px",
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+            {selectedFilters.rating ? `Période : ${label}` : `Date : ${label}`}
+          </Typography>
           {payload.map((item, index) => (
-            <p key={index} style={{ color: item.fill, margin: 0 }}>
-              {`${item.name} : ${item.value}`}
-            </p>
+            <Box key={index} sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography sx={{ color: item.fill }}>{item.name}</Typography>
+              <Typography sx={{ fontWeight: 500 }}>{item.value}</Typography>
+            </Box>
           ))}
-        </div>
+        </Box>
       );
     }
     return null;
   };
 
+  // Définition des filtres disponibles pour l'utilisateur
   const filters = [
     {
       key: "service",
       label: "Service",
       value: selectedFilters.service,
-      
       options: [{ label: "Tous les services", value: "" }].concat(
         Object.keys(periodData).reduce((services, platform) => {
           Object.keys(periodData[platform]).forEach(service => {
@@ -133,14 +144,14 @@ const ServicesChart = () => {
     },
   ];
 
+  // Mise à jour des filtres
   const handleFilterChange = (key, value) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Construction des données pour le graphique
+  // Préparation des données du graphique (selon filtre par note OU par date)
   const chartData = useMemo(() => {
     if (selectedFilters.rating) {
-      // Mode "filtre par note"
       const data = { period: selectedFilters.period };
       if (selectedFilters.plateforme) {
         if (ratingsCount[selectedFilters.plateforme]) {
@@ -153,13 +164,11 @@ const ServicesChart = () => {
       } else {
         const counts = {};
         Object.keys(ratingsCount).forEach(source => {
-          if (source === "Google" || source === "Trustpilot") {
-            Object.keys(ratingsCount[source]).forEach(service => {
-              if (selectedFilters.service && selectedFilters.service !== service) return;
-              const count = ratingsCount[source][service][selectedFilters.rating] || 0;
-              counts[service] = (counts[service] || 0) + count;
-            });
-          }
+          Object.keys(ratingsCount[source]).forEach(service => {
+            if (selectedFilters.service && selectedFilters.service !== service) return;
+            const count = ratingsCount[source][service][selectedFilters.rating] || 0;
+            counts[service] = (counts[service] || 0) + count;
+          });
         });
         Object.entries(counts).forEach(([service, count]) => {
           data[service] = count;
@@ -167,32 +176,25 @@ const ServicesChart = () => {
       }
       return [data];
     } else {
-      // Mode "graphique temporel"
+      // Mode graphique temporel
       const dailyCounts = {};
-      let sources = [];
-      if (selectedFilters.plateforme) {
-        sources.push(selectedFilters.plateforme);
-      } else {
-        sources = Object.keys(reviewsPerPeriod[selectedFilters.period] || {});
-      }
+      let sources = selectedFilters.plateforme ? [selectedFilters.plateforme] : Object.keys(reviewsPerPeriod[selectedFilters.period] || {});
+      
       sources.forEach(source => {
         const sourceData = reviewsPerPeriod[selectedFilters.period][source];
         if (sourceData) {
           Object.keys(sourceData).forEach(service => {
             if (selectedFilters.service && selectedFilters.service !== service) return;
-            const { dates } = sourceData[service];
-            dates.forEach(date => {
+            sourceData[service].dates.forEach(date => {
               if (!dailyCounts[date]) dailyCounts[date] = { date };
               dailyCounts[date][service] = (dailyCounts[date][service] || 0) + 1;
             });
           });
         }
       });
-  
-      const dataArray = Object.values(dailyCounts).sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-      );
-  
+
+      const dataArray = Object.values(dailyCounts).sort((a, b) => new Date(a.date) - new Date(b.date));
+
       dataArray.forEach(entry => {
         allServices.forEach(serviceName => {
           if (!entry.hasOwnProperty(serviceName)) {
@@ -200,12 +202,12 @@ const ServicesChart = () => {
           }
         });
       });
-  
+
       return dataArray;
     }
   }, [reviewsPerPeriod, selectedFilters, ratingsCount]);
 
-
+  // --- RENDER -----------------------------------------------------------------------
   return (
     <Box
       sx={{
@@ -218,7 +220,7 @@ const ServicesChart = () => {
         mt: 8,
       }}
     >
-
+      {/* Titre principal */}
       <Typography 
         variant="h2" 
         fontWeight="bold"
@@ -230,10 +232,12 @@ const ServicesChart = () => {
         </Box>
       </Typography>
 
+      {/* Sous-titre */}
       <Typography variant="body1" sx={{ color: theme.palette.custom.violetRealty, mt: 2, mb: 2 }}>
         Suivez les performances de vos services et leur évolution au fil du temps
       </Typography>
 
+      {/* Bloc contenant filtres + graphique */}
       <Box
         sx={{
           p: isMobile ? 3 : 6,
@@ -244,6 +248,7 @@ const ServicesChart = () => {
           overflow: 'hidden'
         }}
       >
+        {/* Filtres (service, plateforme, note, période) */}
         <Box
           sx={{
             display: 'flex',
@@ -255,7 +260,6 @@ const ServicesChart = () => {
           }}
         >
           <ToggleButtonGroup filters={filters} onFilterChange={handleFilterChange} />
-
           <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-end', width: isMobile ? '100%' : 'auto' }}>
             <PeriodToggleButtons
               selected={selectedFilters.period}
@@ -264,36 +268,22 @@ const ServicesChart = () => {
           </Box>
         </Box>
 
-  
-
-
+        {/* Graphique principal (responsive) */}
         <ResponsiveContainer width="100%" height={isMobile ? 300 : 500}>
-          <BarChart       
-            data={chartData}
-            margin={{ top: 30, right: 0, left: 0, bottom: 40 }}
-
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} /> 
+          <BarChart data={chartData} margin={{ top: 30, right: 0, left: 0, bottom: 40 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
             <XAxis
               dataKey={selectedFilters.rating ? "period" : "date"}
               tickFormatter={date => new Date(date).toLocaleDateString()}
               style={{ fontSize: isMobile ? '10px' : '12px', fill: theme.palette.text.secondary }}
             />
-            <YAxis/>
+            <YAxis />
             <Tooltip content={<CustomTooltip />} />
-            {isMobile ? (
-              <Typography
-                variant="caption"
-                sx={{ color: theme.palette.text.secondary, marginTop: 2, }}
-              >
-              </Typography>
-            ) : (
-              <Legend
-                verticalAlign="bottom"
-                align="center"
-                wrapperStyle={{ marginTop: 20 }}
-              />
+            {!isMobile && (
+              <Legend verticalAlign="bottom" align="center" wrapperStyle={{ marginTop: 20 }} />
             )}
+
+            {/* Génération dynamique des barres par service */}
             {chartData.length > 0 &&
               Object.keys(chartData[0])
                 .filter(key => key !== "period" && key !== "date")
@@ -301,7 +291,7 @@ const ServicesChart = () => {
                   <Bar
                     key={service}
                     dataKey={service}
-                    fill={serviceColors[service] || theme.palette.primary.main} // Utilisation de theme.palette
+                    fill={serviceColors[service] || theme.palette.primary.main}
                     name={service}
                     legendType="square"
                     radius={[10, 10, 0, 0]}
@@ -311,7 +301,6 @@ const ServicesChart = () => {
             }
           </BarChart>
         </ResponsiveContainer>
-
       </Box>
     </Box>
   );

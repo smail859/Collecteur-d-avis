@@ -1,26 +1,36 @@
+// Importation des composants Material UI nécessaires pour la mise en page, les styles, et les icônes
 import {
   Card, CardContent, CardHeader, CardActions, Typography,
   Avatar, Stack, Link, Rating, Modal, Button, Box, IconButton,
   useTheme, useMediaQuery
 } from '@mui/material';
+
+// Icônes utilisées dans les boutons d'action
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ReplyOutlinedIcon from '@mui/icons-material/ReplyOutlined';
 import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined';
 
+// Composant interne pour générer une réponse via ChatGPT
 import ChatGpt from './ChatGpt';
+
+// Gestion des props avec vérification de types
 import PropTypes from "prop-types";
+
+// Hook React pour la gestion d'état
 import { useState } from "react";
 
+// Composant principal qui affiche un avis complet sous forme de carte
 const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // État local pour gérer l'ouverture de la modale
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Détection du format mobile
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  // Gestion du texte de l’avis avec éventuel découpage s’il est trop long
   const MAX_LENGTH = 150;
   const text = avisData.text || avisData.snippet || "";
   const isLongText = text.length > MAX_LENGTH;
@@ -40,6 +50,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.05)",
       }}
     >
+      {/* En-tête de la carte : avatar, nom et note de l'utilisateur */}
       <CardHeader
         avatar={
           <Avatar src={avisData.user?.thumbnail} alt={avisData.user?.name || "Utilisateur"} />
@@ -57,7 +68,6 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         }
         subheader={
           <Stack direction="row" spacing={1} alignItems="center">
-
             <Rating
               name="half-rating-read"
               value={defaultValueAvis}
@@ -73,11 +83,13 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         sx={{ paddingBottom: 0 }}
       />
 
+      {/* Contenu principal : texte de l’avis, éventuellement tronqué */}
       <CardContent sx={{ paddingTop: 1, flexGrow: 1 }}>
         <Typography variant="body2" color="black" mt={1}>
           {detectCommercial(truncatedText)}
         </Typography>
 
+        {/* Bouton pour afficher l’avis complet si trop long */}
         {isLongText && (
           <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
             <Button
@@ -90,6 +102,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         )}
       </CardContent>
 
+      {/* Action : lien vers l’avis original */}
       <CardActions sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <VisibilityOutlinedIcon sx={{ fontSize: 24, color: '#8B5CF6' }} />
@@ -107,6 +120,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         </Stack>
       </CardActions>
 
+      {/* Action : lien pour répondre à l’avis */}
       <CardActions sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <ReplyOutlinedIcon sx={{ fontSize: 24, color: '#8B5CF6' }} />
@@ -126,6 +140,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         </Stack>
       </CardActions>
 
+      {/* Action : suggestion de réponse automatique (ou indication si déjà répondu) */}
       <CardActions sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <AutoFixHighOutlinedIcon sx={{ fontSize: 24, color: '#8B5CF6' }} />
@@ -139,6 +154,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
         </Stack>
       </CardActions>
 
+      {/* Modale affichée lorsqu’on veut lire l’avis complet */}
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
@@ -159,6 +175,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
             overflowY: "auto",
           }}
         >
+          {/* Bouton de fermeture de la modale */}
           <IconButton
             onClick={handleClose}
             sx={{
@@ -175,6 +192,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
             Détail de l'avis
           </Typography>
 
+          {/* Infos utilisateur dans la modale */}
           <Box
             sx={{
               display: "flex",
@@ -200,6 +218,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
             </Box>
           </Box>
 
+          {/* Texte complet de l’avis */}
           <Typography
             sx={{
               mt: 2,
@@ -211,6 +230,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
             {detectCommercial(avisData?.text || avisData?.snippet)}
           </Typography>
 
+          {/* Affichage de la réponse si elle existe */}
           <Typography>
             {avisData.response?.snippet || "Aucune réponse disponible"}
           </Typography>
@@ -220,6 +240,7 @@ const FullAvis = ({ avisData, defaultValueAvis, detectCommercial }) => {
   );
 };
 
+// Définition des types de props attendus pour le composant
 FullAvis.propTypes = {
   avisData: PropTypes.object.isRequired,
   defaultValueAvis: PropTypes.number.isRequired,

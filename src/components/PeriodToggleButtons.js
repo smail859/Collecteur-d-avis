@@ -1,14 +1,17 @@
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup,useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 const PeriodToggleButtons = ({ selected, onChange }) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const periods = [
     { label: "Aujourd'hui", value: "today" },
     { label: "7 derniers jours", value: "7days" },
     { label: "30 derniers jours", value: "30days" },
   ];
+  
+  if (isMobile) return null;
 
   return (
     <ToggleButtonGroup
