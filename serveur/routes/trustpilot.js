@@ -8,7 +8,7 @@ const cacheDuration = 1000 * 60 * 60 * 24 * 2; // 2 jours
 router.get("/", async (req, res) => {
   const cached = cache.get("trustpilot_reviews");
   if (cached) {
-    console.log("✅ Trustpilot renvoyé depuis le cache");
+    console.log("Trustpilot renvoyé depuis le cache");
     return res.status(200).json(cached);
   }
 

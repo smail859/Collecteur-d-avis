@@ -5,7 +5,9 @@ const puppeteer = require("puppeteer");
 const { Review } = require("./model/model");
 require("dotenv").config();
 
+
 const isProd = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+
 let chromePath = null;
 
 if (isProd) {
@@ -67,37 +69,40 @@ const launchBrowserWithFallback = async () => {
   }
 };
 
-
-const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
+// === SCRAPE FUNCTION ===
+const scrapeTrustpilot = async (url, name = "Trustpilot", options = {}) => {
   let browser;
   let avgRating = null;
   let totalReviews = null;
   let allReviews = [];
+  const pagesToScrape = Number.isInteger(options.pages) && options.pages > 0 ? options.pages : 10;
+
 
   try {
     browser = await launchBrowserWithFallback();
     const page = await browser.newPage();
 
-    for (let currentPage = 1; currentPage <= 10; currentPage++) {
-      const url = `${baseUrl}?page=${currentPage}`;
-      console.log(`Scraping ${url}...`);
+    for (let currentPage = 1; currentPage <= pagesToScrape; currentPage++) {
+      const pageUrl = `${url}?page=${currentPage}`;
+      console.log(`🔍 Scraping ${pageUrl}...`);
 
       try {
-        const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+        const response = await page.goto(url, { waitUntil: "networkidle2", timeout: 90000 });
         if (response.status() === 404) break;
 
         const title = await page.title();
-        const h1 = await page.$eval("h1", (el) => el.innerText).catch(() => "");
+        const h1 = await page.$eval("h1", el => el.innerText).catch(() => "");
         if (title.includes("Page non trouvée") || h1.includes("Page non trouvée")) break;
 
         if (currentPage === 1) {
+          // Accept cookies
           try {
             const acceptBtn = '[id^="onetrust-accept-btn-handler"]';
             await page.waitForSelector(acceptBtn, { timeout: 5000 });
             await page.click(acceptBtn);
-            console.log("Cookies acceptés");
+            console.log("✅ Cookies acceptés");
           } catch {
-            console.log("Aucun bouton cookies trouvé");
+            console.log("ℹ️ Aucun bouton cookies trouvé");
           }
 
           try {
@@ -105,7 +110,7 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
             await page.waitForSelector(ratingSelector, { timeout: 5000 });
             avgRating = await page.$eval(ratingSelector, el => parseFloat(el.innerText.trim()));
           } catch {
-            console.warn("Impossible de récupérer la note moyenne");
+            console.warn("⚠️ Impossible de récupérer la note moyenne");
           }
 
           try {
@@ -116,20 +121,18 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
               return match ? parseInt(match[1]) : null;
             });
           } catch {
-            console.warn("Impossible de récupérer le nombre total d’avis");
+            console.warn("⚠️ Impossible de récupérer le nombre total d’avis");
           }
         }
 
         await page.waitForSelector('[data-service-review-card-paper]', { timeout: 10000 });
 
-        const rawReviews = await page.$$eval('[data-service-review-card-paper]', (cards, currentPage) =>
-          cards.map((card) => {
+        const rawReviews = await page.$$eval('[data-service-review-card-paper]', cards =>
+          cards.map(card => {
             const ratingEl = card.querySelector('[data-service-review-rating] img');
             const rating = ratingEl ? parseInt(ratingEl.alt.match(/(\d)/)?.[1]) : null;
-
             const date = card.querySelector("time")?.innerText.trim() || "";
             const iso_date = card.querySelector("time")?.getAttribute("datetime") || null;
-
             const text = card.querySelector("[data-service-review-text-typography]")?.innerText.trim() || "";
 
             const profileLinkEl = card.querySelector('[data-consumer-profile-link="true"]');
@@ -156,14 +159,13 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
                 country,
                 contributor_id: null,
                 thumbnail: null,
-                photos: 0,
-              },
+                photos: 0
+              }
             };
-          }),
-          currentPage
+          })
         );
 
-        const reviews = rawReviews.map((r) => {
+        const reviews = rawReviews.map(r => {
           const hash = crypto
             .createHash("sha256")
             .update(`${r.text}-${r.iso_date}-${r.user.name}`)
@@ -172,56 +174,59 @@ const scrapeTrustpilot = async (baseUrl, name = "Trustpilot") => {
           return {
             ...r,
             review_id: hash,
-            site: name,
+            site: name
           };
         });
 
         allReviews.push(...reviews);
       } catch (err) {
-        console.error(`Erreur scraping ${url} :`, err.message);
+        console.error(`❌ Erreur scraping ${pageUrl} : ${err.message}`);
         break;
       }
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // pause entre pages
     }
 
-    const valid = allReviews.filter((r) => typeof r.rating === "number");
-    console.log(`${valid.length} avis valides récupérés pour ${name}`);
+    const valid = allReviews.filter(r => typeof r.rating === "number");
+    console.log(`✅ ${valid.length} avis valides récupérés pour ${name}`);
 
     if (valid.length > 0) {
-      const reviewIds = valid.map((r) => r.review_id);
+      const reviewIds = valid.map(r => r.review_id);
       const existing = await Review.find({ review_id: { $in: reviewIds } }).select("review_id");
-      const existingIds = new Set(existing.map((e) => e.review_id));
-
-      const newReviews = valid.filter((r) => !existingIds.has(r.review_id));
+      const existingIds = new Set(existing.map(e => e.review_id));
+      const newReviews = valid.filter(r => !existingIds.has(r.review_id));
 
       if (newReviews.length > 0) {
-        const ops = newReviews.map((r) => ({
+        const ops = newReviews.map(r => ({
           updateOne: {
             filter: { review_id: r.review_id },
             update: { $setOnInsert: r },
-            upsert: true,
-          },
+            upsert: true
+          }
         }));
 
         const result = await Review.bulkWrite(ops, { ordered: false });
         console.log(`✔️ ${result.upsertedCount} nouveaux avis ajoutés pour ${name}`);
-
         return {
           inserted: result.upsertedCount,
           avgRating,
-          totalReviews,
+          totalReviews
         };
       } else {
-        console.log("Aucun avis à insérer (tous déjà présents)");
+        console.log("ℹ️ Aucun avis à insérer (déjà existants)");
       }
     }
 
     return { inserted: 0, avgRating, totalReviews };
   } catch (error) {
-    console.error("Erreur critique Trustpilot :", error.message);
+    console.error("❌ Erreur critique Trustpilot :", error.message);
     throw error;
   } finally {
     if (browser) await browser.close();
   }
 };
 
-module.exports = scrapeTrustpilot;
+module.exports = {
+  launchBrowserWithFallback,
+  scrapeTrustpilot
+};

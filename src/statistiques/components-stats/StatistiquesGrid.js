@@ -35,7 +35,7 @@ const StatistiquesGrid = ({
     totalAvisParCommercialParService[normalizedCommercial] || 0;
   const nombreAvis = selectedData.count || 0;
 
-  const objectifMensuelle = 5;
+  const objectifMensuelle = 10;
   const objectifAnnuel = 60;
 
   const gainsBruts = nombreAvis * 10;

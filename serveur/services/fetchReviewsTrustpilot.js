@@ -2,7 +2,7 @@ const cache = require("memory-cache");
 const {trustpilotSites} = require("../config/sites")
 const { UpdateLogTrustpilot } = require("../model/model.js");
 const {updateCache} = require("../updateCache");
-const scrapeTrustpilot = require("../scrapeTrustpilot")
+const {scrapeTrustpilot} = require("../scrapeTrustpilot.js")
 
 // Mise à jour des avis Trustpilot
 // -------------------------
@@ -18,7 +18,7 @@ const updateLatestReviewsTrustpilot = async () => {
 
   for (const tp of trustpilotSites) {
     try {
-      const result = await scrapeTrustpilot(tp.url, tp.name);
+      const result = await scrapeTrustpilot(tp.url, tp.name, { pages: 1 });
       console.log(`Trustpilot - ${tp.name} : ${result.inserted} avis insérés.`);
     } catch (err) {
       console.error(`Erreur Trustpilot pour ${tp.name} :`, err.message);
@@ -36,5 +36,5 @@ const updateLatestReviewsTrustpilot = async () => {
 };
 
 module.exports = {
-  updateLatestReviewsTrustpilot
-}
+  updateLatestReviewsTrustpilot,
+};

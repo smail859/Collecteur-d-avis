@@ -45,7 +45,7 @@
     "openai": "^4.93.0",
     "path": "^0.12.7",
     "pdfkit": "^0.16.0",
-    "puppeteer-core": "^10.4.0",
+    "puppeteer": "^24.7.1",
     "react": "^18.3.1",
     "react-date-range": "^2.0.1",
     "react-dom": "^18.3.1",
@@ -59,14 +59,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "server": "nodemon serveur/server.js",
+    "server": "node serveur/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "nodemon serveur/server.js",
-    "scrape-trustpilot": "node serveur/start-scraping.js"
+    "dev": "nodemon serveur/server.js"
   },
-  
   "proxy": "http://localhost:5000",
   "eslintConfig": {
     "extends": [
