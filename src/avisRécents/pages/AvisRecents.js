@@ -183,6 +183,8 @@ const AvisRecents = ({ onFilterChange }) => {
     return percentages;
   }, [ratingsCountAllTime, selected]);
 
+  
+
   // Texte affiché en fonction des filtres actifs (pour l’UX)
   const activeFiltersText = useMemo(() => {
     const filtersArray = [];
@@ -216,7 +218,13 @@ const AvisRecents = ({ onFilterChange }) => {
   // --- RENDER --------------------------------------------------
 
   return (
-    <Box sx={{ width: "100%", margin: "0 auto", px: isMobile ? 2 : 4 }}>
+    <Box sx={{ 
+      width: "100%", 
+      margin: "0 auto", 
+      px: isMobile ? 2 : 4,
+      pb: isMobile ? 4 : 6,
+    }}>
+    
       {/* Titre de la page */}
       <Typography fontSize={isMobile ? "32px" : "54px"} textAlign={isMobile ? "center" : "start"} fontWeight="900" mt={isMobile ? "10px" : "20px"} gutterBottom marginLeft={isMobile ? "" : 15 }>
         Avis Récents

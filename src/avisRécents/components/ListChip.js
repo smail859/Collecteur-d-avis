@@ -4,7 +4,8 @@ import PropTypes from "prop-types";
 import CustomDropdown from "./CustomDropdown";
 
 
-const ListChip = ({ servicesChip, handleServiceChange, selected, sx, variant, handleCommercialChange, selectedService }) => {
+const ListChip = ({servicesChip = [], handleServiceChange, selected = "", sx, variant = "chip", handleCommercialChange,selectedService }) => {
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -150,21 +151,14 @@ ListChip.propTypes = {
     PropTypes.shape({
       label: PropTypes.string.isRequired,
       icon: PropTypes.node,
-      commerciaux: PropTypes.arrayOf(PropTypes.string).isRequired,
+      commerciaux: PropTypes.arrayOf(PropTypes.string),
       selectedCommercial: PropTypes.string, // Ajout de la prop pour le commercial sélectionné
     })
   ).isRequired,
-  handleServiceChange: PropTypes.func.isRequired,
+  handleServiceChange: PropTypes.func,
   selected: PropTypes.string,
   sx: PropTypes.object,
   variant: PropTypes.oneOf(["chip", "select"]),
-};
-
-// Valeurs par défaut
-ListChip.defaultProps = {
-  servicesChip: [],
-  variant: "chip",
-  selected: "",
 };
 
 export default ListChip;

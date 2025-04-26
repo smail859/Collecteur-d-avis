@@ -7,7 +7,7 @@ import { Star, ArrowUpward, ArrowDownward, Remove } from '@mui/icons-material';
  * Composant réutilisable pour afficher une liste de services et avis.
  * @param {Array} services - Liste des services avec leurs avis et notes.
  */
-export default function ServicesTable({ services }) {
+export default function ServicesTable({ services = [] }) {
   const theme = useTheme(); 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -169,9 +169,4 @@ ServicesTable.propTypes = {
       trend: PropTypes.oneOf(['up', 'down', 'neutral']).isRequired,
     })
   ).isRequired,
-};
-
-// Valeurs par défaut
-ServicesTable.defaultProps = {
-  services: [],
 };

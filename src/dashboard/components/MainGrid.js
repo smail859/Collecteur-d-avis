@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Typography, Grid2, Box,  useMediaQuery, useTheme } from '@mui/material';
+import { Typography, Box, useMediaQuery, useTheme, Grid2 } from '@mui/material';
 import ServicesTable from './Chart/ServicesTable';
 import ServicesChart from './Chart/ServicesChart';
 import StatCard from './StatCard';
@@ -26,7 +26,7 @@ export default function MainGrid() {
   const navigate = useNavigate();
   const {selectedFilter, reviewsCountByService,avgRatingByService, averageRatingLastTwoMonths} = useFetchReviews();
   // État pour gérer le filtre actif du graphique
-  const [activeFilter, setActiveFilter] = useState(selectedFilter);
+  const [, setActiveFilter] = useState(selectedFilter);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Synchroniser l'état interne `activeFilter` avec `selectedFilter`
@@ -83,7 +83,11 @@ export default function MainGrid() {
       google: `${reviewsCountByService?.["Monbien"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Monbien"]?.google) || 0).toFixed(1)}/5`, 
       avgRating: parseFloat(avgRatingByService?.["Monbien"]?.google) || parseFloat(avgRatingByService?.["Monbien"]?.trustpilot) || 0,
       trend: trendByService["Monbien"]?.google || "neutral",
-      totalReviews: (reviewsCountByService?.["Monbien"]?.trustpilot || 0) + (reviewsCountByService?.["Monbien"]?.google || 0)
+      totalReviews: (
+        (reviewsCountByService?.["Monbien"]?.trustpilot || 0) +
+        (reviewsCountByService?.["Monbien"]?.google || 0)
+      ).toString()
+
     },
     { 
       id: 2, 
@@ -93,7 +97,11 @@ export default function MainGrid() {
       google: `${reviewsCountByService?.["Startloc"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Startloc"]?.google) || 0).toFixed(1)}/5`, 
       avgRating: parseFloat(avgRatingByService?.["Startloc"]?.google) || parseFloat(avgRatingByService?.["Startloc"]?.trustpilot) || 0,
       trend: trendByService["Startloc"]?.google || "neutral",
-      totalReviews: (reviewsCountByService?.["Startloc"]?.trustpilot || 0) + (reviewsCountByService?.["Startloc"]?.google || 0)
+      totalReviews: (
+        (reviewsCountByService?.["Startloc"]?.trustpilot || 0) +
+        (reviewsCountByService?.["Startloc"]?.google || 0)
+      ).toString()
+
     },
     { 
       id: 3, 
@@ -103,7 +111,7 @@ export default function MainGrid() {
       google: `${reviewsCountByService?.["Marketing automobile"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Marketing automobile"]?.google) || 0).toFixed(1)}/5`, 
       avgRating: parseFloat(avgRatingByService?.["Marketing automobile"]?.google) || parseFloat(avgRatingByService?.["Marketing automobile"]?.trustpilot) || 0,
       trend: trendByService["Marketing automobile"]?.google || "neutral",
-      totalReviews: (reviewsCountByService?.["Marketing automobile"]?.trustpilot || 0) + (reviewsCountByService?.["Marketing automobile"]?.google || 0)
+      totalReviews: ((reviewsCountByService?.["Marketing automobile"]?.trustpilot || 0) + (reviewsCountByService?.["Marketing automobile"]?.google || 0)).toString()
     },
     { 
       id: 4, 
@@ -113,7 +121,7 @@ export default function MainGrid() {
       google: `${reviewsCountByService?.["Marketing immobilier"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Marketing immobilier"]?.google) || 0).toFixed(1)}/5`, 
       avgRating: parseFloat(avgRatingByService?.["Marketing immobilier"]?.google) || parseFloat(avgRatingByService?.["Marketing immobilier"]?.trustpilot) || 0,
       trend: trendByService["Marketing immobilier"]?.google || "neutral",
-      totalReviews: (reviewsCountByService?.["Marketing immobilier"]?.trustpilot || 0) + (reviewsCountByService?.["Marketing immobilier"]?.google || 0)
+      totalReviews: ((reviewsCountByService?.["Marketing immobilier"]?.trustpilot || 0) + (reviewsCountByService?.["Marketing immobilier"]?.google || 0)).toString()
     },
     { 
       id: 5, 
@@ -123,7 +131,7 @@ export default function MainGrid() {
       google: `${reviewsCountByService?.["Sinimo"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Sinimo"]?.google) || 0).toFixed(1)}/5`, 
       avgRating: parseFloat(avgRatingByService?.["Sinimo"]?.google) || parseFloat(avgRatingByService?.["Sinimo"]?.trustpilot) || 0,
       trend: trendByService["Sinimo"]?.google || "neutral",
-      totalReviews: (parseInt(reviewsCountByService?.["Sinimo"]?.trustpilot) || 0) + (parseInt(reviewsCountByService?.["Sinimo"]?.google) || 0)
+      totalReviews: ((parseInt(reviewsCountByService?.["Sinimo"]?.trustpilot) || 0) + (parseInt(reviewsCountByService?.["Sinimo"]?.google) || 0)).toString()
     },
     { 
       id: 6, 
@@ -133,7 +141,7 @@ export default function MainGrid() {
       google: `${reviewsCountByService?.["Pige Online"]?.google || 0} - ${(parseFloat(avgRatingByService?.["Pige Online"]?.google) || 0).toFixed(1)}/5`, 
       avgRating: parseFloat(avgRatingByService?.["Pige Online"]?.google) || parseFloat(avgRatingByService?.["Pige Online"]?.trustpilot) || 0,
       trend: trendByService["Pige Online"]?.google || "neutral",
-      totalReviews: (parseInt(reviewsCountByService?.["Pige Online"]?.trustpilot) || 0) + (parseInt(reviewsCountByService?.["Pige Online"]?.google) || 0)
+      totalReviews: ((parseInt(reviewsCountByService?.["Pige Online"]?.trustpilot) || 0) + (parseInt(reviewsCountByService?.["Pige Online"]?.google) || 0)).toString()
     }
   ], [reviewsCountByService, avgRatingByService, trendByService]);
   
@@ -189,14 +197,8 @@ export default function MainGrid() {
         </Typography>
   
         {/* GRILLE : Stat + boutons */}
-        <Grid2
-          container
-          spacing={4}
-          justifyContent="center"
-          alignItems="center"
-          sx={{ mt: 6 }}
-        >
-          <Grid2 xs={12} sm={6} md={4}>
+        <Grid2 container spacing={4} justifyContent="center" alignItems="center" sx={{ mt: 6 }}>
+          <Grid2  size={{ xs: 12, sm: 6, md: 4 }}>
             <StatCard />
           </Grid2>
           <Grid2>

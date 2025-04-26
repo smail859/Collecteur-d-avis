@@ -1,29 +1,96 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import useFilterService from "../components/utils/useFilterService";
+import { calculateMonthlyCommercialCounts, calculateYearlyCommercialCounts } from "./utils/commercialsAnalytics";
+import { parseRelativeDate } from "./utils/parseRelativeDate";
+import { getReviewsPerPeriod } from "./utils/getReviewsPerPeriod";
+import { ratingsCount as calculateRatingsCount } from "./utils/calculateRatingsCount";
+import { ratingsCountAllTime as calculateRatingsCountAllTime } from "./utils/calculateRatingsCountAllTime";
+import { calculateReviewsCountAndRatings } from "./utils/calculateReviewsCountAndRatings";
+import { detectCommercialName } from "./utils/detectCommercialName";
+import { mergeReviews } from "./utils/mergeReviews";
+
+/**
+ * Hook personnalisé `useFetchReviews`
+ * =====================================
+ * 
+ * Ce hook gère toute la logique liée à la récupération, au traitement, au tri 
+ * et au filtrage des avis clients provenant de Google et Trustpilot.
+ * 
+ * Fonctions principales :
+ * -----------------------
+ * - Récupère les avis Google et Trustpilot depuis l'API.
+ * - Fusionne, trie et filtre les avis selon de nombreux critères (service, note, commercial, plateforme, période).
+ * - Calcule des statistiques avancées :
+ *    - Nombre d'avis par service et par plateforme
+ *    - Moyennes de notes par service (mois courant et mois précédent)
+ *    - Evolution des performances commerciales (par mois et par an)
+ * - Sauvegarde les moyennes d'avis par mois dans le localStorage.
+ * - Détecte les nouveaux avis reçus depuis la dernière consultation.
+ * - Permet de charger progressivement plus d'avis à l'affichage.
+ * 
+ * Valeurs retournées :
+ * ---------------------
+ * - reviews : Liste paginée des avis affichés
+ * - reviewsPerPeriod : Répartition des avis par service et par période
+ * - totalReviews : Nombre total d'avis
+ * - loading : État de chargement
+ * - error : Message d'erreur éventuel
+ * - fetchReviews : Fonction pour forcer la récupération des avis
+ * - loadMoreReviews : Fonction pour charger plus d'avis
+ * - displayLimit : Nombre d'avis actuellement affichés
+ * - changeFilter : Fonction pour changer le filtre de période
+ * - selectedFilter : Filtre de période sélectionné
+ * - refreshReviews : Fonction pour rafraîchir les avis
+ * - averageRating : Note moyenne globale
+ * - ratingsCount : Compte des notes par service pour la période sélectionnée
+ * - ratingsCountAllTime : Compte des notes par service sans filtre temporel
+ * - filteredReviews : Avis filtrés selon les critères sélectionnés
+ * - sortedReviews : Avis triés par date
+ * - rankingsByService : Classement des avis par service
+ * - commercialCounts : Performances commerciales (par mois)
+ * - commercialCountsYears : Performances commerciales (par an)
+ * - reviewsCountByService : Compte total des avis par service
+ * - avgRatingByService : Moyenne de notes par service
+ * - averageRatingLastTwoMonths : Comparaison des moyennes de notes entre 2 mois
+ * - googleReviews : Avis Google "bruts"
+ * - trustpilotReviews : Avis Trustpilot "bruts"
+ * - setDisplayLimit : Fonction pour modifier le nombre d'avis affichés
+ * - newReviewsCount : Nombre de nouveaux avis non lus
+ * - updateLastCheckDate : Fonction pour mettre à jour la date de dernière consultation
+ * - newReviews : Liste des nouveaux avis non lus
+ * - detectCommercialName : Fonction utilitaire pour détecter un commercial mentionné dans un texte
+*/
+
+
 
 const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: "", plateforme: "", service: "",} ) => {
   
+  // ============================
   // États principaux
+  // ============================
   const [reviews, setReviews] = useState([]); // Liste des avis récupérés
   const [loading, setLoading] = useState(false); // Indicateur de chargement
   const [error, setError] = useState(null); // Gestion des erreurs
   const [totalReviewsAPI, setTotalReviewsAPI] = useState(0); // Nombre total d'avis récupérés
   const [displayLimit, setDisplayLimit] = useState(8); // Nombre d'avis affichés
   const [selectedFilter, setSelectedFilter] = useState("7days"); // Filtre sélectionné
-  const [refresh, setRefresh] = useState(false); // Permet de forcer le rafraîchissement des avis
+  const [, setRefresh] = useState(false); // Permet de forcer le rafraîchissement des avis
   const [googleReviews, setGoogleReviews] = useState([])
   const [trustpilotReviews, setTruspilotReviews] = useState([])
   const [reviewsCountByService, setReviewsCountByService] = useState({});
   const [avgRatingByService ,setAvgRatingByService] = useState({})
-  const { notifCleared = false, ...filters } = externalFilters;
-
-
+  const { notifCleared = false } = externalFilters;
+  
   // Mémoïsation du nombre total d'avis
   const totalReviews = useMemo(() => totalReviewsAPI, [totalReviewsAPI]);
   // Vérifier que `reviews` est bien un tableau
   const validReviews = Array.isArray(reviews) ? reviews : [];
+
   // Utilisation du hook `useFilterService` pour chaque service
+  // ============================
+  // Classement par service
+  // ============================
   const rankingsByService = {
     Startloc: useFilterService(validReviews, "Startloc"),
     Monbien: useFilterService(validReviews, "Monbien"),
@@ -32,144 +99,58 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     "Marketing Immobilier": useFilterService(validReviews, "Marketing Immobilier"),
     "Pige Online": useFilterService(validReviews, "Pige Online"),
   };
-  const commerciauxParService = {
-    "Monbien": {
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "joanna": ["Joanna", "Joana"],
-      "johanna": ["Johanna"],
-      "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
+  
+  // ============================
+  // Gestion des commerciaux
+  // ============================
+  const commerciauxParService = useMemo(() => ({
+    Monbien: {
+      lucas: ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      smail: ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      joanna: ["Joanna", "Joana"],
+      johanna: ["Johanna"],
+      theo: ["Théo", "Theo", "Teo", "Téo", "teo", "téo"],
     },
-    "Startloc": {
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "melanie": ["Mélanie", "Melanie", "Mel"],
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "manon": ["Manon", "Mano", "Mannon"],
+    Startloc: {
+      smail: ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      melanie: ["Mélanie", "Melanie", "Mel"],
+      lucas: ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      manon: ["Manon", "Mano", "Mannon"],
     },
     "Marketing automobile": {
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
-      "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
+      lucas: ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      smail: ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      arnaud: ["Arnaud", "arnaud", "arnot", "Arno"],
+      elodie: ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
     },
     "Marketing immobilier": {
       "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-      "oceane": ["Océane", "Oceane"],
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "johanna": ["Johanna"],
+      oceane: ["Océane", "Oceane"],
+      lucas: ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      smail: ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      johanna: ["Johanna"],
     },
     "Pige Online": {
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
-      "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
+      lucas: ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      smail: ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+      angela: ["Angela", "Angéla", "Angie", "Angel", "Ang"],
+      esteban: ["Esteban", "estebanne", "estebane", "Estebane"],
     },
-    "Sinimo": {
-      "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-    }
-  };
+    Sinimo: {
+      anais: ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
+      lucas: ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
+      smail: ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
+    },
+  }), []);
   
+
   /**
-   * Fonction pour convertir une date relative en objet Date
-   * @param {string} relativeDate - Exemple : "il y a 7 jours"
-   * @returns {Date} Objet Date correspondant
+   * Sauvegarde les moyennes d'avis par service dans le localStorage,
+   * en associant les moyennes au mois courant (ex: "2025-04").
+   * Evite de sauvegarder plusieurs fois pour le même mois.
   */
-  const parseRelativeDate = useCallback((relativeDate) => {
-    if (!relativeDate) return new Date();
-
-    const now = new Date();
-    let result = new Date(now);
-
-    // Normalisation
-    relativeDate = relativeDate.replace(/\u00A0/g, " ").trim().toLowerCase();
-
-    // Mois français
-    const moisFrancais = {
-      "janv.": 0, "janvier": 0,
-      "févr.": 1, "février": 1,
-      "mars": 2,
-      "avr.": 3, "avril": 3,
-      "mai": 4,
-      "juin": 5,
-      "juil.": 6, "juillet": 6,
-      "août": 7,
-      "sept.": 8, "septembre": 8,
-      "oct.": 9, "octobre": 9,
-      "nov.": 10, "novembre": 10,
-      "déc.": 11, "décembre": 11
-    };
-
-    //  Cas : Date absolue (ex: "15 févr. 2025")
-    const matchFullDate = relativeDate.match(/^(\d{1,2})\s+([a-zéûôî.]+)\s+(\d{4})$/iu);
-    if (matchFullDate) {
-      const [, day, monthRaw, year] = matchFullDate;
-      const monthClean = monthRaw.toLowerCase().replace(".", "").trim();
-
-      const matchedKey = Object.keys(moisFrancais).find(key =>
-        key.replace(".", "").toLowerCase() === monthClean
-      );
-
-      const month = moisFrancais[matchedKey];
-      const parsedDay = parseInt(day, 10);
-      const parsedYear = parseInt(year, 10);
-
-      if (!isNaN(parsedDay) && !isNaN(parsedYear) && month !== undefined) {
-        const date = new Date(parsedYear, month, parsedDay);
-        date.setHours(0, 0, 0, 0);
-        return date;
-      }
-    }
-
-    // Cas : Date relative (ex: "il y a 3 jours", "il y a un mois")
-    const matchRelative = relativeDate.match(/il y a (\d+|un|une) (jour|jours|semaine|semaines|mois|an|ans)/i);
-    if (matchRelative) {
-      const value = (matchRelative[1] === "un" || matchRelative[1] === "une") ? 1 : parseInt(matchRelative[1], 10);
-      const unit = matchRelative[2];
-
-      if (unit.includes("jour")) result.setDate(now.getDate() - value);
-      else if (unit.includes("semaine")) result.setDate(now.getDate() - value * 7);
-      else if (unit.includes("mois")) result.setMonth(now.getMonth() - value);
-      else if (unit.includes("an")) result.setFullYear(now.getFullYear() - value);
-
-      result.setHours(0, 0, 0, 0);
-      return result;
-    }
-
-    // Cas : Hier
-    if (relativeDate === "hier") {
-      result.setDate(now.getDate() - 1);
-      result.setHours(0, 0, 0, 0);
-      return result;
-    }
-
-    // Cas : Aujourd’hui / minutes / heures
-    if (
-      relativeDate === "aujourd’hui" ||
-      relativeDate === "aujourd'hui"
-    ) {
-      result.setHours(0, 0, 0, 0);
-      return result;
-    }
-    
-    if (
-      /^il y a \d+ minute/.test(relativeDate) ||
-      /^il y a \d+ heure/.test(relativeDate)
-    ) {
-      return result; // Garder l'heure intacte pour ne pas fausser la journée
-    }
-    
-    return now;
-  }, []);
-
-
-  // Définir la date actuelle
-  const now = new Date();
-
-  // Sauvegarde des moyennes actuelles dans localStorage
   useEffect(() => {
+    const now = new Date();
     if (!avgRatingByService || Object.keys(avgRatingByService).length === 0) return;
   
     // Récupérer les moyennes enregistrées précédemment
@@ -211,7 +192,11 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
 
 
 
-  // Comparaison des moyennes des deux derniers mois
+  /**
+   * Compare les moyennes d'avis par service entre le mois courant et le mois précédent,
+   * en récupérant les données sauvegardées dans le localStorage.
+   * Sert à afficher l'évolution des notes sur 2 mois.
+  */
   const averageRatingLastTwoMonths = useMemo(() => {
     const historicalRatings = JSON.parse(localStorage.getItem("historicalRatings")) || {};
   
@@ -237,108 +222,11 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       lastMonth: lastMonthStoredRatings,
       currentMonth: currentMonthStoredRatings,
     };
-  }, [googleReviews, trustpilotReviews, reviewsCountByService]);
-  
-  
-
-
-  /**
-   * Classement des avis par période
-  */
-  const getReviewsPerPeriod = useMemo(() => (reviews) => {
-    if (!Array.isArray(reviews) || reviews.length === 0) {
-      return {
-        today: {},
-        "7days": {},
-        "30days": {},
-        thismonth: {},
-        thisyear: {},
-        lastmonth: {},
-        thisweek: {},
-        lastweek: {}
-      };
-    }
-  
-    const now = new Date();
-    now.setHours(0, 0, 0, 0); // On normalise à minuit
-  
-    // Début et fin du mois précédent
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // dernier jour du mois précédent
-  
-    // Lundi de cette semaine
-    const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); // dimanche = 7
-    const thisMonday = new Date(now);
-    thisMonday.setDate(now.getDate() - dayOfWeek + 1);
-  
-    // Semaine précédente : lundi → dimanche
-    const lastMonday = new Date(thisMonday);
-    lastMonday.setDate(thisMonday.getDate() - 7);
-    const lastSunday = new Date(thisMonday);
-    lastSunday.setDate(thisMonday.getDate() - 1);
-  
-    const dateRanges = {
-      today: new Date(now),
-      "7days": new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      "30days": new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-      thismonth: new Date(now.getFullYear(), now.getMonth(), 1),
-      thisyear: new Date(now.getFullYear(), 0, 1),
-      lastmonth: { start: startOfLastMonth, end: endOfLastMonth },
-      thisweek: thisMonday,
-      lastweek: { start: lastMonday, end: lastSunday },
-    };
-  
-    const periods = {
-      today: {},
-      "7days": {},
-      "30days": {},
-      thismonth: {},
-      thisyear: {},
-      lastmonth: {},
-      thisweek: {},
-      lastweek: {}
-    };
-  
-    const services = ["Monbien", "Startloc", "Marketing automobile", "Marketing immobilier", "Pige Online", "Sinimo"];
-  
-    // Initialisation centralisée des périodes
-    services.forEach(service => {
-      Object.keys(periods).forEach(period => {
-        periods[period][service] = { count: 0, dates: [] };
-      });
-    });
-  
-    // Traitement des avis
-    reviews.forEach(({ date, service }) => {
-      if (!date || !service || !services.includes(service)) return;
-  
-      const reviewDate = parseRelativeDate(date);
-      if (isNaN(reviewDate.getTime())) return;
-  
-      const reviewTimestamp = reviewDate.getTime();
-      const formattedDate = reviewDate.toISOString().split("T")[0];
-  
-      Object.entries(dateRanges).forEach(([period, range]) => {
-        if (period === "lastmonth" || period === "lastweek") {
-          if (reviewTimestamp >= range.start.getTime() && reviewTimestamp <= range.end.getTime()) {
-            periods[period][service].count += 1;
-            periods[period][service].dates.push(formattedDate);
-          }
-        } else {
-          if (reviewTimestamp >= range.getTime()) {
-            periods[period][service].count += 1;
-            periods[period][service].dates.push(formattedDate);
-          }
-        }
-      });
-    });
-  
-    return periods;
-  }, [parseRelativeDate]);
+  }, []);
   
 
   // Utilisation de `getReviewsPerPeriod` pour Google et Trustpilot
-  const googlePeriods = useMemo(() => getReviewsPerPeriod(googleReviews), [googleReviews, parseRelativeDate]);
+  const googlePeriods = useMemo(() => getReviewsPerPeriod(googleReviews), [googleReviews]);
   const formattedTrustpilotReviews = useMemo(() => {
     return Object.entries(trustpilotReviews).flatMap(([service, data]) =>
       data.reviews.map(review => ({ ...review, service }))
@@ -346,7 +234,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   }, [trustpilotReviews]);
   
 
-  const trustpilotPeriods = getReviewsPerPeriod(formattedTrustpilotReviews);
+  const trustpilotPeriods = useMemo(() => getReviewsPerPeriod(formattedTrustpilotReviews), [formattedTrustpilotReviews]);
 
   // Fusionner les résultats pour avoir `reviewsPerPeriod`
   const reviewsPerPeriod = useMemo(() => {
@@ -383,7 +271,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       const dateB = b.iso_date ? new Date(b.iso_date) : parseRelativeDate(b.date);
       return dateB - dateA;
     });
-  }, [reviews, parseRelativeDate]);
+  }, [reviews]);
 
   // Récupérer tous les avis triés (pour le filtrage ou l'affichage)
   const allReviews = useMemo(() => {
@@ -394,6 +282,17 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   }, [reviews]);
   
 
+
+  /**
+   * Filtre dynamiquement les avis selon plusieurs critères :
+   * - Service
+   * - Plateforme (Google, Trustpilot)
+   * - Note (1 à 5 étoiles)
+   * - Commercial mentionné dans l'avis
+   * - Période temporelle (semaine, mois, année ou personnalisée)
+   * 
+   * Utilise les filtres fournis via `externalFilters`.
+  */
   const filteredReviews = useMemo(() => {
     let result = [...allReviews];
 
@@ -477,15 +376,12 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     }
 
     return result;
-  }, [allReviews, externalFilters, reviewsPerPeriod]);
+  }, [allReviews, externalFilters, commerciauxParService]);
   
 
-
-  
   const displayedReviews = useMemo(() => {
     return allReviews.slice(0, displayLimit);
   }, [allReviews, displayLimit]);
-
 
 
   /**
@@ -510,249 +406,20 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     return (total / reviews.length).toFixed(1);
   }, [reviews]);
     
-
-  // Fonction pour recuperer les avis par étoiles 
   const ratingsCount = useMemo(() => {
-    if (!googleReviews.length && !formattedTrustpilotReviews.length) return { 
-      Google: {}, 
-      Trustpilot: {} 
-    };
-  
-    const counts = { Google: {}, Trustpilot: {} };
-  
-    // Déterminer la plage de dates en fonction de `externalFilters.periode`
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-  
-    const dateRanges = {
-      today: now.getTime(),
-      "7days": new Date(now).setDate(now.getDate() - 7),
-      "30days": new Date(now).setDate(now.getDate() - 30),
-    };
-  
-    const selectedPeriod = externalFilters.periode || "30days"; // Par défaut, 30 jours
-  
-    // Initialiser les objets pour chaque service et chaque note
-    const initializeServiceCount = (platform, service) => {
-      if (!counts[platform][service]) {
-        counts[platform][service] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-      }
-    };
-  
-    // Filtrer et compter les avis Google par service et par note
-    googleReviews.forEach((review) => {
-      const reviewDate = parseRelativeDate(review.date).getTime();
-      if (
-        review.rating >= 1 && review.rating <= 5 && review.service &&
-        reviewDate >= dateRanges[selectedPeriod]
-      ) {
-        initializeServiceCount("Google", review.service);
-        counts.Google[review.service][review.rating] += 1;
-      }
-    });
-  
-    // Filtrer et compter les avis Trustpilot par service et par note
-    formattedTrustpilotReviews.forEach((review) => {
-      const reviewDate = parseRelativeDate(review.date).getTime();
-      if (
-        review.rating >= 1 && review.rating <= 5 && review.service &&
-        reviewDate >= dateRanges[selectedPeriod]
-      ) {
-        initializeServiceCount("Trustpilot", review.service);
-        counts.Trustpilot[review.service][review.rating] += 1;
-      }
-    });
-  
-    return counts;
-  }, [googleReviews, formattedTrustpilotReviews, externalFilters.periode, parseRelativeDate]);
-
-
+    return calculateRatingsCount(googleReviews, formattedTrustpilotReviews, externalFilters.periode);
+  }, [googleReviews, formattedTrustpilotReviews, externalFilters.periode]);
 
   const ratingsCountAllTime = useMemo(() => {
-    if (!googleReviews.length && !formattedTrustpilotReviews.length) return { 
-      Google: {}, 
-      Trustpilot: {} 
-    };
-  
-    const counts = { Google: {}, Trustpilot: {} };
-  
-    // Initialiser les objets pour chaque service et chaque note
-    const initializeServiceCount = (platform, service) => {
-      if (!counts[platform][service]) {
-        counts[platform][service] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-      }
-    };
-  
-    // Compter les avis Google par service et par note (sans filtre de période)
-    googleReviews.forEach((review) => {
-      if (review.rating >= 1 && review.rating <= 5 && review.service) {
-        initializeServiceCount("Google", review.service);
-        counts.Google[review.service][review.rating] += 1;
-      }
-    });
-  
-    // Compter les avis Trustpilot par service et par note (sans filtre de période)
-    formattedTrustpilotReviews.forEach((review) => {
-      if (review.rating >= 1 && review.rating <= 5 && review.service) {
-        initializeServiceCount("Trustpilot", review.service);
-        counts.Trustpilot[review.service][review.rating] += 1;
-      }
-    });
-  
-    return counts;
+    return calculateRatingsCountAllTime(googleReviews, formattedTrustpilotReviews);
   }, [googleReviews, formattedTrustpilotReviews]);
-
-
-
-  const commercialCounts = useMemo(() => {
-    const counts = {};
-  
-  
-    const now = new Date();
-    const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDayCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  
-    const normalizeText = (text) =>
-      text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  
-    // Créer une liste de TOUS les commerciaux (sans service pour éviter les doublons)
-    const allCommercials = {};
-    Object.values(commerciauxParService).forEach(serviceCom => {
-      Object.entries(serviceCom).forEach(([key, variants]) => {
-        if (!allCommercials[key]) {
-          allCommercials[key] = new Set();
-        }
-        variants.forEach(variant => allCommercials[key].add(normalizeText(variant)));
-      });
-    });
-  
-    const currentMonthReviews = filteredReviews.filter((review) => {
-      const reviewDate = new Date(review.iso_date);
-      return reviewDate >= firstDayCurrentMonth && reviewDate <= lastDayCurrentMonth;
-    });
-    
-    currentMonthReviews.forEach((review) => {
-      const reviewText = normalizeText(review.snippet || review.text || "");
-      const alreadyCounted = new Set();
-  
-      Object.entries(allCommercials).forEach(([commercialKey, variantsSet]) => {
-        if (alreadyCounted.has(commercialKey)) return;
-  
-        for (const variant of variantsSet) {
-          if (reviewText.split(/\b/).includes(variant)) {
-            counts[commercialKey] = (counts[commercialKey] || 0) + 1;
-            alreadyCounted.add(commercialKey);
-            break; // On sort dès la première correspondance trouvée
-          }
-        }
-      });
-    });
-
-    // On retourne directement le résultat global
-    return Object.entries(counts).map(([name, count]) => ({ name, count }));
-  
-  }, [filteredReviews, parseRelativeDate]);
-
   
 
+  // Puis dans ton hook :
+  const commercialCounts = useMemo(() => calculateMonthlyCommercialCounts(filteredReviews, commerciauxParService), [filteredReviews, commerciauxParService]);
+  
+  const commercialCountsYears = useMemo(() => calculateYearlyCommercialCounts(filteredReviews, commerciauxParService), [filteredReviews, commerciauxParService]);
 
-  const commercialCountsYears = useMemo(() => {
-    const counts = {};
-  
-    
-  
-    const moisLabels = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-  
-    const normalizeText = (text) =>
-      text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  
-    const now = new Date();
-    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-    const lastDayOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-  
-    const yearlyReviews = filteredReviews.filter((review) => {
-      const reviewDate = new Date(review.iso_date);
-      return reviewDate >= firstDayOfYear && reviewDate <= lastDayOfYear;
-    });
-  
-    // Initialisation de la structure exacte initiale
-    moisLabels.forEach((mois) => {
-      counts[mois] = {};
-      Object.entries(commerciauxParService).forEach(([service, commerciaux]) => {
-        counts[mois][service] = {};
-        Object.keys(commerciaux).forEach((commercial) => {
-          counts[mois][service][commercial] = 0;
-        });
-      });
-    });
-
-  
-    // Comptage exact des avis par service/mois/commercial sans doublon dans un même avis
-    yearlyReviews.forEach((review) => {
-      const reviewDate = new Date(review.iso_date);
-      const moisLabel = moisLabels[reviewDate.getMonth()];
-      const reviewText = normalizeText(review.snippet || review.text || "");
-      const service = review.service;
-      if (!commerciauxParService[service]) return;
-  
-      const alreadyCountedCommercials = new Set();
-  
-      Object.entries(commerciauxParService[service]).forEach(([commercialKey, variants]) => {
-        if (alreadyCountedCommercials.has(commercialKey)) return;
-        for (const variant of variants) {
-          const variantRegex = new RegExp(`\\b${normalizeText(variant)}\\b`, "i");
-          if (variantRegex.test(reviewText)) {
-
-            counts[moisLabel][service][commercialKey] += 1;
-            alreadyCountedCommercials.add(commercialKey);
-            break;
-          }
-        }
-      });
-    });
-  
-    // Conversion finale exactement comme initialement
-    const resultYears = moisLabels.map((mois) => {
-      const services = Object.entries(counts[mois]).map(([service, commerciaux]) => {
-        const commerciauxAvecZero = Object.entries(commerciaux).map(([label, count]) => ({
-          label,
-          count,
-        }));
-        return { service, commerciaux: commerciauxAvecZero };
-      });
-      return { mois, services };
-    });
-  
-    // Fusion des résultats annuels globaux par commercial
-    const globalCounts = {};
-    resultYears.forEach(({ services }) => {
-      services.forEach(({ commerciaux }) => {
-        commerciaux.forEach(({ label, count }) => {
-          globalCounts[label] = (globalCounts[label] || 0) + count;
-        });
-      });
-    });
-  
-    const totalAvisParCommercialParService = globalCounts;
-  
-    return { resultYears, totalAvisParCommercialParService };
-  }, [filteredReviews, parseRelativeDate]);
-
-  const detectCommercialName = (text, service) => {
-    const normalize = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const normalizedText = normalize(text);
-  
-    if (!commerciauxParService[service]) return null;
-  
-    for (const [commercialKey, variants] of Object.entries(commerciauxParService[service])) {
-      for (const variant of variants) {
-        const regex = new RegExp(`\\b${normalize(variant)}\\b`, "i");
-        if (regex.test(normalizedText)) return commercialKey; // <- retourne la clé maintenant
-      }
-    }
-  
-    return null;
-  };
 
   const LAST_REVIEW_KEY = "lastReviewCheck";
 
@@ -761,18 +428,20 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
   };
   
   const pivotDate = useMemo(() => {
+    if (notifCleared) {
+      return new Date(); // si notifs clear, on reset à aujourd'hui
+    }
     const rawLastCheck = localStorage.getItem("lastReviewCheck");
     const lastCheckDate = rawLastCheck ? new Date(rawLastCheck) : null;
   
     if (lastCheckDate && !isNaN(lastCheckDate.getTime())) {
-      // forcer à minuit
       lastCheckDate.setHours(0, 0, 0, 0);
       return lastCheckDate;
     }
   
     const twoDaysAgo = new Date();
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    twoDaysAgo.setHours(0, 0, 0, 0); // également à minuit
+    twoDaysAgo.setHours(0, 0, 0, 0);
     return twoDaysAgo;
   }, [notifCleared]);
   
@@ -783,147 +452,70 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
       return reviewDate > pivotDate;
     });
     return filtered;
-  }, [reviews, pivotDate, notifCleared]);
+  }, [reviews, pivotDate]);
   
   /**
    * Fonction pour récupérer les avis
    */
   const fetchReviews = useCallback(async () => {
-    if (googleReviews.length > 0 && trustpilotReviews.length > 0) {
-      return;
-    }
-  
     setLoading(true);
     setError(null);
   
     try {
       const baseURL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const response = await axios.get(`${baseURL}/api/reviews`);
-      const googleReviewsData = Object.entries(response.data).flatMap(([service, data]) =>
-          (data.reviews || []).map(review => ({
-              ...review,
-              service // Ajoute la clé `service` à chaque avis
-          }))
-      );
-
-      const responseTrustpilot = await axios.get(`${baseURL}/api/trustpilot`);
-      const trustpilotReviewsData = responseTrustpilot.data;
-      
-      // Formatage des avis Trustpilot
-      const formattedTrustpilotReviews = Object.entries(trustpilotReviewsData).flatMap(([service, data]) =>
-        (data.reviews || []).map(review => ({ ...review, service, source: "Trustpilot" })) 
-      );
   
-      // Fusion des avis
-      const combinedReviews = [...googleReviewsData, ...formattedTrustpilotReviews];
+      const googleResponse = await axios.get(`${baseURL}/api/reviews`);
+      const trustpilotResponse = await axios.get(`${baseURL}/api/trustpilot`);
   
-      setGoogleReviews(googleReviewsData);
+      const googleReviewsData = googleResponse.data;
+      const trustpilotReviewsData = trustpilotResponse.data;
+  
+      // Très important : reset les anciens avant de remettre
+      setReviews([]);
+      setGoogleReviews([]);
+      setTruspilotReviews([]);
+  
+      const combinedReviews = mergeReviews(googleReviewsData, trustpilotReviewsData);
+  
+      setGoogleReviews(
+        Object.entries(googleReviewsData).flatMap(([service, data]) =>
+          (data.reviews || []).map(review => ({ ...review, service }))
+        )
+      );
       setTruspilotReviews(trustpilotReviewsData);
       setReviews(combinedReviews);
       setTotalReviewsAPI(combinedReviews.length);
   
     } catch (error) {
-        console.error("Erreur lors de la récupération des avis :", error.message);
-        setError(error?.message || " Une erreur est survenue");
+      console.error("Erreur lors de la récupération des avis :", error.message);
+      setError(error?.message || "Une erreur est survenue");
     } finally {
-        setLoading(false);
-        setRefresh(false);
+      setLoading(false);
+      setRefresh(false);
     }
   }, []);
 
-
-
-
-
- 
-  useEffect(() => {
-    if (!loading && googleReviews.length === 0 && trustpilotReviews.length === 0) {
-      
-      fetchReviews();
-    }
-  }, [googleReviews, trustpilotReviews]);
-
-
-  
-  
-  
-
-  const refreshReviews = () => {
+  const refreshReviews = useCallback(() => {
     setRefresh(true);
     fetchReviews();
-  };
+  }, [fetchReviews]);
+  
   useEffect(() => {
-    if (reviews.length === 0) return; 
+    if (!loading && googleReviews.length === 0 && trustpilotReviews.length === 0) {
+      refreshReviews();
+    }
+  }, [googleReviews, trustpilotReviews, loading, refreshReviews]);
   
   
-    // Initialisation des compteurs
-    const countByService = {};
-    const ratingSumByService = {};
-    const ratingCountByService = {};
-  
-    // Extraire les avis Google et Trustpilot
-    const googleReviewsArray = Array.isArray(googleReviews) 
-      ? googleReviews 
-      : Object.values(googleReviews).flatMap((data) => data.reviews || []);
-  
-      const trustpilotReviewsArray = Object.entries(trustpilotReviews).flatMap(([service, data]) =>
-        (data.reviews || []).map((review) => ({
-          ...review,
-          service,
-          rating: review.rating || 0,
-        }))
-      );
 
-      
-    // Traiter les avis Google
-    googleReviewsArray.forEach(({ service, rating }) => {
-      if (!service || rating == null) return; // Accepte rating = 0
-  
-      if (!countByService[service]) {
-        countByService[service] = { google: 0, trustpilot: 0 };
-        ratingSumByService[service] = { google: 0, trustpilot: 0 };
-        ratingCountByService[service] = { google: 0, trustpilot: 0 };
-      }
-  
-      countByService[service].google += 1;
-      ratingSumByService[service].google += rating;
-      ratingCountByService[service].google += 1;
-    });
-  
-    // Traiter les avis Trustpilot
-    trustpilotReviewsArray.forEach(({ service, rating }) => {
-      if (!service || rating == null) return;
-  
-      if (!countByService[service]) {
-        countByService[service] = { google: 0, trustpilot: 0 };
-        ratingSumByService[service] = { google: 0, trustpilot: 0 };
-        ratingCountByService[service] = { google: 0, trustpilot: 0 };
-      }
-  
-      countByService[service].trustpilot += 1;
-      ratingSumByService[service].trustpilot += rating;
-      ratingCountByService[service].trustpilot += 1;
-    });
-  
-    // Calcul des moyennes
-    const avgRatingByService = {};
-    Object.keys(ratingSumByService).forEach((service) => {
-      avgRatingByService[service] = {
-        google: ratingCountByService[service].google
-          ? (ratingSumByService[service].google / ratingCountByService[service].google).toFixed(1)
-          : "0.0",
-        trustpilot: ratingCountByService[service].trustpilot
-          ? (ratingSumByService[service].trustpilot / ratingCountByService[service].trustpilot).toFixed(1)
-          : "0.0",
-      };
-    });
-  
-    // Mettre à jour les états
+  useEffect(() => {
+    if (reviews.length === 0) return;
+
+    const { countByService, avgRatingByService } = calculateReviewsCountAndRatings(googleReviews, trustpilotReviews);
+
     setReviewsCountByService(countByService);
     setAvgRatingByService(avgRatingByService);
-  
-  }, [reviews, googleReviews, trustpilotReviews]); // Ajout des dépendances
-
+  }, [reviews, googleReviews, trustpilotReviews]);
 
 
   return {
@@ -938,7 +530,6 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     changeFilter,
     selectedFilter,
     refreshReviews,
-    parseRelativeDate,
     averageRating,
     ratingsCount,
     filteredReviews,
@@ -956,7 +547,7 @@ const useFetchReviews = (externalFilters = { note: "", periode: "", commercial: 
     newReviewsCount : newReviews.length,
     updateLastCheckDate,
     newReviews,
-    detectCommercialName
+    detectCommercialName: (text, service) => detectCommercialName(text, service, commerciauxParService)
   };
 };
 

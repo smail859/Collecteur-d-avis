@@ -44,7 +44,6 @@ const ChatGpt = ({ avisData }) => {
       });
 
       const data = await response.json();
-      console.log("🔍 Reçu depuis l'API :", data);
 
       if (data.reply) {
         setSuggestion(data.reply);

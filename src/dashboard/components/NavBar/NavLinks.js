@@ -37,7 +37,7 @@ const NavLinks = ({ path = '/', label = 'Dashboard', icon = null, isFooter = fal
                 borderRadius: isFooter ? '50%' : 'none', // Cercle uniquement dans le footer
                 backgroundColor: isFooter ? (isActive ? '#8B5CF6' : 'white') : 'transparent', // Fond violet si actif, blanc si inactif
                 color: isActive ? 'white' : '#8B5CF6', // Couleur de l'icône
-                boxShadow: isFooter ? (isActive ? "rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px;;" : "none") : "none",
+                boxShadow: isFooter ? (isActive ? "rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px" : "none") : "none",
                 transition: 'background 0.3s ease, width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease',
               }}
             >

@@ -125,7 +125,7 @@ CustomDropdown.propTypes = {
       PropTypes.shape({ label: PropTypes.string, value: PropTypes.string }),
     ])
   ).isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,

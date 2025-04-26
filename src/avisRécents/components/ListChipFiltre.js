@@ -15,7 +15,7 @@ const ListChipFiltre = ({ filters, onChangeFilters, dataFilters }) => {
           key={name}
           label={label}
           options={options}
-          value={filters[name] || options[0].value}
+          value={filters[name] ?? options?.[0]?.value ?? ""}
           isOpen={openDropdown === name}
           onChange={(newValue) => onChangeFilters({ ...filters, [name]: newValue })}
           onToggle={() => setOpenDropdown(openDropdown === name ? null : name)}

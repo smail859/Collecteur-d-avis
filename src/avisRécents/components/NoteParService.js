@@ -173,11 +173,13 @@ const NoteParService = ({
 NoteParService.propTypes = {
   logo: PropTypes.string,
   labelService: PropTypes.string,
-  noteService: PropTypes.shape({
-    google: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), 
-  }), 
-  nombreAvis : PropTypes.number,
-  progress: PropTypes.object 
+  noteService: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]), // <- ici CORRIGÉ
+  nombreAvis: PropTypes.number,
+  progress: PropTypes.object,
 };
+
 
 export default NoteParService;

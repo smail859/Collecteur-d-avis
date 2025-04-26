@@ -49,10 +49,15 @@ const ServicesChart = () => {
   };
 
   // Liste des services disponibles
-  const allServices = [
-    "Monbien", "Startloc", "Marketing immobilier", "Marketing automobile", "Sinimo", "Pige Online"
-  ];
-
+  const allServices = useMemo(() => [
+    "Monbien",
+    "Startloc",
+    "Marketing automobile",
+    "Marketing immobilier",
+    "Pige Online",
+    "Sinimo",
+  ], []);
+  
   const periodData = reviewsPerPeriod[selectedFilters.period] || {};
 
   // Composant de tooltip personnalisé (info-bulle au survol)
@@ -205,7 +210,7 @@ const ServicesChart = () => {
 
       return dataArray;
     }
-  }, [reviewsPerPeriod, selectedFilters, ratingsCount]);
+  }, [reviewsPerPeriod, selectedFilters, ratingsCount, allServices]);
 
   // --- RENDER -----------------------------------------------------------------------
   return (
