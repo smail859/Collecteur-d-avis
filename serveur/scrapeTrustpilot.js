@@ -1,28 +1,70 @@
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+const puppeteer = require("puppeteer");
 const { Review } = require("./model/model");
 require("dotenv").config();
 
+const isProd = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+let chromePath = null;
 
-const isLocal = process.env.NODE_ENV !== "production";
+if (isProd) {
+  // === CONFIG CHROMIUM ===
+  const chromiumBasePath = path.join(__dirname, "../chromium/chrome");
 
-const puppeteer = isLocal
-  ? require("puppeteer")
-  : require("puppeteer-core");
-const chromium = isLocal ? null : require("chrome-aws-lambda");
-
-const launchBrowserWithFallback = async () => {
-  if (isLocal) {
-    console.log("🖥️ Lancement local avec Puppeteer standard");
-    return puppeteer.launch({ headless: true });
+  if (!fs.existsSync(chromiumBasePath)) {
+    throw new Error("❌ Dossier Chromium introuvable à : " + chromiumBasePath);
   }
 
-  console.log("☁️ Lancement cloud avec chrome-aws-lambda");
-  return puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless,
-    defaultViewport: chromium.defaultViewport,
-  });
+  const chromeExecutablePath = fs.readdirSync(chromiumBasePath)
+    .map(version => path.join(chromiumBasePath, version, "chrome-linux64", "chrome"))
+    .find(p => fs.existsSync(p));
+
+  if (!chromeExecutablePath) {
+    throw new Error("❌ Impossible de localiser le binaire Chrome automatiquement");
+  }
+
+  chromePath = chromeExecutablePath;
+}
+
+const launchBrowserWithFallback = async () => {
+  const args = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+    "--no-zygote",
+    "--disable-accelerated-2d-canvas",
+    "--disable-background-networking",
+    "--disable-breakpad",
+    "--disable-client-side-phishing-detection",
+    "--disable-component-update",
+    "--disable-default-apps",
+    "--disable-features=site-per-process",
+    "--disable-hang-monitor",
+    "--disable-popup-blocking",
+    "--disable-infobars",
+    "--mute-audio",
+    "--no-first-run",
+    "--ignore-certificate-errors",
+    "--disable-extensions"
+  ];
+
+  if (isProd) {
+    console.log("🔧 PROD: utilisation de Chromium depuis :", chromePath);
+
+    return puppeteer.launch({
+      headless: "new",
+      executablePath: chromePath,
+      args
+    });
+  } else {
+    console.log("🧪 DEV: utilisation de Chromium par défaut de Puppeteer");
+    return puppeteer.launch({
+      headless: "new",
+      args
+    });
+  }
 };
 
 
