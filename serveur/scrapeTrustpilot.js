@@ -5,21 +5,28 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 
-// === CONFIG CHROMIUM ===
-const chromiumBasePath = path.join(__dirname, "../chromium/chrome");
-const chromeExecutablePath = fs.readdirSync(chromiumBasePath)
-  .map(version => path.join(chromiumBasePath, version, "chrome-linux64", "chrome"))
-  .find(p => fs.existsSync(p));
-
-if (!chromeExecutablePath) {
-  throw new Error("❌ Impossible de localiser le binaire Chrome automatiquement");
-}
-
-const chromePath = chromeExecutablePath;
-
-
-
 const isProd = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+
+let chromePath = null;
+
+if (isProd) {
+  // === CONFIG CHROMIUM ===
+  const chromiumBasePath = path.join(__dirname, "../chromium/chrome");
+
+  if (!fs.existsSync(chromiumBasePath)) {
+    throw new Error("❌ Dossier Chromium introuvable à : " + chromiumBasePath);
+  }
+
+  const chromeExecutablePath = fs.readdirSync(chromiumBasePath)
+    .map(version => path.join(chromiumBasePath, version, "chrome-linux64", "chrome"))
+    .find(p => fs.existsSync(p));
+
+  if (!chromeExecutablePath) {
+    throw new Error("❌ Impossible de localiser le binaire Chrome automatiquement");
+  }
+
+  chromePath = chromeExecutablePath;
+}
 
 const launchBrowserWithFallback = async () => {
   const args = [
@@ -45,10 +52,6 @@ const launchBrowserWithFallback = async () => {
   ];
 
   if (isProd) {
-    if (!fs.existsSync(chromePath)) {
-      throw new Error("❌ Chromium introuvable à ce chemin : " + chromePath);
-    }
-
     console.log("🔧 PROD: utilisation de Chromium depuis :", chromePath);
 
     return puppeteer.launch({
