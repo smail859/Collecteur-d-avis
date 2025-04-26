@@ -6,6 +6,18 @@ Monbien, Startloc, Sinimo, Marketing Automobile, Marketing Immobilier, Pige Onli
 
 ---
 
+## Sommaire
+- [Fonctionnalités principales](#fonctionnalités-principales)
+- [Technologies utilisées](#technologies-utilisées)
+- [Structure du projet](#structure-du-projet)
+- [Lancer le projet en local](#lancer-le-projet-en-local)
+- [Déploiement](#déploiement)
+- [Sécurité](#sécurité)
+- [Scripts disponibles](#scripts-disponibles)
+- [Bonus : Idées d’améliorations](#bonus--idées-daméliorations)
+- [Auteur](#auteur)
+- [Licence](#licence)
+
 ## Fonctionnalités principales
 
 - Récupération automatique des avis Google & Trustpilot via SerpAPI
@@ -127,7 +139,6 @@ Contact : elhajjarsmail70000@gmail.com
 ---
 
 ## Licence
-
 Ce projet est sous licence ISC.
 
 
