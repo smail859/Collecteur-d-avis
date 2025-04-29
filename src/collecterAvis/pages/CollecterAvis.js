@@ -12,7 +12,7 @@ const servicesData = [
       name: "Monbien",
       icon: MONBIEN, 
       links: [
-        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://g.page/r/CUbSilFPNcM9EAE/review", platform: "Google" },
         { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
@@ -20,7 +20,7 @@ const servicesData = [
       name: "Startloc",
       icon: STARTLOC,
       links: [
-        { url: "https://g.page/r/CRiJxyA68Zl4EBE/review", platform: "Google" },
+        { url: "https://g.page/r/CRiJxyA68Zl4EAE/review", platform: "Google" },
         { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
@@ -28,7 +28,7 @@ const servicesData = [
       name: "Marketing Automobile",
       icon: MARKETINGAUTO,
       links: [
-        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://g.page/r/CbGEXSubI5EjEAE/review", platform: "Google" },
         { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
@@ -36,7 +36,7 @@ const servicesData = [
       name: "Marketing Immobilier",
       icon: MARKETINGIMMO,
       links: [
-        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://g.page/r/CR5OWaONoB5iEAE/review", platform: "Google" },
         { url: "https://marketing-immo.fr/Trustpilot", platform: "Trustpilot" }
       ]
     },
@@ -44,7 +44,6 @@ const servicesData = [
       name: "Sinimo",
       icon: SINIMO,
       links: [
-        { url: "https://marketing-immo.fr/Google", platform: "Google" },
         { url: "https://fr.trustpilot.com/evaluate/sinimo.fr", platform: "Trustpilot" }
       ]
     },
@@ -52,7 +51,7 @@ const servicesData = [
       name: "Pige Online",
       icon: PIGEONLINE,
       links: [
-        { url: "https://marketing-immo.fr/Google", platform: "Google" },
+        { url: "https://g.page/r/CZBbQI656uBSEAE/review", platform: "Google" },
         { url: "https://fr.trustpilot.com/evaluate/pige-online.fr", platform: "Trustpilot" }
       ]
       
