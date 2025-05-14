@@ -23,7 +23,14 @@ const updateLatestReviewsTrustpilot = async () => {
         const reviewIds = data.reviews.map(r => r.review_id);
         const existing = await Review.find({ review_id: { $in: reviewIds } }).select("review_id");
         const existingIds = new Set(existing.map(e => e.review_id));
-        const newReviews = data.reviews.filter(r => !existingIds.has(r.review_id));
+
+        const newReviews = data.reviews
+          .filter(r => !existingIds.has(r.review_id))
+          .map(r => ({
+            ...r,
+            service: tp.name,
+            source: "Trustpilot"
+          }));
 
         if (newReviews.length > 0) {
           await Review.insertMany(newReviews, { ordered: false }).catch(() => {});
