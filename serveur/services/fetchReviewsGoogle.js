@@ -88,6 +88,28 @@ const fetchReviewsForSite = async (site) => {
   }
 };
 
+const getJsonWithFallback = (params, keys) => {
+  return new Promise((resolve, reject) => {
+    const tryKey = (index) => {
+      if (index >= keys.length) return reject(new Error("Toutes les clés SERPAPI ont échoué"));
+
+      getJson({
+        ...params,
+        api_key: keys[index]
+      }, (data) => {
+        if (data?.error) {
+          console.warn(`❌ Clé SERPAPI #${index + 1} échouée : ${data.error}`);
+          return tryKey(index + 1);
+        }
+        resolve(data);
+      });
+    };
+
+    tryKey(0);
+  });
+};
+
+
 const updateLatestReviews = async () => {
   const newReviewIds = new Set();
 
@@ -96,20 +118,17 @@ const updateLatestReviews = async () => {
       try {
         const latestInDb = await Review.find({ site: site.name }).sort({ iso_date: -1 }).limit(10);
         const existingMap = new Map(latestInDb.map(r => [r.review_id, r]));
-
-        const json = await new Promise((resolve, reject) => {
-          getJson({
-            engine: "google_maps_reviews",
-            data_id: site.id,
-            hl: "fr",
-            api_key: process.env.SERPAPI_KEY,
-            reviews_limit: 20,
-            sort_by: "newestFirst",
-          }, (data) => {
-            if (data.error) return reject(new Error(data.error));
-            resolve(data);
-          });
-        });
+        
+        const json = await getJsonWithFallback({
+          engine: "google_maps_reviews",
+          data_id: site.id,
+          hl: "fr",
+          reviews_limit: 20,
+          sort_by: "newestFirst",
+        }, [
+          process.env.SERPAPI_KEY,
+          process.env.SERPAPI_KEY_2
+        ]);
 
         if (!json?.reviews?.length) {
           console.warn(`Aucun avis récent pour ${site.name}`);

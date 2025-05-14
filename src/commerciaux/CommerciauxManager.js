@@ -28,6 +28,9 @@ const CommerciauxManager = () => {
 
   const fetchCommerciaux = async () => {
     const baseURL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    console.log("API_URL:", process.env.REACT_APP_API_URL);
+    console.log("Base URL:", baseURL);
+    console.log("Fetching commerciaux from:", `${baseURL}/api/commerciaux`);
     const { data } = await axios.get(`${baseURL}/api/commerciaux`);
     setCommerciaux(data);
   };
