@@ -1,61 +1,16 @@
 import { parseRelativeDate } from './useDateUtils';
 
-// Données des commerciaux par service
-const commerciauxParService = {
-    "Monbien": {
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "joanna": ["Joanna", "Joana"],
-      "johanna": ["Johanna"],
-      "theo": ["Théo", "Theo", "Teo", "Téo", "teo", "téo"]
-    },
-    "Startloc": {
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "melanie": ["Mélanie", "Melanie", "Mel"],
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "manon": ["Manon", "Mano", "Mannon"],
-    },
-    "Marketing automobile": {
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "arnaud": ["Arnaud", "arnaud", "arnot", "Arno"],
-      "elodie": ["Elodie", "Élodie", "Elo", "Lodie", "Élo", "Eloody"],
-    },
-    "Marketing immobilier": {
-      "jean-simon": ["Jean-Simon", "Jean Simon", "J-Simon", "Jean-Si", "JSimon"],
-      "oceane": ["Océane", "Oceane"],
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "johanna": ["Johanna"],
-    },
-    "Pige Online": {
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-      "angela": ["Angela", "Angéla", "Angie", "Angel", "Ang"],
-      "esteban": ["Esteban", "estebanne", "estebane", "Estebane"]
-    },
-    "Sinimo": {
-      "anais": ["Anaïs", "Anais", "Anaïss", "Anaiss", "Annaïs", "Annais"],
-      "lucas": ["Lucas", "Luka", "Luca", "Loucas", "Louka"],
-      "smail": ["Smaïl", "Smail", "Ismail", "Ismael", "Ismaël"],
-    }
-};
-
 const moisLabels = [
-  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
   "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
 ];
 
-/**
- * Normalise le texte pour la comparaison
- */
-const normalizeText = (text) => 
+// Normalise le texte pour comparaison (minuscules + sans accent)
+const normalizeText = (text) =>
   text?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || "";
 
-/**
- * Crée un index de tous les commerciaux
- */
-const createCommercialsIndex = () => {
+// Crée un index: { label: Set(variants normalisés) }
+const createCommercialsIndex = (commerciauxParService) => {
   const index = {};
   Object.values(commerciauxParService).forEach(serviceCom => {
     Object.entries(serviceCom).forEach(([key, variants]) => {
@@ -68,29 +23,34 @@ const createCommercialsIndex = () => {
   return index;
 };
 
-/**
- * Compte les mentions de commerciaux pour le mois en cours
- */
-export const calculateCurrentMonthCommercialCounts = (filteredReviews, parseDateFn = parseRelativeDate) => {
+// Compte les mentions de commerciaux pour le mois en cours
+export const calculateCurrentMonthCommercialCounts = (filteredReviews, commerciauxParService, parseDateFn = parseRelativeDate) => {
   const counts = {};
   const now = new Date();
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  
-  const allCommercials = createCommercialsIndex();
-  const currentMonthReviews = filteredReviews.filter(review => {
-    const reviewDate = parseDateFn(review.date);
-    return reviewDate >= firstDay && reviewDate <= lastDay;
+
+  const allCommercials = createCommercialsIndex(commerciauxParService);
+  const currentMonthReviews = filteredReviews.filter((review) => {
+    const reviewDate = new Date(review.iso_date);
+    return (
+      review.rating === 5 &&
+      reviewDate >= firstDay &&
+      reviewDate <= lastDay
+    );
   });
   
+  
+
   currentMonthReviews.forEach(review => {
     const reviewText = normalizeText(review.snippet || review.text || "");
     const alreadyCounted = new Set();
-  
+
     Object.entries(allCommercials).forEach(([commercialKey, variantsSet]) => {
       if (!alreadyCounted.has(commercialKey)) {
         for (const variant of variantsSet) {
-          if (reviewText.split(/\b/).includes(variant)) {
+          const regex = new RegExp(`\\b${variant}\\b`, "i");
+          if (regex.test(reviewText)) {
             counts[commercialKey] = (counts[commercialKey] || 0) + 1;
             alreadyCounted.add(commercialKey);
             break;
@@ -103,16 +63,14 @@ export const calculateCurrentMonthCommercialCounts = (filteredReviews, parseDate
   return Object.entries(counts).map(([name, count]) => ({ name, count }));
 };
 
-/**
- * Compte les mentions de commerciaux par mois pour l'année
- */
-export const calculateYearlyCommercialCounts = (filteredReviews, parseDateFn = parseRelativeDate) => {
+// Compte les mentions de commerciaux par mois pour l'année en cours
+export const calculateYearlyCommercialCounts = (filteredReviews, commerciauxParService, parseDateFn = parseRelativeDate) => {
   const counts = {};
   const now = new Date();
   const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
   const lastDayOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
 
-  // Initialisation structure
+  // Initialiser la structure des mois/services/commerciaux
   moisLabels.forEach(mois => {
     counts[mois] = {};
     Object.entries(commerciauxParService).forEach(([service, commerciaux]) => {
@@ -123,7 +81,6 @@ export const calculateYearlyCommercialCounts = (filteredReviews, parseDateFn = p
     });
   });
 
-  // Comptage
   const yearlyReviews = filteredReviews.filter(review => {
     const reviewDate = parseDateFn(review.date);
     return reviewDate >= firstDayOfYear && reviewDate <= lastDayOfYear;
@@ -134,14 +91,18 @@ export const calculateYearlyCommercialCounts = (filteredReviews, parseDateFn = p
     const moisLabel = moisLabels[reviewDate.getMonth()];
     const reviewText = normalizeText(review.snippet || review.text || "");
     const service = review.service;
-    
+
     if (commerciauxParService[service]) {
       const alreadyCounted = new Set();
-      
+
       Object.entries(commerciauxParService[service]).forEach(([commercialKey, variants]) => {
         if (!alreadyCounted.has(commercialKey)) {
-          const variantRegex = new RegExp(`\\b${normalizeText(variants[0])}\\b`, "i");
-          if (variantRegex.test(reviewText)) {
+          const matched = variants.some(variant => {
+            const regex = new RegExp(`\\b${normalizeText(variant)}\\b`, "i");
+            return regex.test(reviewText);
+          });
+
+          if (matched) {
             counts[moisLabel][service][commercialKey] += 1;
             alreadyCounted.add(commercialKey);
           }
@@ -150,20 +111,18 @@ export const calculateYearlyCommercialCounts = (filteredReviews, parseDateFn = p
     }
   });
 
-  // Formatage résultats
-  const resultYears = moisLabels.map(mois => ({
+  const monthlyData = moisLabels.map(mois => ({
     mois,
     services: Object.entries(counts[mois]).map(([service, commerciaux]) => ({
       service,
       commerciaux: Object.entries(commerciaux).map(([label, count]) => ({
-        label, 
+        label,
         count
       }))
     }))
   }));
 
-  // Totaux globaux
-  const yearlyTotals = resultYears.reduce((acc, { services }) => {
+  const yearlyTotals = monthlyData.reduce((acc, { services }) => {
     services.forEach(({ commerciaux }) => {
       commerciaux.forEach(({ label, count }) => {
         acc[label] = (acc[label] || 0) + count;
@@ -172,8 +131,8 @@ export const calculateYearlyCommercialCounts = (filteredReviews, parseDateFn = p
     return acc;
   }, {});
 
-  return { 
-    monthlyData: resultYears, 
-    yearlyTotals 
+  return {
+    monthlyData,
+    yearlyTotals
   };
 };

@@ -15,6 +15,7 @@ import ListChipFiltre from "../components/ListChipFiltre";
 import CalendarDate from "../../date/CalendarDate";
 import useFetchReviews from "../../hooks/components/useFetchReviews";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import useCommerciauxParService from "../../commerciaux/useCommerciauxParService"
 import deburr from "lodash/deburr";
 
 // Logos
@@ -30,6 +31,10 @@ import MARKETINGAUTO from "../../image/MARKETINGAUTO.png";
 import MARKETINGIMMO from "../../image/MARKETINGIMMO.png";
 import SINIMO from "../../image/SINIMO.png";
 import PIGEONLINE from "../../image/PIGEONLINE.png";
+
+
+
+
 
 const AvisRecents = ({ onFilterChange }) => {
   const theme = useTheme();
@@ -75,11 +80,25 @@ const AvisRecents = ({ onFilterChange }) => {
     "Pige Online": PIGEONLINE,
   };
 
+  const { data: commerciauxParService, loading: loadingCommerciaux } = useCommerciauxParService();
+
+  const commercialLabels = useMemo(() => {
+    const all = Object.values(commerciauxParService)
+      .flatMap(service => Object.keys(service));
+    return Array.from(new Set(all)); // supprime les doublons
+  }, [commerciauxParService]);
+
+
+  const serviceLabels = useMemo(() => {
+    return Object.keys(commerciauxParService);
+  }, [commerciauxParService]);
+
+
   const dataFilters = [
     {
       name: "service",
       label: "Sélectionner un service",
-      options: ["Tous les services", "Startloc", "Monbien", "Pige Online", "Marketing automobile", "Marketing immobilier", "Sinimo"],
+      options: ["Tous les services", ...serviceLabels],
     },
     {
       name: "note",
@@ -89,11 +108,7 @@ const AvisRecents = ({ onFilterChange }) => {
     {
       name: "commercial",
       label: "Toutes l'équipe Realty",
-      options: [
-        "Tous les commerciaux",
-        "Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Arnaud", "Jean-Simon",
-        "Océane", "Johanna", "Angela", "Esteban", "Anais", "Elodie",
-      ],
+      options: ["Tous les commerciaux", ...commercialLabels],
     },
     {
       name: "plateforme",
@@ -101,15 +116,15 @@ const AvisRecents = ({ onFilterChange }) => {
       options: ["Toutes les plateformes", "Google", "Trustpilot"],
     },
   ];
+  
 
   const detectCommercial = (text) => {
     if (!text) return text;
-    const commerciaux = ["Joanna", "Mélanie", "Smaïl", "Lucas", "Théo", "Manon", "Arnaud", "Jean-Simon", "Océane", "Johanna", "Angela", "Esteban", "Anais", "Elodie"];
     const normalize = (str) => deburr(str).toLowerCase();
-    const regex = new RegExp(`\\b(${commerciaux.map(normalize).join("|")})\\b`, "gi");
-
+    const regex = new RegExp(`\\b(${commercialLabels.map(normalize).join("|")})\\b`, "gi");
+  
     return text.split(regex).map((part, index) =>
-      commerciaux.some((com) => normalize(com) === normalize(part)) ? (
+      commercialLabels.some((com) => normalize(com) === normalize(part)) ? (
         <Typography key={index} component="span" sx={{ fontWeight: 800, color: "black", fontSize: "16px" }}>
           {part}
         </Typography>
@@ -118,6 +133,7 @@ const AvisRecents = ({ onFilterChange }) => {
       )
     );
   };
+  
 
   const handleServiceChange = (newService) => {
     setFilters((prev) => ({ ...prev, service: newService === "Tous les services" ? "" : newService }));
