@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 require("dotenv").config();
 
+
+
 // -------------------------
 // Imports internes
 // -------------------------
@@ -36,8 +38,26 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 // Middleware
 // -------------------------
 app.use(cors());
+// Autoriser l'origine Vercel en production
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://collecteuravis-one.vercel.app" 
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Autoriser les requêtes sans origin (ex: curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  }
+}));
 app.use(express.json());
 app.use(morgan("dev"));
+
 
 // -------------------------
 // Vérification des variables d'environnement
