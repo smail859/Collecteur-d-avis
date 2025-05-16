@@ -31,8 +31,12 @@ export function calculateMonthlyCommercialCounts(reviews, commerciauxParService)
     });
 
     const currentMonthReviews = reviews.filter((review) => {
-        const reviewDate = new Date(review.iso_date);
-        return reviewDate >= firstDayCurrentMonth && reviewDate <= lastDayCurrentMonth;
+    const reviewDate = new Date(review.iso_date);
+    return (
+        review.rating === 5 &&
+        reviewDate >= firstDayCurrentMonth &&
+        reviewDate <= lastDayCurrentMonth
+    );
     });
 
     currentMonthReviews.forEach((review) => {

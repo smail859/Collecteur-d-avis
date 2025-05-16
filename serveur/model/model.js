@@ -49,9 +49,19 @@ const updateLogTrustpilotSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+
+
+const CommercialSchema = new mongoose.Schema({
+  service: { type: String, required: true },
+  label: { type: String, required: true },
+  variants: { type: [String], default: [] }
+}, { timestamps: true });
+
 // Forçage des noms de collections explicites
 const Review = mongoose.model("Review", reviewSchema, "reviews", updateLogSchema, "update_log_google");
 const UpdateLog = mongoose.model("UpdateLog", updateLogSchema,);
 const UpdateLogTrustpilot = mongoose.model("UpdateLogTrustpilot", updateLogTrustpilotSchema, "update_log_trustpilot");
+const Commercial = mongoose.model("Commercial", CommercialSchema, "commerciaux");
 
-module.exports = { Review, UpdateLog, UpdateLogTrustpilot };
+
+module.exports = { Review, UpdateLog, UpdateLogTrustpilot, Commercial};

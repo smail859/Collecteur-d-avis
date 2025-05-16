@@ -1,7 +1,7 @@
 import ChartStatistiques from "../components/ChartStatistiques";
 import ChartBarStatistiques from "../components/ChartBarStatistiques";
 import { Typography, Button, Box,useMediaQuery, useTheme } from "@mui/material";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import MonbienRadius from "../../image/MonbienRadius.png";
 import MARadius from "../../image/MARadius.png";
 import MIRadius from "../../image/MIRadius.png";
@@ -12,6 +12,8 @@ import ListChip from "../../avisRécents/components/ListChip";
 import useFetchReviews from "../../hooks/components/useFetchReviews";
 import CommercialTable from "../components/CommercialTable";
 import ArrowUpwardOutlinedIcon from '@mui/icons-material/ArrowUpwardOutlined';
+import useCommerciauxParService from "../../commerciaux/useCommerciauxParService";
+
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -60,14 +62,24 @@ const Statistiques = () => {
   }));
 
   // Données des services et leurs commerciaux (pour le sélecteur)
-  const servicesData = [
-    { label: "Monbien", icon: MonbienRadius, commerciaux: ["Joanna", "Théo"] },
-    { label: "Startloc", icon: StartlocRadius, commerciaux: ["Mélanie", "Smaïl", "Lucas", "Deborah", "Manon"] },
-    { label: "Sinimo", icon: SinimoRadius, commerciaux: ["Anaïs"] },
-    { label: "Marketing automobile", icon: MARadius, commerciaux: ["Elodie", "Arnaud"] },
-    { label: "Marketing immobilier", icon: MIRadius, commerciaux: ["Johanna", "Jean-Simon","Oceane"] },
-    { label: "Pige Online", icon: PORadius, commerciaux: ["Angela", "Esteban"] },
-  ];
+  const { data: commerciauxParService, loading: loadingCommerciaux } = useCommerciauxParService();
+
+  const servicesData = useMemo(() => {
+    if (!commerciauxParService) return [];
+
+    return Object.entries(commerciauxParService).map(([service, commerciaux]) => ({
+      label: service,
+      icon: {
+        "Monbien": MonbienRadius,
+        "Startloc": StartlocRadius,
+        "Sinimo": SinimoRadius,
+        "Marketing automobile": MARadius,
+        "Marketing immobilier": MIRadius,
+        "Pige Online": PORadius,
+      }[service] || null,
+      commerciaux: Object.keys(commerciaux),
+    }));
+  }, [commerciauxParService]);
 
   // Couleurs
   const colors = ["#7B61FF", "#E3E4FE"];
