@@ -80,7 +80,16 @@ export const parseRelativeDate = (relativeDate) => {
     if (/^il y a \d+ minute/.test(relativeDate) || /^il y a \d+ heure/.test(relativeDate)) {
       return result; // garder l'heure
     }
-  
+
+    // Cas : format JJ/MM/AAAA
+    const matchDateFr = relativeDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (matchDateFr) {
+      const [, day, month, year] = matchDateFr;
+      const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+      
     return now;
   };
   

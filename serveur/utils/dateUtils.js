@@ -1,6 +1,14 @@
 const { Review } = require("../model/model");
 
 const parseValidDate = (d) => {
+  if (!d) return null;
+  // Gère le format JJ/MM/AAAA
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d)) {
+    const [day, month, year] = d.split('/').map(Number);
+    const date = new Date(year, month - 1, day);
+    return isNaN(date.getTime()) ? null : date;
+  }
+  // Sinon, format standard
   const date = new Date(d);
   return isNaN(date.getTime()) ? null : date;
 };

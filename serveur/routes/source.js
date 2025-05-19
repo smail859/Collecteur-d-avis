@@ -3,24 +3,22 @@ const router = express.Router();
 const { Review } = require("../model/model.js");
 const cacheDuration = 1000 * 60 * 60 * 24 * 2; // 2 jours
 
-// GET /api/trustpilot
-router.get("/", async (req, res) => {
+router.get("/:source", async (req, res) => {
+  const source = req.params.source.toLowerCase();
+  const cacheKey = `${source}_reviews`;
 
   try {
-    const reviews = await Review.find({ source: "trustpilot" });
+    const reviews = await Review.find({ source });
 
     if (!reviews || reviews.length === 0) {
-      return res.status(404).json({ message: "Aucun avis Trustpilot trouvé." });
+      return res.status(404).json({ message: `Aucun avis trouvé pour ${source}` });
     }
 
     const grouped = {};
 
     reviews.forEach((r) => {
       if (!grouped[r.site]) {
-        grouped[r.site] = {
-          reviews: [],
-          total: 0,
-        };
+        grouped[r.site] = { reviews: [], total: 0 };
       }
 
       grouped[r.site].reviews.push({
@@ -32,6 +30,7 @@ router.get("/", async (req, res) => {
         text: r.text,
         source: r.source,
         service: r.site,
+        snippet: r.snippet,
         user: r.user,
         link: r.link || null,
       });
@@ -39,24 +38,23 @@ router.get("/", async (req, res) => {
       grouped[r.site].total += r.rating;
     });
 
-    // Calcul de la moyenne par site
     const finalResult = {};
     for (const site in grouped) {
-      const siteData = grouped[site];
-      const avgRating = siteData.reviews.length
-        ? parseFloat((siteData.total / siteData.reviews.length).toFixed(1))
+      const data = grouped[site];
+      const avgRating = data.reviews.length
+        ? parseFloat((data.total / data.reviews.length).toFixed(1))
         : null;
 
       finalResult[site] = {
-        reviews: siteData.reviews,
+        reviews: data.reviews,
         avgRating,
       };
     }
 
     res.json(finalResult);
   } catch (err) {
-    console.error("Erreur API /api/trustpilot :", err.message);
-    res.status(500).json({ error: "Erreur serveur lors de la récupération des avis Trustpilot." });
+    console.error(`❌ Erreur API /api/reviews/${source} :`, err.message);
+    res.status(500).json({ error: `Erreur lors de la récupération des avis ${source}.` });
   }
 });
 

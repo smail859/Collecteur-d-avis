@@ -1,16 +1,9 @@
-const cache = require("memory-cache");
 const axios = require("axios");
 const { trustpilotSites } = require("../config/sites");
 const { Review, UpdateLogTrustpilot } = require("../model/model.js");
-const { updateCache } = require("../updateCache");
 
 // Fonction principale
 const updateLatestReviewsTrustpilot = async () => {
-  console.log("Vidage du cache avant mise à jour des avis...");
-  cache.clear();
-  console.log("Cache vidé.");
-
-  console.log("Mise à jour des avis Trustpilot via le scraper externe...");
 
   for (const tp of trustpilotSites) {
     try {
@@ -46,7 +39,6 @@ const updateLatestReviewsTrustpilot = async () => {
     }
   }
 
-  await updateCache();
   await UpdateLogTrustpilot.findOneAndUpdate({}, { updatedAt: new Date() }, { upsert: true });
 
   console.log("✅ Fin de la mise à jour Trustpilot.\n");

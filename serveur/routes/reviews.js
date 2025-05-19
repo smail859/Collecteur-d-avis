@@ -1,21 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const cache = require("memory-cache");
 const { Review } = require("../model/model.js");
 const { sites } = require("../config/sites");
 const { fetchReviewsForSite } = require("../services/fetchReviewsGoogle");
-const cacheDuration = 1000 * 60 * 60 * 24 * 2; // 2 jours
 
 // GET /api/reviews
 router.get("/", async (req, res) => {
   try {
-    const cacheKey = "reviews";
-    const cached = cache.get(cacheKey);
-
-    if (cached && Object.keys(cached).length > 0) {
-      console.log("Données renvoyées depuis le cache Google");
-      return res.json(cached);
-    }
 
     // Si pas dans le cache : récupérer depuis Mongo
     const dbReviews = await Review.find({ source: "Google" });
@@ -58,8 +49,6 @@ router.get("/", async (req, res) => {
       const avgRating = reviews.length > 0 ? parseFloat((total / reviews.length).toFixed(1)) : null;
       final[site] = { data_id, reviews, avgRating };
     }
-
-    cache.put(cacheKey, final, cacheDuration);
     res.json(final);
   } catch (error) {
     console.error("❌ Erreur API /api/reviews :", error.message);

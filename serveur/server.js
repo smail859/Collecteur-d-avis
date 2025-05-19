@@ -7,7 +7,6 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 require("dotenv").config();
 
-
 // -------------------------
 // Imports internes
 // -------------------------
@@ -21,7 +20,9 @@ const commerciauxRouter = require("./routes/commerciaux");
 const routesUpdate = require("../serveur/routes/update");
 const routesDebug = require("../serveur/routes/debugRoutes");
 const suggestReplyRoute = require("../serveur/routes/routesChatGpt");
-const {shouldUpdateReviews, shouldUpdateReviewsTrustpilot } = require("./services/shouldUpdate")
+const crudRoutes = require("./routes/crud");
+const sourceRoutes = require("./routes/source");
+const { shouldUpdateReviews, shouldUpdateReviewsTrustpilot } = require("./services/shouldUpdate");
 const { updateLatestReviews } = require("./services/fetchReviewsGoogle");
 const { updateLatestReviewsTrustpilot } = require("./services/fetchReviewsTrustpilot");
 const { updateDates } = require("./utils/dateUtils");
@@ -55,16 +56,16 @@ requiredEnv.forEach((env) => {
 // Routes API
 // -------------------------
 app.use("/api/reviews", routesReviews);
+app.use("/api/reviews", crudRoutes);
+app.use("/api/reviews", sourceRoutes);
 app.use("/api/force-update", routesUpdate);
 app.use("/api", routesScrapeTrustpilotAll);
-app.use("/api", routesScrapeTrustpilotSite)
-app.use("/api", routesScrapeTrustpilotLatest)
+app.use("/api", routesScrapeTrustpilotSite);
+app.use("/api", routesScrapeTrustpilotLatest);
 app.use("/api", routesDebug);
 app.use("/api/suggest-reply", suggestReplyRoute);
 app.use("/api/trustpilot", routeTrustpilotGet);
 app.use("/api/commerciaux", commerciauxRouter);
-
-
 
 app.get("/", (req, res) => {
   res.send("API Reviews opérationnelle !");
@@ -86,7 +87,7 @@ updateDates();
 const startServer = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
- 
+
     // Création des collections si elles n’existent pas
     await UpdateLog.createCollection();
     await UpdateLogTrustpilot.createCollection();
@@ -118,3 +119,11 @@ const startServer = async () => {
 };
 
 startServer();
+
+// -------------------------
+// Middleware de gestion des erreurs globales
+// -------------------------
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Erreur interne du serveur" });
+});

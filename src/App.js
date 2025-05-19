@@ -5,7 +5,7 @@ import AvisRecents from "./avisRécents/pages/AvisRecents";
 import Statistiques from './statistiques/page/Statistiques';
 import CollecterAvis from "./collecterAvis/pages/CollecterAvis"
 import AppNavbar from "./dashboard/components/NavBar/AppNavbar"; 
-import CommerciauxManager from "./commerciaux/CommerciauxManager";
+import DashboardManager from "./commerciaux/DashboardManager";
 import Footer from './dashboard/components/Footer';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { useState, useEffect } from 'react';
@@ -33,7 +33,7 @@ function App() {
           <Route path="/avisRecents" element={<AvisRecents />} />
           <Route path="/statistiques" element={<Statistiques />} />
           <Route path="/collecterAvis" element={<CollecterAvis />} />
-          <Route path="/commerciaux-manage" element={<CommerciauxManager />} />
+          <Route path="/dashboard-manage" element={<DashboardManager />} />
         </Routes>
 
         <Footer />
